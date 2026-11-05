@@ -7,6 +7,7 @@ const source = await readFile(new URL('src/server-theme.css', root), 'utf8');
 const profiles = JSON.parse(await readFile(new URL('src/profiles.json', root), 'utf8'));
 const {version} = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 const logo = await readFile(new URL('assets/prime-build-logo.png', root));
+const board = await readFile(new URL('assets/backgrounds/primebuild-board.webp', root));
 const catalog = {version, repository:'PrimeBuild-pc/discord-theme-launcher', themes:[]};
 const checksums = [];
 await mkdir(new URL('assets/generated/', root), {recursive:true});
@@ -28,6 +29,7 @@ for (const p of profiles) {
   const values = {THEME_NAME:p.name, VERSION:version, GUILD_ID:p.guild, DESCRIPTION:p.tagline + ' Server-scoped desktop theme. Disable to restore.',
     ACCENT:p.accent, ACCENT_TEXT:p.accentText, ACCENT_RGB:p.rgb, CHAT:p.chat, SIDEBAR:p.sidebar, PANEL:p.panel, PANEL_RAISED:p.raised, BORDER:p.border, TEXT_MUTED:p.muted, PROFILE_ID:p.id,
     FONT_FACE:'/* Embedded '+p.font.name+' font license:\n'+displayLicense+'\n*/\n@font-face { font-family: "'+p.font.family+'"; src: url("data:font/'+mime+';base64,'+displayBytes.toString('base64')+'") format("'+p.font.format+'"); font-style: normal; font-weight: '+p.font.weight+'; font-display: swap; }',
+    PHOTO: p.id === 'primebuild' ? 'url("data:image/webp;base64,'+board.toString('base64')+'")' : 'none',
     PROFILE_RULES:`  /* Display typography stays in this selected server scope. */
   .header_f37cb1 h2, .container__9293f :is(h1,h2,.title__9293f), .name__2ea32, .name__29444,
   .membersGroup_c8ffbb, [class^="membersGroup__"], [class*=" membersGroup__"] {

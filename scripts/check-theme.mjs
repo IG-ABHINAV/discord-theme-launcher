@@ -31,13 +31,14 @@ for (const profile of catalog.themes) {
   assert.ok(top[0].params.includes('[data-list-id="guildsnav"]'));
   assert.ok(top[0].params.includes('[data-list-item-id="guildsnav___'+profile.guild+'"][aria-selected="true"]'));
   for (const other of catalog.themes.filter(t => t.id !== profile.id)) assert.ok(!top[0].params.includes(other.guild));
-  ast.walkAtRules(rule => assert.ok(['scope', 'media', 'font-face'].includes(rule.name), 'Unexpected @' + rule.name));
+  ast.walkAtRules(rule => assert.ok(['scope', 'media', 'font-face', 'container'].includes(rule.name), 'Unexpected @' + rule.name));
   ast.walkDecls(decl => {
     assert.ok(!/url\(\s*["']?(?:https?:|\/\/|file:)/i.test(decl.value), 'External dependency: ' + decl.prop);
     assert.ok(!/^(?:animation|animation-name|backdrop-filter)$/.test(decl.prop), 'Unnecessary ongoing effect: ' + decl.prop);
   });
   assert.ok(!/__[A-Z][A-Z_]+__/.test(css), 'Unresolved build placeholder');
   for (const area of ['chat','sidebar','members']) assert.ok(css.includes('--pb-'+area+'-art: url("data:image/svg+xml;base64,'), 'Missing panel artwork: '+area);
+  assert.ok(profile.id === 'primebuild' ? css.includes('--pb-photo: url("data:image/webp;base64,') : css.includes('--pb-photo: none;'), 'Prime Build alone carries the board photo');
   assert.ok(Buffer.byteLength(css) <= 350 * 1024, 'Standalone theme exceeds its size budget');
   assert.ok((await stat(new URL('src/server-theme.css', root))).size <= 100 * 1024);
   const hash = createHash('sha256').update(css).digest('hex');

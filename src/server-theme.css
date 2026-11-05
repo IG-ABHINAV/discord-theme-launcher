@@ -35,6 +35,7 @@ __FONT_FACE__
     --pb-chat-art: url("__CHAT_ART__");
     --pb-sidebar-art: url("__SIDEBAR_ART__");
     --pb-members-art: url("__MEMBERS_ART__");
+    --pb-photo: __PHOTO__;
     --pb-profile: "__PROFILE_ID__";
     background: var(--pb-black);
     color: var(--pb-text);
@@ -151,7 +152,30 @@ __FONT_FACE__
   }
 
   .chat_f75fb0, .content_f75fb0 { background: var(--pb-chat); }
-  .chatContent_f75fb0, .container_f369db { background: var(--pb-chat-art) right bottom / cover no-repeat, var(--pb-chat); }
+  .chatContent_f75fb0, .container_f369db {
+    container-type: inline-size;
+    container-name: pb-chat;
+    position: relative;
+    isolation: isolate;
+    background: var(--pb-chat-art) right bottom / cover no-repeat, var(--pb-chat);
+  }
+  .chatContent_f75fb0::after, .container_f369db::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    right: 0;
+    bottom: 0;
+    width: 58%;
+    height: 78%;
+    background: var(--pb-photo) right bottom / contain no-repeat;
+    pointer-events: none;
+    opacity: 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 46%);
+    mask-image: linear-gradient(90deg, transparent, #000 46%);
+  }
+  @container pb-chat (min-width: 720px) {
+    .chatContent_f75fb0::after, .container_f369db::after { opacity: 1; }
+  }
   .scroller__36d07, .scrollerContent__36d07 { background: transparent; }
   .container__9293f {
     background: var(--pb-sidebar);

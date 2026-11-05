@@ -72,6 +72,7 @@ public static class ThemeCompiler
         }
         css = Set(css, "hardware-art", Art(config.Banner, config.CustomBanner, "hardware-art"));
         css = Set(css, "chat-art", Art(config.Background, config.CustomBackground, "chat-art"));
+        css = Set(css, "photo", config.Background is "custom" or "none" ? "none" : Value(PresetCss(config.Background), "photo"));
         if (config.Background is "custom" or "none")
             foreach (var key in new[] { "sidebar-art", "members-art" }) css = Set(css, key, "none");
         else

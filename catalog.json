@@ -26,8 +26,8 @@
         "format": "woff2",
         "weight": 500
       },
-      "sha256": "16064fd39cccf0536f4d3c1b10f6fbaea35324740806e0bd384c4a2bc0ab7a25",
-      "bytes": 315164
+      "sha256": "2e6f49425a476d88f6ce4d97b2e5662cd4db5bcf1d85409b93a4b264092f7b96",
+      "bytes": 336922
     },
     {
       "id": "primebuild-dev",
@@ -53,8 +53,8 @@
         "format": "woff2",
         "weight": 500
       },
-      "sha256": "e4a70fc222801e0a2c3f46c03eb0e93a4728e87e0cdc370562fe896945c995f0",
-      "bytes": 213995
+      "sha256": "2e337c05d92e1e25cfb2e8e174707827e74ab57fc57fa625aec47708db9b2ef5",
+      "bytes": 214675
     },
     {
       "id": "fantafort",
@@ -80,8 +80,8 @@
         "format": "truetype",
         "weight": 400
       },
-      "sha256": "d51e9668a2f87b4910090098220f9eae54326c4642851769957b4e0760032b00",
-      "bytes": 204843
+      "sha256": "40645f7931a83c892095ec9df77d7230b3b53529f6e67aaa1e6f604bdda23845",
+      "bytes": 205523
     }
   ]
 }
