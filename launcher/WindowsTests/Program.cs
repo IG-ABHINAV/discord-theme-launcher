@@ -1,5 +1,6 @@
 using CommunityThemes;
 using Microsoft.Web.WebView2.WinForms;
+using Microsoft.Web.WebView2.Core;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
@@ -69,10 +70,58 @@ internal static class Program
                 await Loaded();
                 Check(await core.ExecuteScriptAsync("getComputedStyle(document.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") == "\"#55ccaa\"", "rapid preview changes render only the latest configuration");
                 using var builder = new BuilderForm(true);
-                IEnumerable<Control> Descendants(Control parent) => parent.Controls.Cast<Control>().SelectMany(c => new[] { c }.Concat(Descendants(c)));
-                var controls = Descendants(builder).ToArray();
-                Check(controls.OfType<Button>().Where(b => b.Text is "Apply theme" or "Disable personal theme" or "Restore previous setup").All(b => !b.Enabled), "preview mode disables all Discord mutations");
-                Check(controls.OfType<TextBox>().Any(t => t.AccessibleName == "Server ID or channel link") && controls.OfType<ComboBox>().Count() == 5, "native configurator exposes labeled server and appearance controls");
+                builder.Show();
+                var studio = builder.Controls.OfType<StudioSurface>().Single();
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (!studio.Ready) await Task.Delay(100, timeout.Token);
+                var studioCore = studio.Controls.OfType<WebView2>().Single().CoreWebView2;
+                Check(await studioCore.ExecuteScriptAsync("document.getElementById('apply').disabled && document.getElementById('disable').disabled && document.getElementById('restore').disabled") == "true", "preview mode disables all Discord mutations in the shipped studio");
+                Check(await studioCore.ExecuteScriptAsync("document.querySelector('label[for=guild]').textContent.includes('Server ID') && document.querySelectorAll('[data-preset]').length===3") == "true", "studio exposes labeled server selection and three coordinated presets");
+                Check(await studioCore.ExecuteScriptAsync("[...document.querySelectorAll('.preset-card img')].every(image=>image.complete&&image.naturalWidth>0)") == "true", "actual native studio loads all bundled preset artwork");
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"fantafort\"]').click()");
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (!studio.Ready || await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") != "\"#f5db36\"") await Task.Delay(100, timeout.Token);
+                Check(true, "native preset selection updates the real preview through the validated bridge");
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-context=other]').click()");
+                Check(await studioCore.ExecuteScriptAsync("document.getElementById('preview-status').textContent.includes('Outside your target server')") == "true", "native studio explains why the theme is off in another server");
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-context=target]').click()");
+                Check(await studioCore.ExecuteScriptAsync("(()=>{const f=document.getElementById('preview');const r=f.contentDocument.querySelector('.scrollableContainer__74017').getBoundingClientRect();return r.bottom<=f.clientHeight})()") == "true", "native preview keeps the composer within its frame");
+                string studioSource = studioCore.Source;
+                await studioCore.ExecuteScriptAsync("location.href='https://example.invalid/blocked'"); await Task.Delay(150);
+                Check(studioCore.Source == studioSource, "studio blocks external top-level navigation");
+                await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.location.href='https://example.invalid/blocked'"); await Task.Delay(150);
+                Check(await studioCore.ExecuteScriptAsync("!document.getElementById('preview').contentDocument?.URL.startsWith('https://example.invalid')") == "true", "studio blocks external iframe navigation");
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-action=refresh]').click()");
+                await Task.Delay(200);
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (!studio.Ready) await Task.Delay(100, timeout.Token);
+                await studioCore.ExecuteScriptAsync("document.getElementById('guild').value='invalid';document.getElementById('guild').dispatchEvent(new Event('input'))");
+                await Task.Delay(400);
+                Check(await studioCore.ExecuteScriptAsync("!document.getElementById('preview-error').hidden && document.getElementById('apply').disabled") == "true", "invalid target is explained over the previous preview and cannot be applied");
+                await studioCore.ExecuteScriptAsync("document.getElementById('guild').value='987654321012345678';document.getElementById('guild').dispatchEvent(new Event('input'))");
+                await Task.Delay(250);
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (!studio.Ready) await Task.Delay(100, timeout.Token);
+                Check(await studioCore.ExecuteScriptAsync("document.getElementById('preview-error').hidden") == "true", "valid target recovers the preview without reopening the application");
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"primebuild\"]').click();document.querySelector('[data-preset=\"primebuild-dev\"]').click();document.querySelector('[data-preset=\"fantafort\"]').click()");
+                await Task.Delay(150);
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (!studio.Ready || await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") != "\"#f5db36\"") await Task.Delay(100, timeout.Token);
+                Check(true, "rapid studio preset changes settle on the latest selected design");
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"primebuild\"]').click()");
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (!studio.Ready || await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") != "\"#ff6600\"") await Task.Delay(100, timeout.Token);
+                var capturePath = Path.GetFullPath(Path.Combine(".local", "studio-native-preview.png")); Directory.CreateDirectory(Path.GetDirectoryName(capturePath)!);
+                await using (var capture = File.Create(capturePath)) await studioCore.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, capture);
+                foreach (var page in new[] { "style", "art" })
+                {
+                    await studioCore.ExecuteScriptAsync("document.querySelector('[data-page=\"" + page + "\"]').click()");
+                    await Task.Delay(75);
+                    await using var capture = File.Create(Path.GetFullPath(Path.Combine(".local", "studio-native-" + page + ".png")));
+                    await studioCore.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, capture);
+                }
+                // Edits made by this test are synthetic; do not open the user's unsaved-edits dialog on disposal.
+                builder.Hide();
                 Console.WriteLine($"{checks} Windows checks passed. Fixture: {fixture}");
                 Environment.ExitCode = 0;
             }

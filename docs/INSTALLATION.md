@@ -6,14 +6,14 @@ The beta launcher targets Windows x64, standard per-user stable Discord in `%LOC
 
 ## Portable launcher (recommended)
 
-1. Download the portable ZIP from the [release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.1) and extract it.
+1. Download the portable ZIP from the [release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.2) and extract it.
 2. Run `DiscordThemeLauncher.exe` normally.
-3. Choose a starting preset and paste your server ID or a Discord text-channel link. Use **How to copy a server ID** for the Developer Mode / Copy Server ID steps. Invite links are refused.
-4. Choose fonts, colors, banner and background. Inspect the live preview. **Save** and **Share a copy…** write a `.dtheme` file containing selected assets and the custom font license. **Open configuration** reopens it. If needed, explicitly choose **Install / repair official Vencord if needed**.
+3. Choose a starting preset and paste your server ID or a Discord text-channel link. Use **How do I find my server ID?** for the Developer Mode / Copy Server ID steps. Invite links are refused.
+4. Open **Style** for fonts and colors and **Artwork** for banner and background. Inspect the live preview. **Save** and **Share theme** write a `.dtheme` file containing selected assets and the custom font license. **Open configuration** reopens it. If needed, open **Recovery** and explicitly choose **Install / repair official Vencord if needed**.
 5. Finish calls/streams and save drafts, then tick the restart checkbox.
-6. Click **Apply theme**. Discord closes during the transaction and is reopened afterwards. The launcher checks startup before confirming success. Personal Apply requires the latest valid preview and loaded display font.
+6. Click **Apply to Discord**. Discord closes during the transaction and is reopened afterwards. The launcher checks startup before confirming success. Personal Apply requires the latest valid preview and loaded display font.
 
-The EXE embeds verified presets, fonts and artwork, so the configurator works offline with Vencord already present. The ZIP also contains standalone preset CSS. The separate **Original presets…** manager keeps multi-server selection; if an adjacent file is absent, it fetches the exact pinned release file. Corrupt/mismatched files are refused. Optional Vencord installation needs Internet access.
+The EXE embeds verified presets, fonts and artwork, so the configurator works offline with Vencord already present. The ZIP also contains standalone preset CSS. The separate **Recovery > Open original presets** manager keeps multi-server selection; if an adjacent file is absent, it fetches the exact pinned release file. Corrupt/mismatched files are refused. Optional Vencord installation needs Internet access.
 
 The embedded preview needs Microsoft Edge WebView2 Runtime. If absent, the launcher explains the prerequisite and still permits configuration saving/sharing. Install it from [Microsoft's official page](https://developer.microsoft.com/microsoft-edge/webview2/) and reopen the launcher; runtime installation is not automated. The application bundles .NET.
 
@@ -27,7 +27,7 @@ The executable is unsigned. Review its source and published checksums before dec
 
 Personal Apply replaces the single `PersonalServer.theme.css` slot and disables a bundled preset targeting the same server, retaining its bytes. Other server presets and unrelated themes remain enabled. **Disable personal theme** removes only the personal slot; it does not automatically re-enable a previously conflicting preset. Use Restore to recover that state.
 
-**Original presets…** retains the old multi-selection flow: checked presets are installed/enabled, unchecked presets removed/disabled, and the personal slot removed. Other themes, plugins, QuickCSS, online theme links and preferences are preserved by both flows. Shared configurations affect only the installing user's client; each member must adopt a shared file independently.
+**Recovery > Open original presets** retains the old multi-selection flow: checked presets are installed/enabled, unchecked presets removed/disabled, and the personal slot removed. Other themes, plugins, QuickCSS, online theme links and preferences are preserved by both flows. Shared configurations affect only the installing user's client; each member must adopt a shared file independently.
 
 The four managed files are backed up before changes, including local edits. New snapshots record exact bytes, file existence, enablement and SHA-256; full settings and credentials are not copied. All existing backup sources are checked before restoration. Failed transactions attempt restoration and keep the recovery reference. Older three-file snapshots remain usable and leave the personal slot intact.
 
@@ -49,7 +49,7 @@ This restores themes, not Vencord's installation or other applications. Historic
 
 ## Remove these themes
 
-Use **Disable personal theme** for the personal slot. To remove every managed theme, open **Original presets…**, deselect all and apply after restart acknowledgement. Or disable and move individual files manually. Managed names:
+Use **Disable personal theme** for the personal slot. To remove every managed theme, open **Recovery > Open original presets**, deselect all and apply after restart acknowledgement. Or disable and move individual files manually. Managed names:
 
 - `PrimeBuild.theme.css`
 - `PrimeBuildDev.theme.css`
@@ -71,7 +71,7 @@ No Nitro, bot, server boost or server administrator permission is needed. Each m
 Download `SHA256SUMS.txt` from the same release. On Windows:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.1-windows-x64-portable.zip
+Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.2-windows-x64-portable.zip
 ```
 
 Compare it with the corresponding filename in the release checksum file. The repository-root checksum file covers generated themes; the release checksum file also covers the launcher, ZIP and catalog. A hash checks integrity, not publisher identity.

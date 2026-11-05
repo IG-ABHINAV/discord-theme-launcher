@@ -10,7 +10,7 @@ The theme audit and Playwright fixtures test the outputs, including all three si
 
 ## Windows launcher
 
-Version 0.3 adds `ThemeConfiguration`, `ThemeCompiler` and `ThemePreview` in Core and a WinForms editor with native asset validation and WebView2 preview. [Personal configurations](CONFIGURATIONS.md) describes the format, compiler, import/licensing limits, preview boundary and upgrade semantics.
+Version 0.3 adds `ThemeConfiguration`, `ThemeCompiler` and `ThemePreview` in Core and a WinForms host with native asset validation and a bundled WebView2 editor/preview. [Personal configurations](CONFIGURATIONS.md) describes the format, compiler, import/licensing limits, preview boundary and upgrade semantics.
 
 - `launcher/Core`: catalog parsing, bounded HTTPS downloads with SHA-256 verification, managed-file transactions and backup restoration. No UI types.
 - `launcher/Windows`: WinForms presentation and Windows process/client integration. UI stays responsive during downloads and file operations. One instance per Windows user/session avoids competing launcher operations.
@@ -36,6 +36,8 @@ Vencord CLI **1.4.2** is pinned to its official release asset and SHA-256 `15268
 The launcher has no account login, membership discovery, Discord token access, telemetry endpoint, auto-start, service, browser injection, or background polling. Ordinary GitHub requests still expose normal request metadata to the hosting provider.
 
 ## Launcher presentation
+
+Version 0.3 beta 2 replaces the long native form with Theme Studio: a bundled offline editor in `launcher/Windows/ui`, served by `StudioSurface`. It has Server, Style, Artwork and Recovery sections, explicit preview-context status, real artwork thumbnails, a visible composer and a fixed apply/restart footer. The host preserves file operations and setup transactions; source-checked, bounded messages carry edit values and named actions. Native file dialogs never accept paths from the page. The editor uses embedded Noto Sans with installed gg sans preferred, classic Discord dark surfaces and the official blurple accent. It identifies itself as an independent Prime Build tool.
 
 The launcher shell uses observed Discord dark grays, blurple actions, native-style spacing and light text. It does not present itself as official Discord software. Server-theme identities remain inside their own previews rather than controlling the shell colors.
 

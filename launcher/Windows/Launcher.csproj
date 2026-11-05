@@ -13,6 +13,7 @@
     <EmbeddedResource Include="../../assets/officina-preview.png;../../assets/primebuild-dev-preview.png;../../assets/fantafort-preview.png" LogicalName="%(Filename)%(Extension)"/>
     <EmbeddedResource Include="../../assets/fonts/*.ttf" LogicalName="%(Filename)%(Extension)"/>
     <EmbeddedResource Include="../../assets/fonts/OFL.txt" LogicalName="NotoSans-OFL.txt"/>
+    <EmbeddedResource Include="ui/*" LogicalName="ui/%(Filename)%(Extension)"/>
   </ItemGroup>
   <Target Name="RemoveUnusedWebViewWpf" BeforeTargets="ResolveAssemblyReferences">
     <ItemGroup><Reference Remove="@(Reference)" Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" /></ItemGroup>

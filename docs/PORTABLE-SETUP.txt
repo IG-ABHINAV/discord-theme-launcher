@@ -2,11 +2,13 @@ DISCORD THEME LAUNCHER 0.3 - WINDOWS X64
 
 1. Extract the ZIP. Run DiscordThemeLauncher.exe normally, not as Administrator.
 2. Choose a starting preset. Paste your server ID or Discord channel link.
-   "How to copy a server ID" explains Developer Mode and Copy Server ID.
-3. Choose typography, palette, banner and background. Inspect the live preview.
-4. Save a .dtheme configuration. Share a copy includes selected assets/licenses.
-5. If needed, explicitly select official Vencord installation or repair.
-6. Finish calls, save drafts, acknowledge the restart, then click Apply theme.
+   "How do I find my server ID?" explains Developer Mode and Copy Server ID.
+3. Use Style and Artwork to customize. Inspect the live preview.
+   Other server and DMs intentionally show stock Discord; your theme stays off
+   outside its target. The composer remains visible while sample messages scroll.
+4. Save a .dtheme configuration. Share theme includes selected assets/licenses.
+5. If needed, open Recovery and select official Vencord installation or repair.
+6. Finish calls, save drafts, acknowledge the restart, then click Apply to Discord.
 
 Changes affect your LOCAL CLIENT. Other members must adopt a shared theme
 themselves. No token, login, bot, Nitro, server permissions or credentials.
@@ -17,7 +19,7 @@ a bundled theme targeting the same server. Other server presets remain enabled.
 Disable personal theme removes the slot. Restore previous setup recovers the
 last managed files/enablement; the restore is itself reversible.
 
-Original presets opens the previous multi-server setup. Applying that selection
+Recovery > Open original presets opens the previous multi-server setup. Applying that selection
 replaces the personal slot too and removes unchecked bundled themes. Unrelated
 themes, plugins, QuickCSS, online theme links and preferences are preserved.
 

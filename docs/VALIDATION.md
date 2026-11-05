@@ -1,8 +1,25 @@
-# Validation - 0.3.0-beta.1
+# Validation - 0.3.0-beta.2
+
+Date: **2026-11-05**. This update redesigns the configurator as Theme Studio and corrects the confusing preview workflow reported in beta 1. The selected-server guard and managed-theme transaction model remain intact. No operation was applied to the user's real Discord/Vencord profile; Discord process IDs and start times remained unchanged.
+
+## Current evidence
+
+- **34 Playwright tests**: 19 original theme tests, 9 personal-preview tests and 6 studio tests. A new regression first failed on the old preview's missing status explanation, then passed after adding explicit target/outside-target labels and a responsive layout with a visible composer. Studio checks load the exact shipped HTML/CSS/JS, fonts and artwork; exercise coordinated preset changes; separate preview contexts; check 1040×720, 1365×900 and 1920×1080 layouts; and ensure pending edits flush before a save action. Page-level resources stay on the reserved offline origin.
+- **57 Windows core checks** (58 Linux): configuration/schema/import integrity, font embedding restrictions, target parsing, personal/preset transactions, legacy backup restoration, unrelated settings/QuickCSS/plugin preservation. No data format or managed-file migration is required.
+- **22 native Windows checks**: existing image/font/large-preview tests plus the actual studio WebView2 host. Tests verify all three preset thumbnails decode, real preset selection reaches the native host and refreshes the generated preview, outside-server status is explicit, composer bounds fit, invalid-target errors recover without reopening, rapid changes settle correctly, and external top/iframe navigation is blocked. Canceled external navigation no longer changes the loaded editor's readiness state.
+- Release compilation passes with **zero warnings/errors**. The Windows package contains the editor, fonts and artwork offline, plus the existing runtime/font/WebView2 notices and checksums.
+
+The three current launcher screenshots are captured from the actual embedded renderer inside the Windows application, using sample conversations and a synthetic server ID. Server, Style and Artwork views were inspected. They replace the earlier development capture. The renderer capture omits the operating system's title bar; it is not an HTML mockup of the app. Browser tests also produce temporary fixture captures for diagnostics.
+
+## Limits
+
+The executable is unsigned. WebView2 Runtime is required; its installation/removal fallback has not been tested by removing the host runtime. Missing-runtime native Open/Save-copy/Help controls are implemented. Full first-time Vencord setup/restart/recovery in a clean VM, applying the new personal workflow to a real Discord session, gaming/call benchmarks, all rare layouts, high contrast, screen readers and every DPI/theme combination remain open. This update uses isolated profiles and actual WebView2 rendering; it does not claim live-client or clean-machine validation.
+
+## Inherited validation - 0.3.0-beta.1
 
 Date: **2026-11-05**. This beta adds a personal configurator while retaining the three original presets. The user's running Discord was not restarted or modified during development. Native preview, isolated-profile transaction tests and actual-client coverage are distinguished below.
 
-## Current automated evidence
+### Automated evidence recorded for beta 1
 
 - **57 Windows core checks** (58 on Linux, including symlink refusal): existing preset transactions and startup checks, server ID/channel-link parsing, invalid targets/schema/colors, portable assets and license round trips, deterministic compilation, corrupt assets, active SVG rejection, image dimensions, font table bounds/embedding flags, personal apply/retarget/disable/restore, conflicting-preset disablement, unrelated preferences/QuickCSS/plugins preserved, backup integrity and legacy three-file restore.
 - **27 Playwright tests**: 19 preset checks and 8 personal-builder checks. All three presets retarget to a synthetic server ID; custom and native typography load; other servers/DMs, hidden/ambiguous rails, changed structure and global settings stay outside the scope. Message/author/composer fonts remain native. The generated CSS parses, uses embedded resources and contains one visual scope. Custom background scrim and composer/text contrast pass. User labels/license text cannot inject preview markup.
@@ -13,7 +30,7 @@ Environment: Windows 11 x64, .NET SDK 10.0.403 / runtime 10.0.14. Native renderi
 
 The configurator was visually inspected in non-mutating preview mode. Updated screenshots show the actual Windows application and synthetic CSS fixtures. The preview has a separate temporary browser profile and blocks external document navigation/requests. Runtime cache files may remain in Temp; this is not a zero-files-written mode. Preview mode never applies to Discord/Vencord or writes the saved-configuration state.
 
-## Current release limits
+### Limits recorded for beta 1
 
 The native launcher screenshot records the beta editor during development, before the final acknowledgement-spacing and preview-zoom refinements. The final package was extracted and opened in preview mode; subsequent native automated checks passed. A final packaged-window screenshot can replace that capture in a later documentation update.
 

@@ -6,6 +6,17 @@ const directory = new URL('../.local/builder-fixtures/', import.meta.url);
 const target = '[data-list-item-id="guildsnav___987654321012345678"]';
 const token = page => page.locator('.base__5e434').evaluate(el => getComputedStyle(el).getPropertyValue('--pb-accent').trim());
 
+test('preview explains outside-server styling and keeps the composer in view', async ({ page }) => {
+  await page.setViewportSize({width: 880, height: 540});
+  await page.goto(new URL('primebuild.html', directory).href);
+  await expect(page.getByRole('status')).toContainText('Theme active', {timeout: 2000});
+  await page.getByRole('treeitem', {name:'ALT',exact:true}).click();
+  await expect(page.getByRole('status')).toContainText('Outside your target server', {timeout: 2000});
+  expect(await token(page)).toBe('');
+  const composer = await page.locator('.scrollableContainer__74017').boundingBox();
+  expect(composer.y + composer.height).toBeLessThanOrEqual(540);
+});
+
 for (const preset of ['primebuild', 'primebuild-dev', 'fantafort', 'custom', 'native']) {
   test(`personal ${preset}: scoped generated CSS, offline assets and native chat typography`, async ({ page }) => {
     const requests = [];

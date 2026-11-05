@@ -22,6 +22,13 @@ public static class ThemeCompiler
     private static string Value(string css, string key) => Regex.Match(css, Pattern(key)).Groups[2].Value;
     private static string Set(string css, string key, string value) => Regex.Replace(css, Pattern(key), m => m.Groups[1].Value + value + ";");
 
+    public static string ArtworkDataUri(string preset, string area)
+    {
+        if (area is not ("header" or "chat")) throw new InvalidDataException("Unknown artwork area.");
+        var value = Value(PresetCss(preset), area == "header" ? "hardware-art" : "chat-art");
+        return value[5..^2];
+    }
+
     public static string Compile(ThemeConfiguration config)
     {
         config.Validate();
