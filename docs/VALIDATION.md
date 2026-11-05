@@ -1,4 +1,10 @@
-# Validation - 0.2.1-beta.1
+# Validation - 0.2.2-beta.1
+
+The artwork update removes identity numbering and adds FantaFort display typography. **17 theme tests** pass, including a new check that the embedded Bangers face actually loads, applies to FantaFort headings/navigation, preserves normal message typography, and releases element styling on Prime Build/Home navigation. Static audit permits only the uniquely named embedded font registration outside the existing server guards. The unchanged launcher core retains its 24 Windows checks (25 on Linux).
+
+The sanitized theme previews were regenerated from the distributed stylesheets. FantaFort's SVG graphic lettering uses static outlines, independent of font loading in image contexts. Native Discord was also checked after replacing only the three managed CSS files: unnumbered identities and the FantaFort display face appeared in graphics, headings, channel names and member groups without restarting Discord. The font test includes nested channel-label typography spans observed in the current client. Installed CSS hashes match the generated files. This is an appearance update; startup protections introduced in 0.2.1 remain intact. Earlier live/setup evidence and its limitations are retained below.
+
+## Inherited validation - 0.2.1-beta.1
 
 The patch adds runtime completeness and startup-result checks. The regression first failed against the original renderer-only readiness predicate, then passed after the fix. **24 Windows core checks** pass (Linux additionally checks symlink refusal), and the Windows Release build passes with warnings treated as errors. The same 16 theme tests cover this release; server artwork and scope behavior are unchanged apart from version metadata.
 

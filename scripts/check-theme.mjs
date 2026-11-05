@@ -11,7 +11,16 @@ for (const profile of catalog.themes) {
   const ast = postcss.parse(css);
   const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
   assert.ok(css.includes('@version ' + pkg.version), 'Theme and package versions must agree');
-  const top = ast.nodes.filter(node => node.type !== 'comment');
+  const resources = ast.nodes.filter(node => node.type === 'atrule' && node.name === 'font-face');
+  assert.equal(resources.length, profile.id === 'fantafort' ? 1 : 0, 'Unexpected global font registration');
+  for (const resource of resources) {
+    assert.equal(resource.nodes.find(n=>n.prop==='font-family')?.value, '"PrimeBuild FantaFort Display"');
+    assert.match(resource.nodes.find(n=>n.prop==='src')?.value ?? '', /^url\("data:font\/ttf;base64,/);
+    assert.ok(resource.nodes.every(n=>n.type==='decl'), 'Font registration cannot contain selectors');
+  }
+  ast.walkAtRules('font-face', resource => assert.ok(resources.includes(resource), 'Only the audited top-level font resource is allowed'));
+  assert.ok(!/\/\s*0[123]\b/.test(profile.caption), 'Server identities must not have serial numbers');
+  const top = ast.nodes.filter(node => node.type !== 'comment' && !resources.includes(node));
   assert.equal(top.length, 1, 'All styling must be inside one guarded scope');
   assert.equal(top[0].type, 'atrule');
   assert.equal(top[0].name, 'scope');
@@ -20,7 +29,7 @@ for (const profile of catalog.themes) {
   assert.ok(top[0].params.includes('[data-list-id="guildsnav"]'));
   assert.ok(top[0].params.includes('[data-list-item-id="guildsnav___'+profile.guild+'"][aria-selected="true"]'));
   for (const other of catalog.themes.filter(t => t.id !== profile.id)) assert.ok(!top[0].params.includes(other.guild));
-  ast.walkAtRules(rule => assert.ok(['scope', 'media'].includes(rule.name), 'Unexpected @' + rule.name));
+  ast.walkAtRules(rule => assert.ok(['scope', 'media', 'font-face'].includes(rule.name), 'Unexpected @' + rule.name));
   ast.walkDecls(decl => {
     assert.ok(!/url\(\s*["']?(?:https?:|\/\/|file:)/i.test(decl.value), 'External dependency: ' + decl.prop);
     assert.ok(!/^(?:animation|animation-name|backdrop-filter)$/.test(decl.prop), 'Unnecessary ongoing effect: ' + decl.prop);

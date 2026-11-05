@@ -119,6 +119,24 @@ test('styles parse in Chromium and contain no network-dependent assets', async (
   expect(await page.locator('#channels').evaluate(el => getComputedStyle(el, '::before').backgroundImage)).toContain('data:image/svg+xml;base64,');
 });
 
+test('FantaFort display font loads offline, stays server-scoped and keeps message typography', async ({page})=>{
+  const normal = await page.locator('.header_f37cb1 h2').evaluate(el=>getComputedStyle(el).fontFamily);
+  const body = await page.locator('.markup__75297').first().evaluate(el=>getComputedStyle(el).fontFamily);
+  await page.locator('[data-list-item-id="guildsnav___1536382143796748389"]').click();
+  expect(await page.evaluate(async()=>{
+    await document.fonts.load('22px "PrimeBuild FantaFort Display"','FANTAFORT');
+    return Array.from(document.fonts).some(font=>font.family.includes('PrimeBuild FantaFort Display') && font.status==='loaded');
+  })).toBe(true);
+  expect(await page.locator('.header_f37cb1 h2').evaluate(el=>getComputedStyle(el).fontFamily)).toContain('PrimeBuild FantaFort Display');
+  expect(await page.locator('.name__2ea32').first().evaluate(el=>getComputedStyle(el).fontFamily)).toContain('PrimeBuild FantaFort Display');
+  expect(await page.locator('.name__2ea32 > span').first().evaluate(el=>getComputedStyle(el).fontFamily)).toContain('PrimeBuild FantaFort Display');
+  expect(await page.locator('.markup__75297').first().evaluate(el=>getComputedStyle(el).fontFamily)).toBe(body);
+  await page.locator(target).click();
+  expect(await page.locator('.header_f37cb1 h2').evaluate(el=>getComputedStyle(el).fontFamily)).toBe(normal);
+  await page.locator('[data-list-item-id="guildsnav___home"]').click();
+  expect(await page.locator('.header_f37cb1 h2').evaluate(el=>getComputedStyle(el).fontFamily)).toBe(normal);
+});
+
 for (const width of [1024, 1280, 1920]) {
   test('desktop layout stays usable at width ' + width, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });

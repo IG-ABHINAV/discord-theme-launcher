@@ -8,7 +8,7 @@
 | Prime Build Dev / Workbench | `1537861795090268302` |
 | FantaFort / Arena | `1536382143796748389` |
 
-Each generated file wraps all rules and custom properties in one native CSS `@scope`. The guard requires the matching selected server-rail item within the recognized `.base__5e434` layout. It rejects hidden/ARIA-hidden rails, missing selection and ambiguous selection. Merely having a server icon or message link is insufficient.
+Each generated file wraps all visual rules and custom properties in one native CSS `@scope`. FantaFort also registers one uniquely named embedded font resource outside the scope; it has no selectors and does not apply a font globally. The guard requires the matching selected server-rail item within the recognized `.base__5e434` layout. It rejects hidden/ARIA-hidden rails, missing selection and ambiguous selection. Merely having a server icon or message link is insufficient.
 
 The three CSS files can be enabled together. Only one matching server scope activates. Other servers, Home/DM contexts and global settings remain outside those scopes. Exact layout anchoring is intentional: incompatible Discord updates should make a theme stay off rather than turn global. It still needs maintenance as Discord changes.
 
@@ -47,3 +47,5 @@ Tested text/input contrast pairs and desktop fixture widths are recorded in Vali
 After a Discord update, inspect the selected-server marker and panel hierarchy in the actual client, update sanitized fixtures only from structural observations, rerun negative isolation cases, verify all three servers, and publish CSS/catalog/checksums together. Never remove the guard as a quick fix.
 
 A companion plugin is still unnecessary for supported views. [Vencord custom plugins require source builds](https://docs.vencord.dev/installing/custom-plugins/), which would make installation harder for members. External portals remain stock instead of introducing that dependency.
+
+FantaFort uses Bangers for display lettering, server/channel headings, channel names and member groups. Normal messages, usernames and input retain their existing fonts. The font and artwork are embedded; no font installation is required. Other scripts/languages fall back to available native fonts when a glyph is absent.

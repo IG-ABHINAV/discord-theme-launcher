@@ -13,6 +13,7 @@
  * Build with `npm run build`; install the generated PrimeBuild.theme.css.
  * The exact layout anchor intentionally fails closed after incompatible updates.
  */
+__FONT_FACE__
 @scope (.base__5e434:has(> .content__5e434 > .sidebar__5e434 > nav.guilds__5e434:not([hidden]):not([aria-hidden="true"]) > [data-list-id="guildsnav"] [data-list-item-id="guildsnav_____GUILD_ID__"][aria-selected="true"]):not(:has(> .content__5e434 > .sidebar__5e434 > nav.guilds__5e434 > [data-list-id="guildsnav"] [aria-selected="true"]:not([data-list-item-id="guildsnav_____GUILD_ID__"])))) {
   :scope {
     /* Customization: edit these values, keeping the scope intact. */
@@ -230,6 +231,7 @@
   ::-webkit-scrollbar-thumb { background-color: #55535b; border-radius: 4px; }
   ::-webkit-scrollbar-track { background-color: transparent; }
 
+__PROFILE_RULES__
   @media (prefers-reduced-motion: no-preference) {
     .link__2ea32, .scrollableContainer__74017 { transition: background-color 100ms ease, border-color 100ms ease; }
   }

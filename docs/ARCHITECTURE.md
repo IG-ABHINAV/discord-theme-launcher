@@ -4,7 +4,7 @@
 
 `src/profiles.json` defines three identities and exact guild IDs. `src/server-theme.css` contains shared scoped component rules. `scripts/artwork.mjs` produces original header/chat/channel/member SVGs. `scripts/build.mjs` embeds artwork, substitutes each profile, and writes the three standalone theme files, inspectable vector assets, `catalog.json` and theme checksums.
 
-Each output has exactly one selected-server `@scope`. The catalog records file sizes and digests. It is embedded in the launcher, so an existing binary cannot silently switch to a mutable main-branch catalog or a different release. The `--pb-` variable prefix is retained for compatibility with the original Officina source; each active scope gets its own values.
+Each output has exactly one selected-server `@scope`. FantaFort additionally registers a uniquely named, embedded data-only `@font-face`; this resource registration contains no selectors, and its font is applied only inside the FantaFort scope. The catalog records file sizes and digests. It is embedded in the launcher, so an existing binary cannot silently switch to a mutable main-branch catalog or a different release. The `--pb-` variable prefix is retained for compatibility with the original Officina source; each active scope gets its own values.
 
 The theme audit and Playwright fixtures test the outputs, including all three simultaneous installations. Previews contain synthetic content; fixtures must never copy actual member messages, account data or credentials.
 
@@ -59,3 +59,11 @@ A loader marker plus renderer.js is insufficient: Electron's main process also n
 Recognized incomplete Vencord installations offer upstream `--repair --branch stable`; small unrecognized loaders remain refused. Startup observation is limited to process path, window handle and title. A loaded title ending in " - Discord" is accepted; a native "Error" title fails; generic/splash windows keep waiting for up to 40 seconds. No messages, tokens or renderer state are inspected. A successful window check cannot guarantee future stability.
 
 After an operation fails, there is no automatic retry/relaunch. Theme-transaction restoration remains the responsibility of the existing snapshot mechanism. Original user incident evidence and regression limits are documented in STARTUP-INCIDENT.md.
+
+## FantaFort typography in 0.2.2
+
+Bangers Regular is embedded unmodified in the FantaFort CSS, together with its full SIL OFL notice. This is a shared font resource registration with the unique family name `PrimeBuild FantaFort Display`; all rules selecting elements remain guarded by the exact FantaFort server scope. The audit permits only this registration in that output, with an embedded source, and no additional global style rules.
+
+The build uses committed glyph outlines for SVG graphic text, avoiding dependencies on font loading inside SVG image contexts. `scripts/extract-font-glyphs.py` can regenerate the map with fontTools 4.63.0; normal builds and member installation do not require Python. The map records the source font's SHA-256 digest, checked during builds.
+
+Ordinary message/composer/username typography and the launcher UI remain unchanged. Disabling the theme or navigating away releases all display-font element styling. The font needs no OS installation and no network requests. Header/league serial numbers and decorative Dev line indices were removed.

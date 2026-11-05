@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.2-beta.1 - 2026-11-05
+
+- Removed theme numbering from all three server headers, the FantaFort league artwork and decorative Dev line indices.
+- Added embedded Bangers display typography to FantaFort graphics, server/channel headings, navigation and member-group labels.
+- Kept ordinary messages, usernames, composer and launcher typography unchanged.
+- Converted FantaFort graphic lettering to static outlines and included the unmodified font and SIL OFL notice in its CSS for offline use.
+- Audited the uniquely named font registration separately from all server-scoped visual rules; added font-loading and isolation coverage.
+
 ## 0.2.1-beta.1 - 2026-11-05
 
 - Reject incomplete Vencord installations before restarting Discord: check readable, nonempty patcher, preload, renderer and renderer CSS files.
