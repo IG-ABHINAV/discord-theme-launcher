@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Discord Theme Launcher — repository banner</title>
+  <style>
+    @font-face { font-family: Noto; src: url('../../fonts/NotoSans-Regular.ttf'); font-weight: 400; }
+    @font-face { font-family: Noto; src: url('../../fonts/NotoSans-Bold.ttf'); font-weight: 700; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Noto, sans-serif; }
+    .banner { position: relative; width: 1600px; height: 480px; overflow: hidden; background: #1e1f22; color: #f2f3f5; padding: 62px 88px; }
+    .banner::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 92% 42%, #5865f224, transparent 56%); }
+    .brand { position: relative; display: flex; align-items: center; gap: 14px; color: #c5c6cd; font-size: 17px; letter-spacing: 2px; }
+    .brand img { width: 42px; height: 42px; object-fit: contain; }
+    h1 { position: relative; margin: 22px 0 16px; font-size: 63px; line-height: 1.12; font-weight: 700; letter-spacing: -2px; }
+    .subtitle { position: relative; margin: 0; color: #c5c6cd; font-size: 23px; }
+    .meta { position: absolute; bottom: 56px; left: 88px; display: flex; align-items: center; gap: 14px; color: #b5bac1; font-size: 17px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #5865f2; }
+    .designs { position: absolute; top: 106px; right: 88px; display: flex; align-items: center; gap: 18px; }
+    .design { width: 188px; height: 248px; border: 1px solid #3f4147; border-radius: 14px; background: #2b2d31; overflow: hidden; box-shadow: 0 12px 36px #0004; }
+    .design:nth-child(2) { transform: translateY(-18px); }
+    .design:nth-child(3) { transform: translateY(12px); }
+    .scene { height: 150px; margin: 9px; border-radius: 8px; background-size: cover; background-position: right bottom; border-top: 3px solid var(--theme-accent); }
+    .hardware { --theme-accent: #ff6600; }
+    .hardware .scene { background-image: url('../../generated/primebuild-chat.svg'); }
+    .software { --theme-accent: #ff782e; }
+    .software .scene { background-image: url('../../generated/primebuild-dev-chat.svg'); }
+    .arena { --theme-accent: #f5db36; }
+    .arena .scene { background-image: url('../../generated/fantafort-chat.svg'); }
+    .server { margin: 15px 15px 5px; color: #f2f3f5; font-size: 18px; font-weight: 700; }
+    .name { margin: 0 15px; color: #b5bac1; font-size: 16px; }
+    .cta { position: absolute; right: 88px; bottom: 48px; padding: 13px 22px; border-radius: 7px; background: #5865f2; color: #fff; font-size: 18px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <main class="banner" aria-label="Discord Theme Launcher: three community themes and one Windows launcher">
+    <div class="brand"><img src="../../prime-build-logo.png" alt="Prime Build"><span>PRIME BUILD / COMMUNITY TOOLS</span></div>
+    <h1>Your communities.<br>Your Discord.</h1>
+    <p class="subtitle">Three local themes. One Windows launcher.</p>
+    <div class="meta"><span>Windows x64</span><span class="dot"></span><span>Server-scoped</span><span class="dot"></span><span>Reversible setup</span></div>
+    <div class="designs" aria-label="Included community designs">
+      <section class="design hardware"><div class="scene"></div><p class="server">Prime Build</p><p class="name">Build Your Dream</p></section>
+      <section class="design software"><div class="scene"></div><p class="server">Prime Build · Dev</p><p class="name">Software House</p></section>
+      <section class="design arena"><div class="scene"></div><p class="server">FantaFort</p><p class="name">Arena</p></section>
+    </div>
+    <div class="cta">Get the launcher →</div>
+  </main>
+</body>
+</html>

@@ -1,14 +1,42 @@
-# Discord Theme Launcher
+<div align="center">
+  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.4-beta.1/DiscordThemeLauncher-0.2.4-beta.1-windows-x64-portable.zip">
+    <img src="assets/banners/readme/discord-theme-launcher-1600x480.png" alt="Your communities. Your Discord. Three local themes, one Windows launcher, by Prime Build." width="1600">
+  </a>
 
-**Three server-scoped Discord desktop designs. One Windows launcher.** Maintained by [PrimeBuild-pc](https://github.com/PrimeBuild-pc).
+  <h1>Discord Theme Launcher</h1>
 
-Choose **Prime Build**, **Prime Build Dev**, **FantaFort**, or any combination. The launcher prepares the selected themes, backs up the managed files, enables them, and reopens Discord. Each theme appears only in its matching server; other servers and global account settings remain outside its scope.
+  <p><strong>Three community designs. One simple Windows setup.</strong><br>Personalize Prime Build, Prime Build Dev and FantaFort with independent, server-scoped themes.</p>
 
-**[Download Windows portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.4-beta.1/DiscordThemeLauncher-0.2.4-beta.1-windows-x64-portable.zip)** | [All release assets](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.2.4-beta.1) | [Installation and recovery](docs/INSTALLATION.md) | [Validation](docs/VALIDATION.md)
+  <p>
+    <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/actions/workflows/check.yml"><img src="https://github.com/PrimeBuild-pc/discord-theme-launcher/actions/workflows/check.yml/badge.svg?branch=main" alt="Theme checks and Windows build"></a>
+    <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases"><img src="https://img.shields.io/github/v/release/PrimeBuild-pc/discord-theme-launcher?include_prereleases&amp;label=release&amp;color=5865F2" alt="Latest release, including beta versions"></a>
+    <a href="docs/COMPATIBILITY.md"><img src="https://img.shields.io/badge/Windows-x64-5865F2" alt="Windows x64"></a>
+    <a href="https://vencord.dev/download/"><img src="https://img.shields.io/badge/Vencord-required-5865F2" alt="Requires Vencord"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/PrimeBuild-pc/discord-theme-launcher?color=5865F2" alt="MIT license for project code"></a>
+  </p>
+
+  <p>
+    <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.4-beta.1/DiscordThemeLauncher-0.2.4-beta.1-windows-x64-portable.zip"><strong>Download for Windows</strong></a>
+    &nbsp;·&nbsp; <a href="#quick-setup">Quick setup</a>
+    &nbsp;·&nbsp; <a href="#three-identities">Theme gallery</a>
+    &nbsp;·&nbsp; <a href="docs/INSTALLATION.md">Installation &amp; recovery</a>
+    &nbsp;·&nbsp; <a href="docs/VALIDATION.md">Validation</a>
+  </p>
+
+  <p><sub>Maintained by <a href="https://github.com/PrimeBuild-pc">PrimeBuild-pc</a>. Independent community project; not affiliated with Discord or Vencord.</sub></p>
+</div>
 
 ## Launcher interface
 
-![Actual Windows launcher preview with Discord-inspired dark surfaces, blurple selection and readable disabled controls](assets/launcher-preview.jpg)
+<p align="center">
+  <a href="assets/launcher-preview.jpg">
+    <img src="assets/launcher-preview.jpg" alt="Actual Windows launcher with all three community choices, theme previews, Vencord prerequisite, apply and restore controls" width="1200">
+  </a>
+  <br>
+  <sub>Actual Windows application, shown in non-mutating preview mode. Click to view at full size.</sub>
+</p>
+
+Choose **Prime Build**, **Prime Build Dev**, **FantaFort**, or any combination. The launcher prepares the selected themes, backs up the managed files, enables them, and reopens Discord. Each theme appears only in its matching server; other servers and global account settings remain outside its scope.
 
 The launcher follows Discord's native dark palette and typography stack. It uses installed **gg sans** when available, otherwise embedded **Noto Sans**, also a Discord fallback. Proprietary Discord fonts are not bundled. Checkboxes, buttons and dialogs retain light, readable text in disabled states. This is an independent community tool, not an official Discord extension.
 
@@ -24,17 +52,26 @@ The server identities are not numbered. Each server has its own embedded display
 
 All three customize the **chat background, channel panel, member panel, header, common cards, reactions, composer and navigation states**. Artwork is static and embedded in the CSS. The server icon rail is not redesigned. Role/status colors and useful native controls are retained.
 
-### Prime Build / Build Your Dream
+<details>
+<summary><strong>Prime Build — Build Your Dream</strong></summary>
 
 ![Build Your Dream: hardware artwork in chat and both side panels](assets/officina-preview.png)
 
-### Prime Build Dev / Software House
+</details>
+
+<details>
+<summary><strong>Prime Build · Dev — Software House</strong></summary>
 
 ![Software House: code editor background, terminal details and Prime Build orange](assets/primebuild-dev-preview.png)
 
-### FantaFort / Arena
+</details>
+
+<details>
+<summary><strong>FantaFort — Arena</strong></summary>
 
 ![Arena: fantasy league tactics, angular violet panels, cyan and yellow accents](assets/fantafort-preview.png)
+
+</details>
 
 *These previews use the distributed CSS with synthetic content. They are sanitized test fixtures, not community-message screenshots. Actual desktop checks are reported separately.*
 
@@ -42,7 +79,7 @@ All three customize the **chat background, channel panel, member panel, header, 
 
 1. Download and **extract the portable ZIP**. Run `DiscordThemeLauncher.exe` normally, without Administrator privileges.
 2. Select the communities you want to personalize.
-3. If Vencord is missing, explicitly choose **Install official Vencord if it is missing**.
+3. If Vencord is missing, explicitly choose **Install official Vencord if it is missing**. The launcher downloads and verifies the official installer for the supported setup.
 4. Finish calls/streams, save drafts, and tick the restart checkbox.
 5. Click **Apply & open Discord**.
 
