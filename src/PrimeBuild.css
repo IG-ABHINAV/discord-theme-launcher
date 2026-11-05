@@ -1,0 +1,230 @@
+/**
+ * @name Prime Build — Officina
+ * @author PrimeBuild
+ * @authorLink https://github.com/PrimeBuild-pc
+ * @version 0.1.0-beta.1
+ * @description A clean, hardware-inspired theme that activates only in the Prime Build server. Desktop Vencord. Disable the theme to restore your previous appearance.
+ * @website https://primebuild.website/
+ * @source https://github.com/PrimeBuild-pc/primebuild-discord-theme
+ * @invite ERUwSxE79q
+ */
+
+/*
+ * MIT — Copyright (c) 2026 Prime Build.
+ * Build with `npm run build`; install the generated PrimeBuild.theme.css.
+ * The exact layout anchor intentionally fails closed after incompatible updates.
+ */
+@scope (.base__5e434:has(> .content__5e434 > .sidebar__5e434 > nav.guilds__5e434:not([hidden]):not([aria-hidden="true"]) > [data-list-id="guildsnav"] [data-list-item-id="guildsnav___1206415718728601600"][aria-selected="true"]):not(:has(> .content__5e434 > .sidebar__5e434 > nav.guilds__5e434 > [data-list-id="guildsnav"] [aria-selected="true"]:not([data-list-item-id="guildsnav___1206415718728601600"])))) {
+  :scope {
+    /* Customization: edit these values, keeping the scope intact. */
+    --pb-accent: #ff6600;
+    --pb-accent-text: #ff9a57;
+    --pb-black: #080809;
+    --pb-chat: #0d0d0f;
+    --pb-sidebar: #111113;
+    --pb-panel: #19191d;
+    --pb-panel-raised: #222227;
+    --pb-border: #303036;
+    --pb-border-strong: #696972;
+    --pb-text: #eeeeF2;
+    --pb-text-muted: #aaaab4;
+    --pb-radius: 6px;
+    --pb-header-height: 112px;
+    --pb-hardware-art: url("__OFFICINA_HEADER__");
+    background: var(--pb-black);
+    color: var(--pb-text);
+  }
+
+  :scope, .theme-dark, .theme-darker, .theme-midnight {
+    --background-base-lowest: var(--pb-black);
+    --background-base-lower: var(--pb-sidebar);
+    --background-base-low: var(--pb-chat);
+    --background-surface-high: var(--pb-panel);
+    --background-surface-higher: var(--pb-panel-raised);
+    --background-surface-highest: #2c2c33;
+    --background-primary: var(--pb-chat);
+    --background-secondary: var(--pb-sidebar);
+    --background-secondary-alt: var(--pb-panel);
+    --background-tertiary: var(--pb-black);
+    --background-floating: var(--pb-panel-raised);
+    --background-accent: #392216;
+    --background-brand: var(--pb-accent);
+    --background-mod-muted: #ffffff06;
+    --background-mod-subtle: #ffffff09;
+    --background-mod-normal: #ffffff0e;
+    --background-mod-strong: #ffffff16;
+    --background-modifier-hover: #ffffff08;
+    --background-modifier-active: #ffffff10;
+    --background-modifier-selected: #ff660018;
+    --background-message-hover: #ffffff04;
+    --background-mentioned: #ff66000d;
+    --background-mentioned-hover: #ff660014;
+    --background-code: #ffffff08;
+    --chat-background: var(--pb-chat);
+    --chat-border: var(--pb-border);
+    --channel-background-default: var(--pb-sidebar);
+    --channeltextarea-background: var(--pb-panel);
+    --channel-text-area-placeholder: var(--pb-text-muted);
+    --text-default: var(--pb-text);
+    --text-normal: var(--pb-text);
+    --text-strong: #fafafb;
+    --text-muted: var(--pb-text-muted);
+    --text-subtle: #a3a3af;
+    --text-link: var(--pb-accent-text);
+    --text-brand: var(--pb-accent-text);
+    --header-primary: #fafafb;
+    --header-secondary: var(--pb-text-muted);
+    --channels-default: #b6b6c0;
+    --channel-icon: #9999a6;
+    --interactive-text-default: #b6b6c0;
+    --interactive-text-hover: #fafafb;
+    --interactive-text-active: #fafafb;
+    --interactive-icon-default: #b2b2bc;
+    --interactive-icon-hover: #fafafb;
+    --interactive-icon-active: #fafafb;
+    --interactive-background-default: #ffffff05;
+    --interactive-background-hover: #ffffff0c;
+    --interactive-background-active: #ffffff12;
+    --interactive-background-selected: #ff66001c;
+    --interactive-accent-background-default: #ff660010;
+    --interactive-accent-background-hover: #ff660020;
+    --interactive-accent-background-active: #ff66002b;
+    --interactive-accent-background-selected: #ff660022;
+    --mention-background: #ff660024;
+    --mention-foreground: #ffb482;
+    --border-muted: #ffffff08;
+    --border-subtle: #ffffff0d;
+    --border-normal: var(--pb-border);
+    --border-strong: var(--pb-border-strong);
+    --border-focus: var(--pb-accent-text);
+    --scrollbar-thin-thumb: #55535b;
+    --scrollbar-thin-track: transparent;
+    --scrollbar-auto-thumb: #55535b;
+    --scrollbar-auto-track: transparent;
+  }
+
+  .bar_c38106 { background: var(--pb-black); border-bottom: 1px solid var(--pb-border); }
+  .content__5e434, .page__5e434 { background: var(--pb-chat); }
+  .sidebar__5e434, .sidebarList__5e434, .container__2637a { background: var(--pb-sidebar); }
+  .sidebarList__5e434 { border-right: 1px solid var(--pb-border); }
+  .guilds__5e434 { background: var(--pb-black); }
+  .header_f37cb1 {
+    background: var(--pb-sidebar);
+    border-bottom: 1px solid var(--pb-border);
+    box-shadow: inset 0 1px #ffffff04;
+  }
+  .header_f37cb1 h2 { letter-spacing: .015em; }
+  #channels::before {
+    content: "";
+    display: block;
+    height: var(--pb-header-height);
+    margin: 12px 8px 16px;
+    border-radius: var(--pb-radius);
+    background: var(--pb-hardware-art) center / contain no-repeat;
+    pointer-events: none;
+  }
+  .containerDefault__29444 { color: var(--pb-text-muted); }
+  .name__29444 { letter-spacing: .065em; }
+  .link__2ea32 { border-radius: var(--pb-radius); }
+  .wrapper__2ea32:not(.modeMuted__2ea32):hover .link__2ea32 { background: #ffffff08; }
+  .modeSelected__2ea32 .link__2ea32 {
+    background: #ff66001c;
+    box-shadow: inset 2px 0 var(--pb-accent);
+  }
+  .modeSelected__2ea32 :is(.name__2ea32, .icon__2ea32) { color: #fff3e9; }
+  .modeUnreadImportant__2ea32 .name__2ea32 { color: #fafafb; }
+  .modeMuted__2ea32 .name__2ea32 { color: #8c8c98; }
+  .unreadImportant__2ea32 { background: var(--pb-accent-text); }
+  .panels__5e434 {
+    background: var(--pb-panel);
+    border: 1px solid var(--pb-border);
+    border-radius: var(--pb-radius);
+    box-shadow: inset 0 1px #ffffff05;
+  }
+
+  .chat_f75fb0, .chatContent_f75fb0, .content_f75fb0 { background: var(--pb-chat); }
+  .container__9293f {
+    background: var(--pb-sidebar);
+    border-bottom: 1px solid var(--pb-border);
+    box-shadow: none;
+  }
+  .toolbar__9293f::after {
+    content: "";
+    display: block;
+    width: 25px;
+    height: 8px;
+    margin-inline: 4px;
+    background: repeating-linear-gradient(115deg, transparent 0 4px, #ad663b 4px 6px);
+    opacity: .5;
+    pointer-events: none;
+  }
+  .searchBar__25bec, .searchBar_c322aa { background: var(--pb-panel); border-radius: var(--pb-radius); }
+  .message__5126c { border-radius: 0; }
+  .message__5126c:hover { background-color: #ffffff04; }
+  .mentioned__5126c { background-color: #ff66000d; }
+  .mentioned__5126c:hover { background-color: #ff660014; }
+  .mentioned__5126c::before { background-color: var(--pb-accent); }
+  .replying__5126c { background-color: #ffffff08; }
+  .replying__5126c::before { background-color: var(--pb-accent-text); }
+  .repliedMessage_c19a55 { color: var(--pb-text-muted); }
+  .repliedMessage_c19a55::before { border-color: #64606b; }
+  .markup__75297 { color: var(--pb-text); }
+  .markup__75297 a { color: var(--pb-accent-text); text-underline-offset: 2px; }
+  .markup__75297 :is(pre, code) { background: var(--pb-panel); border-color: var(--pb-border); border-radius: var(--pb-radius); }
+  .markup__75297 blockquote { border-left-color: #7c6a5d; }
+  .markup__75297 .wrapper_f61d60 { border-radius: 3px; }
+  .divider__5126c { border-color: var(--pb-border); }
+  .divider__5126c .content__908e2 { color: var(--pb-text-muted); background: var(--pb-chat); }
+  .isUnread__908e2 { border-color: var(--pb-accent); }
+  .unreadPill__908e2 { background: var(--pb-accent); color: #15100b; }
+  .newMessagesBar__0f481 { background: #9b3d00; color: #ffffff; }
+  .jumpToPresentBar__0f481 { background: var(--pb-panel-raised); border: 1px solid var(--pb-border); }
+
+  .form_f75fb0 { background: var(--pb-chat); }
+  .form_f75fb0::before { background: var(--pb-chat); }
+  .channelTextArea__74017 { border-radius: var(--pb-radius); }
+  .scrollableContainer__74017 {
+    background: var(--pb-panel);
+    border: 1px solid #6d6d78;
+    border-radius: var(--pb-radius);
+    box-shadow: inset 0 1px #ffffff06;
+  }
+  .scrollableContainer__74017:focus-within { border-color: var(--pb-accent-text); }
+  .stackedBars__74017 { background: var(--pb-panel-raised); border-radius: var(--pb-radius) var(--pb-radius) 0 0; }
+  .attachedBars_bdf0de { background: var(--pb-panel-raised); border-color: var(--pb-border); }
+
+  /* Exact semantic class prefixes keep unrelated role/status text intact. */
+  [class^="embedFull__"], [class*=" embedFull__"] {
+    background-color: var(--pb-panel);
+    border-radius: var(--pb-radius);
+    box-shadow: inset 0 1px #ffffff05;
+  }
+  [class^="reaction__"], [class*=" reaction__"] { background-color: #ffffff06; border-color: var(--pb-border); border-radius: 5px; }
+  [class^="reactionMe__"], [class*=" reactionMe__"] { background-color: #ff660018; border-color: #ac5b27; }
+  [class^="reaction__"]:hover, [class*=" reaction__"]:hover { background-color: #ffffff10; }
+  .membersWrap_c8ffbb { background: var(--pb-sidebar); border-left: 1px solid var(--pb-border); }
+  .members_c8ffbb { background: var(--pb-sidebar); }
+  .membersGroup_c8ffbb, [class^="membersGroup__"], [class*=" membersGroup__"] { color: var(--pb-text-muted); letter-spacing: .04em; }
+  .member_c8ffbb, [class^="member__"], [class*=" member__"] { background: transparent; }
+  .member_c8ffbb:hover, [class^="member__"]:hover, [class*=" member__"]:hover { background: #ffffff08; border-radius: var(--pb-radius); }
+
+  .lookFilled__201d5.colorBrand__201d5 {
+    background: var(--pb-accent);
+    color: #16100b;
+    border-radius: var(--pb-radius);
+  }
+  .lookFilled__201d5.colorBrand__201d5:hover { background: #ff8233; }
+  .lookFilled__201d5.colorBrand__201d5:disabled { background: #8d4316; color: #f3d6c2; }
+  :is(button, a, [role="button"], input, textarea, [contenteditable="true"]):focus-visible { outline-color: var(--pb-accent-text); }
+  ::selection { background: #ff66004a; color: #ffffff; }
+  * { scrollbar-color: #55535b transparent; }
+  ::-webkit-scrollbar-thumb { background-color: #55535b; border-radius: 4px; }
+  ::-webkit-scrollbar-track { background-color: transparent; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .link__2ea32, .scrollableContainer__74017 { transition: background-color 100ms ease, border-color 100ms ease; }
+  }
+  @media (max-width: 1100px) {
+    .toolbar__9293f::after { display: none; }
+  }
+}

@@ -1,0 +1,37 @@
+name: Theme bug
+description: Report a visual, isolation, or removal problem with Officina.
+title: '[Bug] '
+labels: [bug]
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Tested versions
+      description: Discord host/build, Vencord version or commit, Windows version, and Officina version.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Prime Build server view
+        - Another server or direct messages
+        - Global settings
+        - Disabling or removing the theme
+        - Performance
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: What happened?
+      description: Include steps, expected behavior, and whether other themes were enabled.
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Optional sanitized screenshot
+      description: Remove private messages, account details, tokens, API keys, and unrelated personal information before attaching an image.
