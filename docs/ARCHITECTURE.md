@@ -22,7 +22,7 @@ The normal flow is:
 4. Stop only verified stable Discord processes under the current user's standard installation, after the explicit calls/drafts acknowledgement.
 5. Run the official installer if needed; otherwise leave Vencord's installation alone.
 6. Snapshot the three managed theme files and enablement. Apply selected files and merge only their `enabledThemes` entries into current settings.
-7. Reopen Discord.
+7. Validate the runtime again, reopen Discord, and wait for a loaded Discord window before reporting success.
 
 File replacement uses a temporary sibling file and an atomic rename. A durable backup reference is written before the first profile mutation. A failed apply attempts restoration. Restore reads current settings and merges the saved managed subset; unrelated preferences changed since the snapshot survive. Restore also saves a new snapshot so it can be undone.
 
@@ -51,3 +51,11 @@ CI uses pinned action commit SHAs, read-only repository permissions and no deplo
 The beta executable is unsigned. No signing certificate or signing service was configured for this project, and checksums do not change that status. Windows may show a trust warning. No warning bypass or security-setting change is automated.
 
 Native clean-machine first-time installation, all Windows variants, call quality and game frame times remain separate validation work; do not infer them from fixture/core tests.
+
+## Startup checks in 0.2.1
+
+A loader marker plus renderer.js is insufficient: Electron's main process also needs patcher.js, and preload/renderer CSS are part of the supported runtime. The shared core now checks all four files for readable, nonempty contents. This is a completeness check, not a cryptographic or exhaustive functional validation of an existing third-party installation.
+
+Recognized incomplete Vencord installations offer upstream `--repair --branch stable`; small unrecognized loaders remain refused. Startup observation is limited to process path, window handle and title. A loaded title ending in " - Discord" is accepted; a native "Error" title fails; generic/splash windows keep waiting for up to 40 seconds. No messages, tokens or renderer state are inspected. A successful window check cannot guarantee future stability.
+
+After an operation fails, there is no automatic retry/relaunch. Theme-transaction restoration remains the responsibility of the existing snapshot mechanism. Original user incident evidence and regression limits are documented in STARTUP-INCIDENT.md.

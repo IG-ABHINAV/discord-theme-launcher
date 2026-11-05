@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1-beta.1 - 2026-11-05
+
+- Reject incomplete Vencord installations before restarting Discord: check readable, nonempty patcher, preload, renderer and renderer CSS files.
+- Offer official Repair for recognized Vencord loaders with missing runtime files; preserve unknown-loader refusal.
+- Confirm a loaded Discord window before reporting success. Error windows and a still-starting client no longer pass.
+- Remove automatic second launch after failure and retain explicit error/recovery instructions.
+- Add regression coverage for the reported missing-patcher failure pattern. The original intermittent crash was not reproducible once the user reopened Discord successfully.
+
 ## 0.2.0-beta.1 — 2026-11-05
 
 - Expanded the project into Discord Theme Launcher for Windows x64.

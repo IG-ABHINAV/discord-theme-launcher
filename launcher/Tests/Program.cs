@@ -10,6 +10,18 @@ void Check(bool result, string name) { if (!result) throw new Exception("FAILED:
 void Reject(Action action, string name) { bool rejected = false; try { action(); } catch (Exception error) when (error is InvalidDataException or System.Text.Json.JsonException or IOException) { rejected = true; } Check(rejected, name); }
 var vencord = Path.Combine(fixture, "Vencord"); var state = Path.Combine(fixture, "State");
 var store = new ThemeStore(vencord, state, catalog);
+var asar = Path.Combine(fixture, "app.asar"); File.WriteAllText(asar, "require('Vencord/dist/patcher.js')");
+Directory.CreateDirectory(Path.Combine(vencord, "dist"));
+File.WriteAllText(Path.Combine(vencord, "dist", "renderer.js"), "// renderer exists, main-process patcher missing");
+Check(!VencordInstallation.IsReady(asar, vencord), "renderer without patcher.js must not be reported ready");
+foreach (var file in new[] {"patcher.js","preload.js","renderer.css"}) File.WriteAllText(Path.Combine(vencord,"dist",file),"// complete fixture");
+Check(VencordInstallation.IsReady(asar, vencord), "all required readable runtime files permit startup");
+File.WriteAllText(Path.Combine(vencord,"dist","patcher.js"), "");
+Check(!VencordInstallation.IsReady(asar, vencord), "empty patcher also rejects startup");
+File.WriteAllText(Path.Combine(vencord,"dist","patcher.js"), "// fixture patcher");
+File.Delete(Path.Combine(vencord,"dist","preload.js"));
+Check(!VencordInstallation.IsReady(asar,vencord) && VencordInstallation.MissingRuntimeFiles(vencord).SequenceEqual(new[]{"preload.js"}), "missing preload is identified before starting Discord");
+Check(VencordInstallation.InspectWindowTitle("Error") == StartupState.Failed && VencordInstallation.InspectWindowTitle("Discord") == StartupState.Waiting && VencordInstallation.InspectWindowTitle("Friends - Discord") == StartupState.Ready, "native error and splash windows cannot be reported as a successful startup");
 Directory.CreateDirectory(store.ThemesDirectory); Directory.CreateDirectory(Path.GetDirectoryName(store.SettingsPath)!);
 File.WriteAllText(store.SettingsPath, """{"enabledThemes":["SomeoneElse.theme.css","PrimeBuild.theme.css"],"useQuickCss":true,"plugins":{"Other":{"enabled":true}},"themeLinks":["https://example.invalid/other.css"]}""");
 File.WriteAllText(Path.Combine(store.ThemesDirectory, "SomeoneElse.theme.css"), "/* unrelated */");

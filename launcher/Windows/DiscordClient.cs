@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Security.Principal;
-using System.Text;
 
 namespace CommunityThemes;
 
@@ -12,13 +11,13 @@ internal sealed class DiscordClient
     private string Update => Path.Combine(Root, "Update.exe");
     public bool Found => File.Exists(Update);
     private string? LatestApp => Directory.Exists(Root) ? Directory.EnumerateDirectories(Root, "app-*").Where(d => Version.TryParse(Path.GetFileName(d)[4..], out _)).OrderByDescending(d => Version.Parse(Path.GetFileName(d)[4..])).FirstOrDefault() : null;
+    private string Asar => LatestApp is string app ? Path.Combine(app, "resources", "app.asar") : "";
+    public bool NeedsRepair => VencordInstallation.HasLoader(Asar) && !Patched;
     public bool Patched
     {
         get
         {
-            var asar = LatestApp is string app ? Path.Combine(app, "resources", "app.asar") : "";
-            return File.Exists(asar) && new FileInfo(asar).Length < 65536 && Encoding.UTF8.GetString(File.ReadAllBytes(asar)).Contains("Vencord", StringComparison.OrdinalIgnoreCase)
-                && File.Exists(Path.Combine(VencordRoot, "dist", "renderer.js"));
+            return VencordInstallation.IsReady(Asar, VencordRoot);
         }
     }
     public static bool Elevated => new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
@@ -30,9 +29,10 @@ internal sealed class DiscordClient
         if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VENCORD_USER_DATA_DIR")))
             throw new InvalidOperationException("A custom Vencord data directory is configured. Use manual theme installation for this profile.");
         ThemeStore.CheckPath(Root); ThemeStore.CheckPath(Update); ThemeStore.CheckPath(VencordRoot); ThemeStore.CheckPath(StateRoot);
+        ThemeStore.CheckPath(Path.Combine(VencordRoot, "dist"));
         var asar = Path.Combine(LatestApp ?? throw new InvalidOperationException("Discord's app folder was not found."), "resources", "app.asar");
         ThemeStore.CheckPath(asar);
-        if (!Patched && new FileInfo(asar).Length < 65536)
+        if (!VencordInstallation.HasLoader(asar) && new FileInfo(asar).Length < 65536)
             throw new InvalidOperationException("An unrecognized client modification was detected. Use the manual installation route to avoid replacing it.");
     }
 
@@ -56,14 +56,14 @@ internal sealed class DiscordClient
         }
     }
 
-    public async Task InstallVencordAsync(byte[] installer)
+    public async Task InstallVencordAsync(byte[] installer, bool repair)
     {
         ReleaseDownload.Verify(installer, ReleaseDownload.InstallerSha256);
         var directory = Path.Combine(StateRoot, "downloads"); ThemeStore.CheckPath(directory); Directory.CreateDirectory(directory);
         var path = Path.Combine(directory, "VencordInstallerCli-" + ReleaseDownload.InstallerVersion + ".exe"); ThemeStore.CheckPath(path);
         await File.WriteAllBytesAsync(path, installer);
         using var process = new Process { StartInfo = new ProcessStartInfo(path) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true } };
-        process.StartInfo.ArgumentList.Add("--install"); process.StartInfo.ArgumentList.Add("--branch"); process.StartInfo.ArgumentList.Add("stable");
+        process.StartInfo.ArgumentList.Add(repair ? "--repair" : "--install"); process.StartInfo.ArgumentList.Add("--branch"); process.StartInfo.ArgumentList.Add("stable");
         if (!process.Start()) throw new InvalidOperationException("The official Vencord installer could not start.");
         var output = process.StandardOutput.ReadToEndAsync(); var error = process.StandardError.ReadToEndAsync();
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(4));
@@ -73,10 +73,33 @@ internal sealed class DiscordClient
         if (process.ExitCode != 0 || !Patched) throw new InvalidOperationException("The official Vencord installer did not complete. Use the official manual installer, then reopen this launcher.");
     }
 
-    public void Open()
+    public async Task OpenAsync()
     {
+        if (NeedsRepair) throw new InvalidOperationException("Vencord is incomplete. Missing or unreadable: " + string.Join(", ", VencordInstallation.MissingRuntimeFiles(VencordRoot)) + ". Choose Repair official Vencord before reopening Discord.");
         var start = new ProcessStartInfo(Update) { UseShellExecute = false, CreateNoWindow = true };
         start.ArgumentList.Add("--processStart"); start.ArgumentList.Add("Discord.exe");
-        Process.Start(start)?.Dispose();
+        using var updater = Process.Start(start) ?? throw new InvalidOperationException("Discord's updater could not start.");
+        var timer = Stopwatch.StartNew();
+        while (timer.Elapsed < TimeSpan.FromSeconds(40))
+        {
+            foreach (var process in Process.GetProcessesByName("Discord"))
+            {
+                using (process)
+                {
+                    StartupState state;
+                    try
+                    {
+                        var path = process.MainModule?.FileName;
+                        if (path is null || !path.StartsWith(Path.GetFullPath(Root) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) || process.MainWindowHandle == IntPtr.Zero) continue;
+                        state = VencordInstallation.InspectWindowTitle(process.MainWindowTitle);
+                    }
+                    catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException) { continue; }
+                    if (state == StartupState.Failed) throw new InvalidOperationException("Theme files were saved, but Discord opened an error window. Setup is not confirmed. Use the official Vencord Repair option and check Discord before retrying.");
+                    if (state == StartupState.Ready) return;
+                }
+            }
+            await Task.Delay(250);
+        }
+        throw new InvalidOperationException("Theme files were saved, but Discord startup could not be confirmed. Check its window; if Vencord reports an error, use the official Repair option.");
     }
 }

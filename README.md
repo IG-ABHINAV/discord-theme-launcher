@@ -4,7 +4,7 @@
 
 Choose **Prime Build**, **Prime Build Dev**, **FantaFort**, or any combination. The launcher prepares the selected themes, backs up the managed files, enables them, and reopens Discord. Each theme appears only in its matching server; other servers and global account settings remain outside its scope.
 
-**[Download Windows portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.0-beta.1/DiscordThemeLauncher-0.2.0-beta.1-windows-x64-portable.zip)** | [All release assets](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.2.0-beta.1) | [Installation and recovery](docs/INSTALLATION.md) | [Validation](docs/VALIDATION.md)
+**[Download Windows portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.1-beta.1/DiscordThemeLauncher-0.2.1-beta.1-windows-x64-portable.zip)** | [All release assets](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.2.1-beta.1) | [Installation and recovery](docs/INSTALLATION.md) | [Validation](docs/VALIDATION.md)
 
 ## Launcher interface
 
@@ -44,7 +44,7 @@ All three customize the **chat background, channel panel, member panel, header, 
 4. Finish calls/streams, save drafts, and tick the restart checkbox.
 5. Click **Apply & open Discord**.
 
-The ZIP includes all three small theme files so existing Vencord users can apply their selection offline. The [standalone launcher EXE](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.0-beta.1/DiscordThemeLauncher-0.2.0-beta.1-windows-x64.exe) downloads selected files from its exact release when they are not beside the executable. Both routes check file sizes and SHA-256 hashes embedded in that launcher version.
+The ZIP includes all three small theme files so existing Vencord users can apply their selection offline. The [standalone launcher EXE](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.1-beta.1/DiscordThemeLauncher-0.2.1-beta.1-windows-x64.exe) downloads selected files from its exact release when they are not beside the executable. Both routes check file sizes and SHA-256 hashes embedded in that launcher version.
 
 **Unchecked managed themes are removed.** Other themes, plugins, QuickCSS and unrelated settings are preserved. To remove these designs, deselect all three and apply. To undo an operation, choose **Restore previous setup**. A safety snapshot is retained before restoration too.
 

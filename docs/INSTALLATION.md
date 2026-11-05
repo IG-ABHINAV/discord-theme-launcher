@@ -6,12 +6,12 @@ The beta launcher targets Windows x64, standard per-user stable Discord in `%LOC
 
 ## Portable launcher (recommended)
 
-1. Download the portable ZIP from the [release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.2.0-beta.1) and extract it.
+1. Download the portable ZIP from the [release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.2.1-beta.1) and extract it.
 2. Run `DiscordThemeLauncher.exe` normally.
 3. Select Prime Build, Prime Build Dev and/or FantaFort. Select all three if you want all three communities themed.
 4. When Vencord is missing, explicitly choose **Install official Vencord if it is missing**. The launcher uses the pinned official upstream installer, without elevation.
 5. Finish calls/streams and save drafts, then tick the restart checkbox.
-6. Click **Apply & open Discord**. Discord closes during the file/settings transaction and is reopened afterwards.
+6. Click **Apply & open Discord**. Discord closes during the file/settings transaction and is reopened afterwards. The launcher waits for a loaded Discord window before confirming success.
 
 The portable ZIP contains all three CSS files. Only selected themes are installed. With Vencord already present, this route needs no theme download. The standalone EXE downloads a selected file from its exact release if it is not beside the executable. A corrupt or mismatched local file causes an error rather than being silently installed. Every selected file is checked before Discord is closed or the profile is changed.
 
@@ -63,10 +63,18 @@ No Nitro, bot, server boost or server administrator permission is needed. Each m
 Download `SHA256SUMS.txt` from the same release. On Windows:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.2.0-beta.1-windows-x64-portable.zip
+Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.2.1-beta.1-windows-x64-portable.zip
 ```
 
 Compare it with the corresponding filename in the release checksum file. The repository-root checksum file covers generated themes; the release checksum file also covers the launcher, ZIP and catalog. A hash checks integrity, not publisher identity.
+
+## Missing Vencord runtime or startup error
+
+If a recognized Vencord loader is present but `patcher.js`, `preload.js`, `renderer.js` or `renderer.css` is missing, empty or unreadable, the launcher offers **Repair official Vencord (incomplete installation)**. Explicitly select it before applying. The official installer is invoked with its repair operation; themes and unrelated settings remain separate.
+
+A native Error window or an unconfirmed startup produces an error message rather than a success banner. No automatic second launch follows a failure. A generic loading/login window can require manual verification after the timeout; this is not proof that Discord crashed.
+
+If Discord already reopened successfully, do not assume a repair is still necessary. Check the current installation and avoid repeatedly restarting a working client. The [startup incident report](STARTUP-INCIDENT.md) distinguishes the observed failure from the confirmed launcher validation defect.
 
 ## Updates
 

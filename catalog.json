@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0-beta.1",
+  "version": "0.2.1-beta.1",
   "repository": "PrimeBuild-pc/discord-theme-launcher",
   "themes": [
     {
@@ -19,7 +19,7 @@
       "muted": "#b6b6c0",
       "tagline": "Hardware, precision, performance.",
       "caption": "HARDWARE LAB / 01",
-      "sha256": "a066d26289b0d30fe9707893d3386a47521868c93988a2a8b07063702bd1d0c1",
+      "sha256": "85e2e8fb96a9b714486b79f8dc08576da2a1105e06b599a0bf5679ae20e64992",
       "bytes": 269791
     },
     {
@@ -39,7 +39,7 @@
       "muted": "#b2bfce",
       "tagline": "Commit. Build. Ship.",
       "caption": "DEVELOPER WORKSPACE / 02",
-      "sha256": "4e659e1850844854f504c0e5a8e21754c871fa6e0a439a5022b0ce88be878f8c",
+      "sha256": "0aa9446937a932d602e3d7e74fd806670f3b852c4a8018667fb4a9ee8a08f24a",
       "bytes": 17924
     },
     {
@@ -59,7 +59,7 @@
       "muted": "#b7c8e5",
       "tagline": "Draft your roster. Own the arena.",
       "caption": "FANTASY LEAGUE / 03",
-      "sha256": "15224c9a79cd49d6c676190d83f85f6e27608d26e0a7fd8058357e49a5a7320e",
+      "sha256": "a9dbae2d8bf8cc2543b24b3ba777711f62534afeb04916f05c81f5031502fa12",
       "bytes": 16854
     }
   ]

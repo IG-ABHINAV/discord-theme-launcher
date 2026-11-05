@@ -102,10 +102,10 @@ internal sealed class LauncherForm : Form
             var selected = store.InstalledSelection();
             foreach (var choice in choices) choice.Checked = selected.Contains((string)choice.Tag!);
             install.Enabled = !client.Patched && !preview;
-            install.Text = client.Patched ? "Vencord is already installed" : "Install official Vencord if it is missing";
+            install.Text = client.Patched ? "Vencord is already installed" : client.NeedsRepair ? "Repair official Vencord (incomplete installation)" : "Install official Vencord if it is missing";
             install.Checked = client.Patched;
             restore.Enabled = store.CanRestore && !preview; apply.Enabled = !preview;
-            status.Text = preview ? "Preview mode — no network calls, files or Discord processes will be changed." : client.Found ? (client.Patched ? "Discord + Vencord detected. Choose themes and apply. Unchecked managed themes will be removed; other themes stay." : "Discord detected. Enable Vencord installation above for first setup.") : "Standard Discord desktop was not found for this Windows user.";
+            status.Text = preview ? "Preview mode — no network calls, files or Discord processes will be changed." : client.Found ? (client.Patched ? "Discord + Vencord detected. Choose themes and apply. Unchecked managed themes will be removed; other themes stay." : client.NeedsRepair ? "Vencord's loader is present but runtime files are missing or unreadable. Choose Repair above." : "Discord detected. Enable Vencord installation above for first setup.") : "Standard Discord desktop was not found for this Windows user.";
             if (DiscordClient.Elevated) { apply.Enabled = false; restore.Enabled = false; status.Text = "Run normally, without Administrator privileges."; }
         }
         catch { status.Text = "The profile could not be read. Check the manual setup guide before applying."; apply.Enabled = false; restore.Enabled = false; }
@@ -119,7 +119,9 @@ internal sealed class LauncherForm : Form
         try
         {
             client.ValidateEnvironment();
-            if (!undo && !client.Patched && !install.Checked) throw new InvalidOperationException("Choose official Vencord installation above, or install it manually first.");
+            bool repair = client.NeedsRepair;
+            bool needsSetup = repair || (!undo && !client.Patched);
+            if (needsSetup && !install.Checked) throw new InvalidOperationException(repair ? "Vencord is incomplete. Choose Repair official Vencord above, or repair it with the official installer first." : "Choose official Vencord installation above, or install it manually first.");
             busy = true; apply.Enabled = restore.Enabled = false; install.Enabled = ready.Enabled = false;
             foreach (var choice in choices) choice.Enabled = false;
             progress.Visible = true;
@@ -142,27 +144,28 @@ internal sealed class LauncherForm : Form
                     }
                     else downloads[theme.File] = await ReleaseDownload.FetchAsync(http, ReleaseDownload.ThemeUri(catalog, theme), theme.Sha256, 358400, theme.Bytes);
                 }
-                if (!client.Patched)
-                {
-                    status.Text = "Downloading the official Vencord installer…";
-                    installer = await ReleaseDownload.FetchAsync(http, ReleaseDownload.InstallerUri, ReleaseDownload.InstallerSha256, 32 * 1024 * 1024);
-                }
+            }
+            if (needsSetup)
+            {
+                status.Text = "Downloading the official Vencord installer…";
+                installer = await ReleaseDownload.FetchAsync(http, ReleaseDownload.InstallerUri, ReleaseDownload.InstallerSha256, 32 * 1024 * 1024);
             }
             status.Text = "Closing Discord…"; await client.StopAsync(); stopped = true;
-            if (installer != null) { status.Text = "Installing official Vencord…"; await client.InstallVencordAsync(installer); }
+            if (installer != null) { status.Text = repair ? "Repairing official Vencord…" : "Installing official Vencord…"; await client.InstallVencordAsync(installer, repair); }
             status.Text = undo ? "Restoring previous setup…" : "Backing up and applying your selection…";
             await Task.Run(() => { if (undo) store.RestoreLast(); else store.Apply(ids, downloads); });
-            client.Open(); stopped = false;
-            RefreshState(); status.Text = undo ? "Previous managed themes restored. Discord is opening." : "Done. Discord is opening. Each selected theme appears in its matching server.";
+            status.Text = "Opening Discord and checking startup…";
+            await client.OpenAsync(); stopped = false;
+            RefreshState(); status.Text = undo ? "Previous managed themes restored. Discord startup confirmed." : "Done. Discord startup confirmed. Each selected theme appears in its matching server.";
         }
         catch (Exception error)
         {
             var message = error is InvalidOperationException or InvalidDataException ? error.Message : error is HttpRequestException ? "The download could not finish. Check your connection and the release page, then retry." : "Setup could not finish. Check available disk space, the profile and the manual recovery guide.";
+            if (stopped) message += " No automatic retry was made.";
             status.Text = message; LauncherStyle.ShowMessage(this, message, "Setup did not complete");
         }
         finally
         {
-            if (stopped) { try { client.Open(); } catch { status.Text += " Open Discord manually."; } }
             busy = false; progress.Visible = false; apply.Enabled = !preview; restore.Enabled = store.CanRestore && !preview; install.Enabled = !client.Patched && !preview; ready.Enabled = true; ready.Checked = false;
             foreach (var choice in choices) choice.Enabled = true;
         }

@@ -1,4 +1,12 @@
-# Validation - 0.2.0-beta.1
+# Validation - 0.2.1-beta.1
+
+The patch adds runtime completeness and startup-result checks. The regression first failed against the original renderer-only readiness predicate, then passed after the fix. **24 Windows core checks** pass (Linux additionally checks symlink refusal), and the Windows Release build passes with warnings treated as errors. The same 16 theme tests cover this release; server artwork and scope behavior are unchanged apart from version metadata.
+
+The live installation was read-only checked after the user successfully reopened Discord: all required runtime files were readable/nonempty, patcher resolution and patcher/preload syntax checks passed, and a loaded Friends window was present. No repair or restart of that working client was needed. A native startup window does not prove stability beyond that observation.
+
+The full automated first-install/repair path and every possible startup error remain outside exhaustive live coverage. See [startup incident and regression evidence](STARTUP-INCIDENT.md). The report below records the inherited 0.2.0 desktop/package checks separately; those are not claims that the 0.2.1 monitor was tested by restarting the user's working Discord.
+
+## Inherited validation - 0.2.0-beta.1
 
 Date: **2026-11-05**. This release adds three independently scoped themes and a Windows launcher. The original 0.1 measurements are historical; they are not measurements of the new backgrounds.
 
