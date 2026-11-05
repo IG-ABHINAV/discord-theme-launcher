@@ -1,11 +1,11 @@
 {
-  "version": "0.2.2-beta.1",
+  "version": "0.2.3-beta.1",
   "repository": "PrimeBuild-pc/discord-theme-launcher",
   "themes": [
     {
       "id": "primebuild",
       "guild": "1206415718728601600",
-      "name": "Prime Build — Officina",
+      "name": "Prime Build — Build Your Dream",
       "server": "Prime Build",
       "file": "PrimeBuild.theme.css",
       "accent": "#ff6600",
@@ -19,13 +19,13 @@
       "muted": "#b6b6c0",
       "tagline": "Hardware, precision, performance.",
       "caption": "HARDWARE LAB",
-      "sha256": "193a6f093336c0d5e4139b8b96ebea99e804f7b572a6b430396eb2044d5ecefa",
-      "bytes": 269789
+      "sha256": "36e62941e577db4bc11692e4ed4df1d5f0dd68101e5125d86945bd4a89bc6299",
+      "bytes": 269805
     },
     {
       "id": "primebuild-dev",
       "guild": "1537861795090268302",
-      "name": "Prime Build Dev — Workbench",
+      "name": "Prime Build Dev — Software House",
       "server": "Prime Build · Dev",
       "file": "PrimeBuildDev.theme.css",
       "accent": "#ff782e",
@@ -39,8 +39,8 @@
       "muted": "#b2bfce",
       "tagline": "Commit. Build. Ship.",
       "caption": "DEVELOPER WORKSPACE",
-      "sha256": "7f935fa3305931a30d1975f8f9d5f22fd95b07b9fbecd1dd8dceaacbff271c7d",
-      "bytes": 16990
+      "sha256": "46e0aa896e1aa991fb4cb5c0781d3fc83890dcdc4adf9f81ba05a99850da3d49",
+      "bytes": 17003
     },
     {
       "id": "fantafort",
@@ -59,7 +59,7 @@
       "muted": "#b7c8e5",
       "tagline": "Draft your roster. Own the arena.",
       "caption": "FANTASY LEAGUE",
-      "sha256": "611469e9a49f988fca9dacacc4d04aed93fb0d334917062629c7f51b621559c5",
+      "sha256": "ac363867d53002d64c77ed819567363165503fd59e0187c00c574ec38c3a1ea5",
       "bytes": 204852
     }
   ]

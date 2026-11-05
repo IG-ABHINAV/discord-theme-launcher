@@ -4,8 +4,8 @@
 
 | Theme | Exact server ID |
 | --- | --- |
-| Prime Build / Officina | `1206415718728601600` |
-| Prime Build Dev / Workbench | `1537861795090268302` |
+| Prime Build / Build Your Dream | `1206415718728601600` |
+| Prime Build Dev / Software House | `1537861795090268302` |
 | FantaFort / Arena | `1536382143796748389` |
 
 Each generated file wraps all visual rules and custom properties in one native CSS `@scope`. FantaFort also registers one uniquely named embedded font resource outside the scope; it has no selectors and does not apply a font globally. The guard requires the matching selected server-rail item within the recognized `.base__5e434` layout. It rejects hidden/ARIA-hidden rails, missing selection and ambiguous selection. Merely having a server icon or message link is insufficient.

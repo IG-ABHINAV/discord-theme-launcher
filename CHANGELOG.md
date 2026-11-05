@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3-beta.1 - 2026-11-05
+
+- Renamed Prime Build / Officina to Build Your Dream and Prime Build Dev / Workbench to Software House in artwork, theme metadata, launcher cards and current documentation.
+- Generate artwork subtitles from the profile names so the launcher and graphics stay consistent.
+
 ## 0.2.2-beta.1 - 2026-11-05
 
 - Removed theme numbering from all three server headers, the FantaFort league artwork and decorative Dev line indices.

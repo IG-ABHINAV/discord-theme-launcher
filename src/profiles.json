@@ -2,7 +2,7 @@
   {
     "id": "primebuild",
     "guild": "1206415718728601600",
-    "name": "Prime Build — Officina",
+    "name": "Prime Build — Build Your Dream",
     "server": "Prime Build",
     "file": "PrimeBuild.theme.css",
     "accent": "#ff6600",
@@ -20,7 +20,7 @@
   {
     "id": "primebuild-dev",
     "guild": "1537861795090268302",
-    "name": "Prime Build Dev — Workbench",
+    "name": "Prime Build Dev — Software House",
     "server": "Prime Build · Dev",
     "file": "PrimeBuildDev.theme.css",
     "accent": "#ff782e",

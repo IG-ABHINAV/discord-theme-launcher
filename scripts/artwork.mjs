@@ -19,7 +19,7 @@ export function artwork(profile, logo, displayFont) {
   const hardware = id === 'primebuild', coding = id === 'primebuild-dev';
   const label = id === 'fantafort' ? (x,y,text,color,size=13) => outlinedLabel(displayFont,x,y,text,color,size) : monoLabel;
   const title = hardware ? 'PRIME BUILD' : coding ? 'PRIME BUILD / DEV' : 'FANTAFORT';
-  const themeName = hardware ? 'OFFICINA' : coding ? 'WORKBENCH' : 'ARENA';
+  const themeName = profile.name.split('—').at(-1).trim().toUpperCase();
   let scene, edge;
   if (hardware) {
     const fins = Array.from({ length: 18 }, (_, i) => `<path d="M${1040 + i * 20} 400v350"/>`).join('');

@@ -6,7 +6,7 @@ The beta launcher targets Windows x64, standard per-user stable Discord in `%LOC
 
 ## Portable launcher (recommended)
 
-1. Download the portable ZIP from the [release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.2.2-beta.1) and extract it.
+1. Download the portable ZIP from the [release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.2.3-beta.1) and extract it.
 2. Run `DiscordThemeLauncher.exe` normally.
 3. Select Prime Build, Prime Build Dev and/or FantaFort. Select all three if you want all three communities themed.
 4. When Vencord is missing, explicitly choose **Install official Vencord if it is missing**. The launcher uses the pinned official upstream installer, without elevation.
@@ -63,7 +63,7 @@ No Nitro, bot, server boost or server administrator permission is needed. Each m
 Download `SHA256SUMS.txt` from the same release. On Windows:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.2.2-beta.1-windows-x64-portable.zip
+Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.2.3-beta.1-windows-x64-portable.zip
 ```
 
 Compare it with the corresponding filename in the release checksum file. The repository-root checksum file covers generated themes; the release checksum file also covers the launcher, ZIP and catalog. A hash checks integrity, not publisher identity.

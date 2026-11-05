@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Officina — sanitized stylesheet fixture</title>
+  <title>Build Your Dream — sanitized stylesheet fixture</title>
   <link id="theme" rel="stylesheet" href="../PrimeBuild.theme.css">
   <style>
     * { box-sizing:border-box; }
@@ -81,7 +81,7 @@
   <link id="ff-theme" rel="stylesheet" href="../FantaFort.theme.css">
 </head>
 <body>
-<div class="fixture-controls"><strong>Officina</strong><span>Sanitized fixture · real theme stylesheet</span><button id="toggle-theme">Disable theme</button><button id="settings">Global settings</button></div>
+<div class="fixture-controls"><strong>Build Your Dream</strong><span>Sanitized fixture · real theme stylesheet</span><button id="toggle-theme">Disable theme</button><button id="settings">Global settings</button></div>
 <div class="base__5e434">
   <div class="bar_c38106">Prime Build · Discord desktop theme</div>
   <div class="content__5e434">
@@ -99,7 +99,7 @@ document.querySelectorAll('[role="treeitem"]').forEach(button=>button.addEventLi
   document.querySelectorAll('[role="treeitem"]').forEach(item=>item.setAttribute('aria-selected',String(item===button)));
   document.getElementById('server-name').textContent=button.textContent==='PB'?'Prime Build':button.textContent==='DM'?'Direct Messages':button.textContent==='DEV'?'Prime Build Dev':button.textContent==='FF'?'FantaFort':'Another server';
   const dev=button.textContent==='DEV', ff=button.textContent==='FF';
-  document.querySelector('.fixture-controls strong').textContent=ff?'Arena':dev?'Workbench':'Officina';
+  document.querySelector('.fixture-controls strong').textContent=ff?'Arena':dev?'Software House':'Build Your Dream';
   document.querySelector('.bar_c38106').textContent=(ff?'FantaFort':dev?'Prime Build Dev':'Prime Build')+' / Discord desktop theme';
   document.querySelector('.welcome-title').textContent=ff?'Your roster. Your strategy. Your league.':dev?'From the first commit to the next release.':'Your next build starts here.';
   document.querySelector('.welcome-copy').textContent=ff?'Competitive Fortnite meets fantasy league strategy.':dev?'Ideas, code reviews, release notes, and useful feedback.':'Hardware, useful advice, and ideas worth sharing.';

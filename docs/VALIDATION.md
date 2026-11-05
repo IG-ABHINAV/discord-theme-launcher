@@ -1,4 +1,8 @@
-# Validation - 0.2.2-beta.1
+# Validation - 0.2.3-beta.1
+
+This copy-only update replaces the Officina and Workbench theme labels with Build Your Dream and Software House across graphic subtitles, theme metadata and launcher cards. All 17 existing theme tests and the Windows Release package build pass. Regenerated previews and the native launcher in non-mutating preview mode were visually checked. Updated CSS was hot-reloaded without restarting Discord; no setup or server-scope logic changes.
+
+## Inherited validation - 0.2.2-beta.1
 
 The artwork update removes identity numbering and adds FantaFort display typography. **17 theme tests** pass, including a new check that the embedded Bangers face actually loads, applies to FantaFort headings/navigation, preserves normal message typography, and releases element styling on Prime Build/Home navigation. Static audit permits only the uniquely named embedded font registration outside the existing server guards. The unchanged launcher core retains its 24 Windows checks (25 on Linux).
 
