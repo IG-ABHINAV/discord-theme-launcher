@@ -32,6 +32,12 @@ foreach ($runtimePackage in $runtimePackages) {
     if ($noticeFiles.Count -eq 0) { throw "Runtime notices missing: $runtimePackage" }
     foreach ($notice in $noticeFiles) { Copy-Item -LiteralPath $notice.FullName -Destination (Join-Path $packageDir "$runtimePackage-$($notice.Name)") }
 }
+$webViewEntry = @($assetInfo.libraries.Keys | Where-Object { $_ -like 'Microsoft.Web.WebView2/*' })[0]
+if (!$webViewEntry) { throw 'WebView2 SDK provenance missing.' }
+$webViewRoot = Join-Path $packageCache $webViewEntry.ToLowerInvariant()
+foreach ($notice in @('LICENSE.txt', 'NOTICE.txt')) {
+    Copy-Item -LiteralPath (Join-Path $webViewRoot $notice) -Destination (Join-Path $packageDir "WebView2-$notice")
+}
 $themeNames = @('PrimeBuild.theme.css','PrimeBuildDev.theme.css','FantaFort.theme.css')
 foreach ($name in $themeNames) {
     Copy-Item -LiteralPath (Join-Path $repoRoot $name) -Destination (Join-Path $packageDir $name)
@@ -39,7 +45,7 @@ foreach ($name in $themeNames) {
 }
 Copy-Item -LiteralPath (Join-Path $repoRoot 'catalog.json') -Destination (Join-Path $releaseDir 'catalog.json')
 $runtimeNoticeNames = @(Get-ChildItem -LiteralPath $packageDir -File | Where-Object { $_.Name -like 'Microsoft.*' } | Select-Object -ExpandProperty FullName)
-$portableFiles = @('DiscordThemeLauncher.exe','LICENSE.txt','START-HERE.txt','NotoSans-OFL.txt','Bangers-OFL.txt','Rajdhani-OFL.txt','JetBrainsMono-OFL.txt') + $themeNames | ForEach-Object { Join-Path $packageDir $_ }
+$portableFiles = @('DiscordThemeLauncher.exe','LICENSE.txt','START-HERE.txt','NotoSans-OFL.txt','Bangers-OFL.txt','Rajdhani-OFL.txt','JetBrainsMono-OFL.txt','WebView2-LICENSE.txt','WebView2-NOTICE.txt') + $themeNames | ForEach-Object { Join-Path $packageDir $_ }
 Compress-Archive -LiteralPath ($portableFiles + $runtimeNoticeNames) -DestinationPath (Join-Path $releaseDir $zipName) -Force
 $releaseNames = @($launcherName,$zipName,'catalog.json') + $themeNames
 $hashLines = foreach ($name in $releaseNames) { (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $releaseDir $name)).Hash.ToLowerInvariant() + '  ' + $name }

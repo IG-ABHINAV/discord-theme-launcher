@@ -1,3 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><TreatWarningsAsErrors>true</TreatWarningsAsErrors></PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../../PrimeBuild.theme.css;../../PrimeBuildDev.theme.css;../../FantaFort.theme.css" LogicalName="%(Filename)%(Extension)"/>
+    <EmbeddedResource Include="../../catalog.json" LogicalName="catalog.json"/>
+    <EmbeddedResource Include="../../tests/builder-preview.html" LogicalName="builder-preview.html"/>
+  </ItemGroup>
 </Project>

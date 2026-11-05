@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Build Your Dream — sanitized stylesheet fixture</title>
+  
+  <style>
+    * { box-sizing:border-box; }
+    body { margin:0; background:#202127; color:#efeff2; font:14px/1.5 'Segoe UI',Arial,sans-serif; }
+    button,input { font:inherit; }
+    button { cursor:pointer; }
+    .fixture-controls { display:flex; align-items:center; gap:16px; padding:12px 20px; background:#24252b; flex-wrap:wrap; }
+    .fixture-controls span { color:#b7b7c2; font-size:12px; }
+    .fixture-controls button { color:#efeff2; background:#36373e; border:1px solid #64646f; padding:5px 12px; border-radius:5px; }
+    .base__5e434 { background:#313338; color:#efeff2; min-height:720px; --background-base-low:#313338; --text-default:#efeff2; }
+    .bar_c38106 { text-align:center; padding:9px; background:#1e1f22; font-size:12px; color:#b6b6c2; }
+    .content__5e434 { display:grid; grid-template-columns:288px minmax(0,1fr); min-height:685px; }
+    .sidebar__5e434 { position:relative; display:grid; grid-template-columns:64px minmax(0,1fr); background:#2b2d31; }
+    .guilds__5e434 { grid-row:1 / 3; background:#1e1f22; padding:14px 10px; }
+    [data-list-id="guildsnav"] { display:flex; flex-direction:column; gap:15px; }
+    [role="treeitem"] { width:42px; height:42px; border:1px solid #5b5d67; border-radius:14px; background:#303138; color:#dddde8; display:grid; place-items:center; cursor:pointer; font-size:12px; font-weight:600; }
+    [role="treeitem"][aria-selected="true"] { border-color:#ff6600; color:#ff9a57; }
+    .sidebarList__5e434 { min-width:0; }
+    .header_f37cb1 { padding:18px 14px; background:#2b2d31; border-bottom:1px solid #3b3d45; }
+    .header_f37cb1 h2 { margin:0; font-size:14px; }
+    #channels { padding:0 7px 16px; }
+    .containerDefault__29444 { padding:21px 7px 7px; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:#b6b6bf; }
+    .wrapper__2ea32 { margin:3px 0; }
+    .link__2ea32 { display:block; padding:8px 10px; color:#b6b6c2; text-decoration:none; }
+    .modeSelected__2ea32 .link__2ea32 { background:#404249; color:#f1f1f5; }
+    .icon__2ea32 { display:inline-block; width:23px; opacity:.75; }
+    .name__2ea32 > span { font-family:"Segoe UI",Arial,sans-serif; }
+    .modeMuted__2ea32 .name__2ea32 { color:#92929d; }
+    .panels__5e434 { grid-column:2; align-self:end; margin:0 7px 8px; padding:12px; background:#232428; }
+    .presence { color:#76d39f; font-size:11px; }
+    .page__5e434 { min-width:0; }
+    .chat_f75fb0 { display:flex; flex-direction:column; min-height:685px; }
+    .container__9293f .title__9293f { margin:0; font-size:14px; }
+    .container__9293f { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; min-height:58px; background:#313338; border-bottom:1px solid #42444c; }
+    .toolbar__9293f { display:flex; align-items:center; gap:14px; color:#b6b6c2; }
+    .content_f75fb0 { display:grid; grid-template-columns:minmax(0,1fr) 170px; flex:1; }
+    .chatContent_f75fb0 { display:flex; flex-direction:column; min-width:0; }
+    .scroller__36d07 { padding:26px 22px 20px; flex:1; }
+    .welcome-title { font-size:25px; margin:0 0 8px; letter-spacing:-.04em; }
+    .welcome-copy { margin:0 0 24px; color:#b6b6c2; font-size:13px; }
+    .message__5126c { display:flex; gap:12px; padding:12px 8px; margin:4px -8px; }
+    .avatar { flex:0 0 34px; height:34px; display:grid; place-items:center; border:1px solid #655a54; background:#31241c; color:#ffad78; border-radius:50%; font-size:12px; }
+    .message-body { min-width:0; }
+    .author { font-weight:600; color:#eeeeF2; }
+    time { font-size:11px; color:#a3a3ad; margin-left:8px; }
+    .markup__75297 { color:#ddddE4; margin-top:4px; font-size:14px; }
+    .markup__75297 a { color:#a5afff; }
+    .embedFull__test { margin:14px 0 0; padding:15px; border-left:3px solid #ff6600; background:#28292e; max-width:460px; }
+    .embedFull__test strong { display:block; margin:5px 0; }
+    .embed-label { color:#b6b6c2; font-size:11px; letter-spacing:.09em; }
+    .embedFull__test p { margin:5px 0; font-size:13px; }
+    .reaction__test { display:inline-block; padding:2px 8px; margin-top:10px; border:1px solid #686872; border-radius:5px; font-size:12px; }
+    .reactionMe__test { background:#424263; border-color:#7777b7; }
+    .wrapper_f61d60 { background:var(--mention-background,#5865f240); color:var(--mention-foreground,#c0c8ff); padding:1px 3px; }
+    .mentioned__5126c { position:relative; background:#f5c76b12; }
+    .mentioned__5126c::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:#d4ad65; }
+    .markup__75297 pre { padding:12px; border:1px solid #55555f; margin:12px 0 0; font-size:12px; }
+    .form_f75fb0 { padding:8px 20px 18px; }
+    .scrollableContainer__74017 { background:#383a40; border:1px solid #62626e; padding:12px; border-radius:8px; display:flex; gap:10px; align-items:center; }
+    .scrollableContainer__74017 input { background:none; border:0; min-width:0; width:100%; color:#eeeef2; outline-offset:3px; }
+    .scrollableContainer__74017 input::placeholder { color:#aaaab4; }
+    .membersWrap_c8ffbb { background:#2b2d31; padding:20px 12px; }
+    .members_c8ffbb { min-height:100%; }
+    .membersGroup__test { color:#b6b6c2; font-size:11px; text-transform:uppercase; margin:10px 0; letter-spacing:.06em; }
+    .member__test { display:flex; align-items:center; gap:8px; padding:9px 3px; border-radius:6px; font-size:12px; }
+    .member__test .avatar { flex-basis:28px; height:28px; }
+    .role-color { color:#77b9fa; }
+    .danger { color:#f37b83; }
+    .portal { display:none; position:absolute; inset:75px 30px auto auto; width:280px; background:#313338; color:#eeeeF2; padding:25px; border:1px solid #666671; }
+    .portal.open { display:block; }
+    .portal h2 { font-size:18px; }
+    @media(max-width:1000px) { .content_f75fb0 { grid-template-columns:1fr; } .membersWrap_c8ffbb { display:none; } }
+    @media(max-width:700px) { .content__5e434 { grid-template-columns:64px minmax(0,1fr); } .sidebar__5e434 { display:block; } .sidebarList__5e434,.panels__5e434 { display:none; } .toolbar__9293f { display:none; } }
+  </style>
+  
+  
+<style id="personal-theme">__PERSONAL_CSS__</style></head>
+<body>
+<div class="fixture-controls"><strong>__SERVER_NAME__</strong><span>Local preview · synthetic content · test another server or DM</span><button id="toggle-theme">Disable theme</button><button id="settings">Global settings</button></div>
+<div class="base__5e434">
+  <div class="bar_c38106">Prime Build · Discord desktop theme</div>
+  <div class="content__5e434">
+    <div class="sidebar__5e434 theme-dark theme-darker">
+      <nav class="guilds__5e434" aria-label="Servers"><div data-list-id="guildsnav"><button role="treeitem" data-list-item-id="guildsnav___home" aria-selected="false">DM</button><button role="treeitem" data-list-item-id="guildsnav_____TARGET_GUILD__" aria-selected="true">PB</button><button role="treeitem" data-list-item-id="guildsnav___1537861795090268302" aria-selected="false">DEV</button><button role="treeitem" data-list-item-id="guildsnav___1536382143796748389" aria-selected="false">FF</button><button role="treeitem" data-list-item-id="guildsnav___other" aria-selected="false">ALT</button></div></nav>
+      <div class="sidebarList__5e434"><nav class="container__2637a" aria-label="Server channels"><header class="header_f37cb1"><h2 id="server-name">__SERVER_NAME__</h2></header><div id="channels"><div class="containerDefault__29444 name__29444">Start here</div><div class="wrapper__2ea32"><a class="link__2ea32" href="#welcome"><span class="icon__2ea32">#</span><span class="name__2ea32"><span class="body-md/medium_cf4812">welcome</span></span></a></div><div class="wrapper__2ea32"><a class="link__2ea32" href="#announcements"><span class="icon__2ea32">#</span><span class="name__2ea32"><span class="body-md/medium_cf4812">announcements</span></span></a></div><div class="containerDefault__29444 name__29444">Community</div><div class="wrapper__2ea32 modeSelected__2ea32"><a class="link__2ea32" href="#general"><span class="icon__2ea32">#</span><span class="name__2ea32"><span class="body-md/medium_cf4812">general</span></span></a></div><div class="wrapper__2ea32"><a class="link__2ea32" href="#your-builds"><span class="icon__2ea32">#</span><span class="name__2ea32"><span class="body-md/medium_cf4812">your-builds</span></span></a></div><div class="wrapper__2ea32 modeMuted__2ea32"><a class="link__2ea32" href="#benchmarks"><span class="icon__2ea32">#</span><span class="name__2ea32"><span class="body-md/medium_cf4812">benchmarks</span></span></a></div><div class="containerDefault__29444 name__29444">Voice</div><div class="wrapper__2ea32"><a class="link__2ea32" href="#lounge"><span class="icon__2ea32">◖</span><span class="name__2ea32"><span class="body-md/medium_cf4812">Lounge</span></span></a></div></div></nav></div>
+      <section class="panels__5e434">Member <span class="presence">● Online</span></section>
+    </div>
+    <div class="page__5e434"><div class="chat_f75fb0"><header class="container__9293f"><h1 class="title__9293f"># general</h1><div class="toolbar__9293f"><span>Threads</span><span>Members</span><span>Search</span></div></header><div class="content_f75fb0"><main class="chatContent_f75fb0"><div class="scroller__36d07"><h1 class="welcome-title">Your next build starts here.</h1><p class="welcome-copy">Hardware, useful advice, and ideas worth sharing.</p><article class="message__5126c"><span class="avatar">PB</span><div class="message-body"><span class="author role-color" style="color:#77b9fa">Prime Build</span><time>Today at 18:32</time><div class="markup__75297">Welcome! Share your setup, your goals, and what you want to improve.<div class="embedFull__test"><div class="embed-label">PRIME BUILD // COMMUNITY</div><strong>Built around what you actually need.</strong><p>Thoughtful components, clean assembly, and room for your next upgrade.</p><a href="https://primebuild.website/">Explore Prime Build</a></div><span class="reaction__test reactionMe__test">✓ 4</span></div></div></article><article class="message__5126c"><span class="avatar">M</span><div class="message-body"><span class="author">Member</span><time>Today at 18:35</time><div class="markup__75297">Putting a new strategy together. What would you improve first?</div></div></article><article class="message__5126c mentioned__5126c"><span class="avatar">PB</span><div class="message-body"><span class="author">Prime Build</span><time>Today at 18:37</time><div class="markup__75297"><span class="wrapper_f61d60">@Member</span> Let's start with your monitor, budget, and case clearance.<pre>Clearance first. Components second.</pre></div></div></article></div><form class="form_f75fb0" onsubmit="return false"><div class="channelTextArea__74017"><div class="scrollableContainer__74017"><span aria-hidden="true">⊕</span><input aria-label="Unsent fixture message" placeholder="Message #general"><span aria-hidden="true">☺</span></div></div></form></main><aside class="membersWrap_c8ffbb"><div class="members_c8ffbb"><div class="membersGroup__test">Prime Build — 1</div><div class="member__test"><span class="avatar">PB</span><span class="role-color" style="color:#77b9fa">Prime Build</span></div><div class="membersGroup__test">Online — 3</div><div class="member__test"><span class="avatar">M</span>Member</div><div class="member__test"><span class="avatar">P</span>Pilot</div><div class="member__test"><span class="avatar">L</span>Lumen</div></div></aside></div></div></div>
+  </div>
+</div>
+<section id="global-settings" class="portal" aria-label="Global settings"><h2>Global settings</h2><p>This surface keeps its normal styling.</p><span class="danger">Destructive control</span></section>
+
+<script>
+document.querySelectorAll('[role="treeitem"]').forEach(button => button.addEventListener('click', () => {
+  document.querySelectorAll('[role="treeitem"]').forEach(item => item.setAttribute('aria-selected', String(item === button)));
+}));
+document.getElementById('toggle-theme').addEventListener('click', () => {
+  const sheet = document.getElementById('personal-theme').sheet; sheet.disabled = !sheet.disabled;
+  document.getElementById('toggle-theme').textContent = sheet.disabled ? 'Enable theme' : 'Disable theme';
+});
+document.getElementById('settings').addEventListener('click', () => document.getElementById('global-settings').classList.toggle('open'));
+document.querySelectorAll('a').forEach(a => a.addEventListener('click', event => event.preventDefault()));
+</script>
+</body>
+</html>

@@ -2,6 +2,8 @@
 
 ## Independent selected-server scopes
 
+The 0.3 configurator can retarget any included design to a supplied server ID or Discord channel link. One personal theme is active at a time; original presets may remain enabled on other servers. Standalone preset CSS keeps these fixed targets:
+
 | Theme | Exact server ID |
 | --- | --- |
 | Prime Build / Build Your Dream | `1206415718728601600` |
@@ -32,13 +34,15 @@ The theme does not add or rename channels, change descriptions, grant permission
 
 ## Launcher support
 
+The embedded preview requires Microsoft Edge WebView2 Runtime, with an isolated temporary profile and no document network access. Runtime installation is not automated. If absent, configuration saving remains available and personal Apply is disabled. [Configuration details](CONFIGURATIONS.md) covers the format and import limits. Bundled artwork uses static SVG; imported PNG/JPEG images become static PNG. Large imports increase CSS size and rendering cost, up to the documented limits.
+
 Automatic setup: Windows x64, per-user stable Discord, standard Vencord folder, normal privileges. The installer operation uses official Vencord CLI v1.4.2 with a pinned binary digest. It can still require manual assistance if Discord's installation layout changes or upstream services are unavailable.
 
 Store, PTB, Canary, custom Vencord profiles, obvious unknown loaders and linked profile folders are not automatically modified. Use the manual route in [Installation](INSTALLATION.md). Full Windows 10, clean-machine and low-end hardware coverage is still pending; see [Validation](VALIDATION.md).
 
 ## Performance and accessibility
 
-All decorative images are static SVG data embedded in the CSS. No theme JavaScript, polling, remote font/image imports, full-window blur or continuous animation is added. The launcher exits when closed and adds no resident process to Discord. Static backgrounds and CSS relational selectors still have rendering cost.
+All decorative images are static embedded data: SVG for bundled designs and normalized PNG for imports. No theme JavaScript, polling, remote font/image imports, full-window blur or continuous animation is added. The launcher exits when closed and adds no resident process to Discord. Static backgrounds and CSS relational selectors still have rendering cost.
 
 Tested text/input contrast pairs and desktop fixture widths are recorded in Validation. Scaling, high contrast, large text and other third-party theme combinations need wider testing. If a conflict appears, compare with these themes disabled and preserve the server guard when investigating.
 

@@ -1,4 +1,31 @@
-# Validation - 0.2.4-beta.1
+# Validation - 0.3.0-beta.1
+
+Date: **2026-11-05**. This beta adds a personal configurator while retaining the three original presets. The user's running Discord was not restarted or modified during development. Native preview, isolated-profile transaction tests and actual-client coverage are distinguished below.
+
+## Current automated evidence
+
+- **57 Windows core checks** (58 on Linux, including symlink refusal): existing preset transactions and startup checks, server ID/channel-link parsing, invalid targets/schema/colors, portable assets and license round trips, deterministic compilation, corrupt assets, active SVG rejection, image dimensions, font table bounds/embedding flags, personal apply/retarget/disable/restore, conflicting-preset disablement, unrelated preferences/QuickCSS/plugins preserved, backup integrity and legacy three-file restore.
+- **27 Playwright tests**: 19 preset checks and 8 personal-builder checks. All three presets retarget to a synthetic server ID; custom and native typography load; other servers/DMs, hidden/ambiguous rails, changed structure and global settings stay outside the scope. Message/author/composer fonts remain native. The generated CSS parses, uses embedded resources and contains one visual scope. Custom background scrim and composer/text contrast pass. User labels/license text cannot inject preview markup.
+- **13 native Windows integration checks**: JPEG-to-PNG normalization, shared-image decoding, disguised SVG and invalid dimensions refused, preview above 2 MiB with actual WebView2, embedded font loading, generated CSS activation/isolation, external-navigation blocking, latest-config rendering after rapid refresh, and mutation controls disabled in preview mode.
+- `dotnet build launcher/Windows/Launcher.csproj -c Release`: passes with **zero warnings/errors**. `scripts/package-windows.ps1` produces the self-contained x64 EXE/portable ZIP, preset CSS, catalog and checksums, including .NET/font/WebView2 SDK notices.
+
+Environment: Windows 11 x64, .NET SDK 10.0.403 / runtime 10.0.14. Native rendering uses the locally installed Evergreen WebView2 Runtime. Tests use temporary assets/profiles and synthetic messages; no Discord token, messages, membership data or credentials are read.
+
+The configurator was visually inspected in non-mutating preview mode. Updated screenshots show the actual Windows application and synthetic CSS fixtures. The preview has a separate temporary browser profile and blocks external document navigation/requests. Runtime cache files may remain in Temp; this is not a zero-files-written mode. Preview mode never applies to Discord/Vencord or writes the saved-configuration state.
+
+## Current release limits
+
+The native launcher screenshot records the beta editor during development, before the final acknowledgement-spacing and preview-zoom refinements. The final package was extracted and opened in preview mode; subsequent native automated checks passed. A final packaged-window screenshot can replace that capture in a later documentation update.
+
+- A new personal theme has **not** been applied to the user's running Discord. The new workflow is verified in temporary profiles and WebView2/Chromium; inherited native Discord observations below apply to the earlier preset implementation.
+- First-time Vencord installation/repair and full apply/restart/recovery have not been repeated on a clean VM for this beta. The upstream installer and client-startup logic are retained; temporary-profile checks do not establish every native setup condition.
+- One personal configuration is active at a time. Custom profiles, PTB/Canary/Store, other operating systems, ARM64 and Discord Web are outside automatic support.
+- The executable remains **unsigned**. No signing certificate is configured. SHA-256 verifies integrity, not publisher identity; antivirus/SmartScreen acceptance is not guaranteed.
+- The preview requires WebView2 Runtime. Missing-runtime UI fallback is implemented; the native test host has the runtime installed. Runtime removal/installation is not part of the tests.
+- General performance/game/call benchmarks, every Discord forum/thread/voice/search layout, high contrast, screen-reader behavior, all DPI combinations and unrelated theme combinations remain outside exhaustive coverage.
+- Custom font validation checks format/table/embedding metadata and actual preview loading; it cannot determine ownership or guarantee every glyph/script works. Users must have redistribution rights. Imported image formats and sizes are intentionally bounded; bright backgrounds are strongly darkened for readable chat.
+
+## Inherited validation - 0.2.4-beta.1
 
 **19 theme tests** cover all three embedded display fonts, real font loading, heading/category/channel/member-group application, cross-server/Home font isolation and unchanged message, author and composer typography. The CSS audit checks one uniquely named font resource per output, one guarded visual scope, offline assets, file size and checksums. The 24 Windows launcher-core checks and self-contained Release package build also pass locally; Linux adds its symlink-refusal check in CI.
 

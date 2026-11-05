@@ -1,5 +1,5 @@
 {
-  "version": "0.2.4-beta.1",
+  "version": "0.3.0-beta.1",
   "repository": "PrimeBuild-pc/discord-theme-launcher",
   "themes": [
     {
@@ -26,7 +26,7 @@
         "format": "woff2",
         "weight": 500
       },
-      "sha256": "0313e4d60a283e1610466e86b4ea746f9303a58ae069ebf3193102b090bcae63",
+      "sha256": "a4044743cababdf444733fc1f0c5e62e1f5abedae8fb8b1c19945d05510c6dc9",
       "bytes": 315164
     },
     {
@@ -53,7 +53,7 @@
         "format": "woff2",
         "weight": 500
       },
-      "sha256": "6754790e1166bad649a48a385576ae2de5ce2fe56686f159c9ffee531a8442e0",
+      "sha256": "7ab3aeb0c1badc4deddb464a419a3027c54ed3a040eb53ad9fe65510607034e1",
       "bytes": 213995
     },
     {
@@ -80,7 +80,7 @@
         "format": "truetype",
         "weight": 400
       },
-      "sha256": "302c3a32f45a80bcd5bd23d2390be1eb0f30d71e219f6a07c1f531f86ccf6e61",
+      "sha256": "fd52001cbef11e4d8af875c5fdc3371d5b2824a51ed9f77b0eddfaaabd5ec56d",
       "bytes": 204843
     }
   ]

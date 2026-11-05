@@ -1,55 +1,60 @@
-DISCORD THEME LAUNCHER - WINDOWS X64
+DISCORD THEME LAUNCHER 0.3 - WINDOWS X64
 
-1. Extract this entire ZIP to a regular local folder.
-2. Run DiscordThemeLauncher.exe normally, not as Administrator.
-3. Choose Prime Build, Prime Build Dev and/or FantaFort.
-4. If Vencord is missing, choose its official installation option.
-5. Finish calls/streams, save drafts, and tick the restart checkbox.
-6. Click Apply & open Discord.
+1. Extract the ZIP. Run DiscordThemeLauncher.exe normally, not as Administrator.
+2. Choose a starting preset. Paste your server ID or Discord channel link.
+   "How to copy a server ID" explains Developer Mode and Copy Server ID.
+3. Choose typography, palette, banner and background. Inspect the live preview.
+4. Save a .dtheme configuration. Share a copy includes selected assets/licenses.
+5. If needed, explicitly select official Vencord installation or repair.
+6. Finish calls, save drafts, acknowledge the restart, then click Apply theme.
 
-Unchecked themes managed by this launcher are removed; unrelated themes and
-settings are preserved. Each design appears only in its matching server.
-You still need to belong to a server to view it. The launcher never logs in,
-joins servers, changes permissions, or sends messages.
+Changes affect your LOCAL CLIENT. Other members must adopt a shared theme
+themselves. No token, login, bot, Nitro, server permissions or credentials.
+The launcher never joins servers, reads messages or changes server settings.
 
-The included CSS files allow offline setup when Vencord is already installed.
-If a selected CSS file is absent, the launcher fetches its exact release from
-GitHub. Vencord installation needs Internet access. Every download is checked
-against a SHA-256 digest embedded in this launcher version.
+One personal theme is active at a time. Apply replaces that slot and disables
+a bundled theme targeting the same server. Other server presets remain enabled.
+Disable personal theme removes the slot. Restore previous setup recovers the
+last managed files/enablement; the restore is itself reversible.
 
-RESTORE: Reopen the launcher, tick the restart checkbox, then click Restore
-previous setup. Or deselect all three and apply to remove these themes.
+Original presets opens the previous multi-server setup. Applying that selection
+replaces the personal slot too and removes unchecked bundled themes. Unrelated
+themes, plugins, QuickCSS, online theme links and preferences are preserved.
+
+The EXE embeds verified preset CSS/fonts/artwork. Vencord users can configure
+offline. Optional upstream Vencord installation requires Internet access.
+The preview requires Microsoft Edge WebView2 Runtime. If missing, install it
+from Microsoft's official page, then reopen the launcher:
+https://developer.microsoft.com/microsoft-edge/webview2/
+Runtime installation is not automated. .NET is already bundled.
+
+IMAGES: PNG/JPEG, <=8 MiB each, <=4096 px per side, <=16 million pixels.
+Imports become static PNG without original metadata. Use assets you may share.
+FONTS: static TTF/OTF <=2 MiB, license TXT <=64,000 bytes, editable embedding
+and redistribution rights required. Restricted fonts, variable fonts, font
+collections and imported WOFF/WOFF2 are rejected. Bundled fonts include notices.
+CONFIGURATIONS: .dtheme, <=24 MiB, selected assets embedded with SHA-256.
+Files contain data rather than arbitrary CSS/scripts. Review the target before
+applying a file from someone else. A checksum is not a publisher signature.
+
 Backups: %LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\backups
+Last saved/applied configuration: same parent folder, last-configuration.dtheme
 Themes: %APPDATA%\Vencord\themes
+Managed filenames: PrimeBuild.theme.css, PrimeBuildDev.theme.css,
+FantaFort.theme.css, PersonalServer.theme.css
 
-MANUAL RECOVERY: Fully quit Discord, move only the three managed .theme.css
-files outside its Themes folder, then reopen Discord. Do not delete the entire
-Discord or Vencord data folder. Vencord itself is separate: uninstall it using
-its official installer if desired.
+MANUAL RECOVERY: Fully quit Discord, move only affected managed CSS files out
+of Themes, then reopen. Do not delete entire Discord/Vencord data folders.
+Restoration does not uninstall Vencord. Old three-file backups remain usable.
 
-This beta targets standard per-user stable Discord and the default Vencord
-profile. PTB, Canary, Store, custom profiles and other platforms need manual
-setup. The launcher is portable and has no background service or auto-start.
+Windows x64 / standard per-user stable Discord / default Vencord only.
+No service or auto-start. The preview uses a temporary isolated WebView2 cache;
+it blocks external navigation and document network requests.
 
-The launcher is currently unsigned. Windows may display a security prompt;
-review the source and published checksums before deciding whether to run it.
-No security protection is disabled by this application.
+The executable is UNSIGNED. Review source and checksums before running it.
+No protection or Windows warning is bypassed. Vencord is unofficial and has
+Discord terms/account implications. FantaFort is independent of Epic Games.
 
-Vencord is an unofficial client modification, prohibited by Discord's terms.
-Rollback of theme files does not guarantee account safety. FantaFort is an
-independent project, not affiliated with or endorsed by Epic Games.
-
-Source, release checksums, support and full instructions:
+Source, compatibility, recovery, licenses and validation:
 https://github.com/PrimeBuild-pc/discord-theme-launcher
 Official Vencord: https://vencord.dev/download/
-
-Typography: installed gg sans when present, otherwise embedded Noto Sans.
-Noto Sans is SIL OFL 1.1; see NotoSans-OFL.txt and the Font license link.
-The launcher is an independent community tool, not an official Discord app.
-
-FantaFort display lettering uses embedded Bangers (SIL OFL 1.1), with its
-license in Bangers-OFL.txt and in the CSS. No OS font installation is needed.
-
-Prime Build uses embedded Rajdhani; Prime Build Dev uses embedded JetBrains Mono.
-Their SIL OFL licenses are in Rajdhani-OFL.txt / JetBrainsMono-OFL.txt and
-in the CSS. Normal chat text and launcher typography remain native.

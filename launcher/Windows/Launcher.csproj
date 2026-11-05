@@ -7,10 +7,14 @@
     <DebugType>none</DebugType><EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
     <ProjectReference Include="../Core/Core.csproj"/>
     <EmbeddedResource Include="../../catalog.json" LogicalName="catalog.json"/>
-    <EmbeddedResource Include="../../assets/*-preview.png" LogicalName="%(Filename)%(Extension)"/>
+    <EmbeddedResource Include="../../assets/officina-preview.png;../../assets/primebuild-dev-preview.png;../../assets/fantafort-preview.png" LogicalName="%(Filename)%(Extension)"/>
     <EmbeddedResource Include="../../assets/fonts/*.ttf" LogicalName="%(Filename)%(Extension)"/>
     <EmbeddedResource Include="../../assets/fonts/OFL.txt" LogicalName="NotoSans-OFL.txt"/>
   </ItemGroup>
+  <Target Name="RemoveUnusedWebViewWpf" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup><Reference Remove="@(Reference)" Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" /></ItemGroup>
+  </Target>
 </Project>

@@ -6,14 +6,18 @@ The beta launcher targets Windows x64, standard per-user stable Discord in `%LOC
 
 ## Portable launcher (recommended)
 
-1. Download the portable ZIP from the [release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.2.4-beta.1) and extract it.
+1. Download the portable ZIP from the [release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.1) and extract it.
 2. Run `DiscordThemeLauncher.exe` normally.
-3. Select Prime Build, Prime Build Dev and/or FantaFort. Select all three if you want all three communities themed.
-4. When Vencord is missing, explicitly choose **Install official Vencord if it is missing**. The launcher uses the pinned official upstream installer, without elevation.
+3. Choose a starting preset and paste your server ID or a Discord text-channel link. Use **How to copy a server ID** for the Developer Mode / Copy Server ID steps. Invite links are refused.
+4. Choose fonts, colors, banner and background. Inspect the live preview. **Save** and **Share a copy…** write a `.dtheme` file containing selected assets and the custom font license. **Open configuration** reopens it. If needed, explicitly choose **Install / repair official Vencord if needed**.
 5. Finish calls/streams and save drafts, then tick the restart checkbox.
-6. Click **Apply & open Discord**. Discord closes during the file/settings transaction and is reopened afterwards. The launcher waits for a loaded Discord window before confirming success.
+6. Click **Apply theme**. Discord closes during the transaction and is reopened afterwards. The launcher checks startup before confirming success. Personal Apply requires the latest valid preview and loaded display font.
 
-The portable ZIP contains all three CSS files. Only selected themes are installed. With Vencord already present, this route needs no theme download. The standalone EXE downloads a selected file from its exact release if it is not beside the executable. A corrupt or mismatched local file causes an error rather than being silently installed. Every selected file is checked before Discord is closed or the profile is changed.
+The EXE embeds verified presets, fonts and artwork, so the configurator works offline with Vencord already present. The ZIP also contains standalone preset CSS. The separate **Original presets…** manager keeps multi-server selection; if an adjacent file is absent, it fetches the exact pinned release file. Corrupt/mismatched files are refused. Optional Vencord installation needs Internet access.
+
+The embedded preview needs Microsoft Edge WebView2 Runtime. If absent, the launcher explains the prerequisite and still permits configuration saving/sharing. Install it from [Microsoft's official page](https://developer.microsoft.com/microsoft-edge/webview2/) and reopen the launcher; runtime installation is not automated. The application bundles .NET.
+
+Images: PNG/JPEG up to 8 MiB each, at most 4096 px per side and 16 million pixels; normalized output must also fit. Fonts: static TTF/OTF up to 2 MiB, redistribution license TXT up to 64,000 bytes and explicit permission confirmation. Restricted embedding, variable fonts, collections, imported WOFF/WOFF2, SVG and GIF are refused. Configurations are limited to 24 MiB. See [Personal configurations](CONFIGURATIONS.md).
 
 The launcher does not detect membership, join a server, log into Discord, access tokens/messages, change server settings, or send messages. It does not install itself, add a service or configure auto-start. You may delete its extracted folder after closing it; backups remain separate.
 
@@ -21,15 +25,18 @@ The executable is unsigned. Review its source and published checksums before dec
 
 ## Apply semantics
 
-Checked themes are installed/updated and enabled. Unchecked themes from this project's three-file set are removed and disabled. Other files and enabled-theme entries are retained, including third-party themes. Plugins, QuickCSS, theme links and unrelated preferences are not changed.
+Personal Apply replaces the single `PersonalServer.theme.css` slot and disables a bundled preset targeting the same server, retaining its bytes. Other server presets and unrelated themes remain enabled. **Disable personal theme** removes only the personal slot; it does not automatically re-enable a previously conflicting preset. Use Restore to recover that state.
 
-The previous state of the three managed files is backed up before changes, including any local edits. Snapshots record their original bytes, file existence and enabled state; full Vencord settings and credentials are not copied into the backups. If a file transaction fails, restoration is attempted using that snapshot. The launcher retains the recovery reference if an interrupted operation needs manual recovery.
+**Original presets…** retains the old multi-selection flow: checked presets are installed/enabled, unchecked presets removed/disabled, and the personal slot removed. Other themes, plugins, QuickCSS, online theme links and preferences are preserved by both flows. Shared configurations affect only the installing user's client; each member must adopt a shared file independently.
+
+The four managed files are backed up before changes, including local edits. New snapshots record exact bytes, file existence, enablement and SHA-256; full settings and credentials are not copied. All existing backup sources are checked before restoration. Failed transactions attempt restoration and keep the recovery reference. Older three-file snapshots remain usable and leave the personal slot intact.
 
 Paths:
 
 - Theme files: `%APPDATA%\Vencord\themes`.
 - Backup history: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\backups`.
 - Recovery reference: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\last-backup.txt`.
+- Last saved/applied configuration: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\last-configuration.dtheme`. This editing document is independent of theme restoration. Preview mode never writes it.
 - Verified upstream installer, if needed: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\downloads`.
 
 Keep the backup folder if you want to undo earlier changes. Nothing in these local folders is uploaded by the launcher. Downloads are ordinary HTTPS requests to GitHub and its release delivery infrastructure; provider request logging is outside this project.
@@ -42,11 +49,12 @@ This restores themes, not Vencord's installation or other applications. Historic
 
 ## Remove these themes
 
-Deselect all three and click **Apply & open Discord**. Or disable and move the individual files manually. The managed filenames are:
+Use **Disable personal theme** for the personal slot. To remove every managed theme, open **Original presets…**, deselect all and apply after restart acknowledgement. Or disable and move individual files manually. Managed names:
 
 - `PrimeBuild.theme.css`
 - `PrimeBuildDev.theme.css`
 - `FantaFort.theme.css`
+- `PersonalServer.theme.css`
 
 ## Manual theme installation
 
@@ -63,7 +71,7 @@ No Nitro, bot, server boost or server administrator permission is needed. Each m
 Download `SHA256SUMS.txt` from the same release. On Windows:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.2.4-beta.1-windows-x64-portable.zip
+Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.1-windows-x64-portable.zip
 ```
 
 Compare it with the corresponding filename in the release checksum file. The repository-root checksum file covers generated themes; the release checksum file also covers the launcher, ZIP and catalog. A hash checks integrity, not publisher identity.

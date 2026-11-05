@@ -10,23 +10,26 @@ The theme audit and Playwright fixtures test the outputs, including all three si
 
 ## Windows launcher
 
+Version 0.3 adds `ThemeConfiguration`, `ThemeCompiler` and `ThemePreview` in Core and a WinForms editor with native asset validation and WebView2 preview. [Personal configurations](CONFIGURATIONS.md) describes the format, compiler, import/licensing limits, preview boundary and upgrade semantics.
+
 - `launcher/Core`: catalog parsing, bounded HTTPS downloads with SHA-256 verification, managed-file transactions and backup restoration. No UI types.
 - `launcher/Windows`: WinForms presentation and Windows process/client integration. UI stays responsive during downloads and file operations. One instance per Windows user/session avoids competing launcher operations.
 - `launcher/Tests`: dependency-free executable checks using isolated temporary profiles. It never discovers or edits the real user profile.
+- `launcher/WindowsTests`: temporary image decoding, actual WebView2 rendering and native configurator checks. No real Discord writes or restarts.
 
 The normal flow is:
 
 1. Validate the supported standard client/profile and normal privileges.
-2. Read only known adjacent theme files, or download selected assets from a pinned release; verify all selected bytes.
+2. Compile validated personal data from embedded verified presets, or verify original preset bytes from adjacent files / the pinned release.
 3. If the user opted into first-time Vencord setup, download and verify the official CLI installer.
 4. Stop only verified stable Discord processes under the current user's standard installation, after the explicit calls/drafts acknowledgement.
 5. Run the official installer if needed; otherwise leave Vencord's installation alone.
-6. Snapshot the three managed theme files and enablement. Apply selected files and merge only their `enabledThemes` entries into current settings.
+6. Snapshot the four managed theme files and enablement. Apply selected files and merge only their `enabledThemes` entries into current settings.
 7. Validate the runtime again, reopen Discord, and wait for a loaded Discord window before reporting success.
 
 File replacement uses a temporary sibling file and an atomic rename. A durable backup reference is written before the first profile mutation. A failed apply attempts restoration. Restore reads current settings and merges the saved managed subset; unrelated preferences changed since the snapshot survive. Restore also saves a new snapshot so it can be undone.
 
-Only the three fixed filenames are accepted. Profile and backup paths are checked for reparse points; backup references must be a generated 32-character identifier. No downloaded CSS filename becomes an arbitrary destination. Integrity checks are not a substitute for trusting the publisher.
+Only the three fixed preset filenames and `PersonalServer.theme.css` are managed. New snapshots verify SHA-256 of existing sources before restoration. Old three-file snapshots restore their subset and retain the personal slot. Profile and backup paths are checked for reparse points; backup references must be generated 32-character identifiers. No downloaded filename becomes an arbitrary destination. Hashes do not establish publisher identity.
 
 Vencord CLI **1.4.2** is pinned to its official release asset and SHA-256 `15268aba25625797bf562187dd87ddadf42882e079c7b6192880ad3e83353ef5`. It runs as a separate upstream program with `--install --branch stable`. Its own downloads and installation behavior remain upstream responsibilities. No third-party installer binary is committed or bundled. [Official installer source](https://github.com/Vencord/Installer/blob/v1.4.2/cli.go) and [Windows instructions](https://vencord.dev/download/) describe that prerequisite.
 
@@ -46,7 +49,7 @@ The canonical release version is `package.json`; checks require generated CSS/ca
 
 `scripts/package-windows.ps1` publishes a Release, self-contained `win-x64` single-file executable, then creates a portable ZIP with themes, instructions, MIT license and bundled .NET notices. The release checksum file covers every downloadable product asset; the root checksum file covers themes only. Standalone-EXE users should consult the runtime notices included in the portable ZIP.
 
-CI uses pinned action commit SHAs, read-only repository permissions and no deployment secrets. Linux checks the theme outputs and installer core. Windows checks the core and packages the native application. Published Windows artifacts are taken from that commit's successful CI run.
+CI uses pinned action commit SHAs, read-only repository permissions and no deployment secrets. Linux checks preset/personal browser fixtures and Core. Windows checks Core, native decoding, WebView2 and packaging. Published Windows artifacts come from that commit's successful CI run. The ZIP includes WebView2 SDK license/notice files alongside runtime/font notices; WebView2 Runtime is not bundled.
 
 The beta executable is unsigned. No signing certificate or signing service was configured for this project, and checksums do not change that status. Windows may show a trust warning. No warning bypass or security-setting change is automated.
 

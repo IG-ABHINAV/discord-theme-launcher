@@ -57,11 +57,12 @@ public static class ReleaseDownload
     }
 }
 
-public sealed record SavedTheme(string File, bool Existed, bool Enabled);
+public sealed record SavedTheme(string File, bool Existed, bool Enabled, string? Sha256 = null);
 public sealed record Snapshot(SavedTheme[] Themes);
 
 public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog catalog)
 {
+    private string[] ManagedFiles => catalog.Themes.Select(t => t.File).Append(ThemeCompiler.PersonalFile).ToArray();
     public string ThemesDirectory => Path.Combine(vencordRoot, "themes");
     public string SettingsPath => Path.Combine(vencordRoot, "settings", "settings.json");
     public string StateDirectory => stateRoot;
@@ -95,7 +96,7 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         return catalog.Themes.Where(t => enabled.Contains(t.File) && File.Exists(Path.Combine(ThemesDirectory, t.File))).Select(t => t.Id).ToArray();
     }
 
-    private static void AtomicWrite(string path, byte[] bytes)
+    public static void AtomicWrite(string path, byte[] bytes)
     {
         CheckPath(path);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
@@ -104,9 +105,9 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         finally { if (File.Exists(temporary)) File.Delete(temporary); }
     }
     private static void WriteJson<T>(string path, T value) => AtomicWrite(path, System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value, Catalog.JsonOptions)));
-    private void WriteEnabled(JsonObject settings, IEnumerable<string> selected)
+    private void WriteEnabled(JsonObject settings, IEnumerable<string> selected, string[]? managed = null)
     {
-        var unmanaged = Enabled(settings).Where(name => !catalog.Themes.Any(t => t.File == name));
+        var unmanaged = Enabled(settings).Where(name => !(managed ?? ManagedFiles).Contains(name));
         settings["enabledThemes"] = new JsonArray(unmanaged.Concat(selected).Distinct().Select(s => (JsonNode?)JsonValue.Create(s)).ToArray());
         AtomicWrite(SettingsPath, System.Text.Encoding.UTF8.GetBytes(settings.ToJsonString(Catalog.JsonOptions)));
     }
@@ -137,7 +138,31 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
                 if (selectedIds.Contains(theme.Id)) AtomicWrite(destination, downloads[theme.File]);
                 else if (File.Exists(destination)) File.Delete(destination); // Recoverable from the snapshot above.
             }
+            var personal = Path.Combine(ThemesDirectory, ThemeCompiler.PersonalFile);
+            if (File.Exists(personal)) File.Delete(personal);
             WriteEnabled(settings, selected.Select(t => t.File));
+        }
+        catch { Restore(folder); throw; }
+    }
+
+    public bool PersonalEnabled => Enabled(ReadSettings()).Contains(ThemeCompiler.PersonalFile) && File.Exists(Path.Combine(ThemesDirectory, ThemeCompiler.PersonalFile));
+
+    public void ApplyPersonal(ThemeConfiguration? configuration)
+    {
+        // Compile only validated data; shared packages never supply executable CSS.
+        byte[]? css = configuration is null ? null : System.Text.Encoding.UTF8.GetBytes(ThemeCompiler.Compile(configuration));
+        var settings = ReadSettings();
+        var enabled = Enabled(settings).Where(name => name != ThemeCompiler.PersonalFile &&
+            !catalog.Themes.Any(t => t.File == name && t.Guild == configuration?.Guild)).ToList();
+        if (css is not null) enabled.Add(ThemeCompiler.PersonalFile);
+        var folder = SaveSnapshot(settings);
+        AtomicWrite(LastPath, System.Text.Encoding.UTF8.GetBytes(Path.GetFileName(folder)));
+        try
+        {
+            var path = Path.Combine(ThemesDirectory, ThemeCompiler.PersonalFile); CheckPath(path);
+            if (css is not null) AtomicWrite(path, css);
+            else if (File.Exists(path)) File.Delete(path);
+            WriteEnabled(settings, enabled);
         }
         catch { Restore(folder); throw; }
     }
@@ -157,9 +182,12 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         CheckPath(ThemesDirectory); CheckPath(stateRoot);
         var folder = Path.Combine(stateRoot, "backups", Guid.NewGuid().ToString("N"));
         CheckPath(folder);
-        foreach (var theme in catalog.Themes) CheckPath(Path.Combine(ThemesDirectory, theme.File));
+        foreach (var file in ManagedFiles) CheckPath(Path.Combine(ThemesDirectory, file));
         var enabled = Enabled(settings);
-        var snapshot = new Snapshot(catalog.Themes.Select(t => new SavedTheme(t.File, File.Exists(Path.Combine(ThemesDirectory, t.File)), enabled.Contains(t.File))).ToArray());
+        var snapshot = new Snapshot(ManagedFiles.Select(file => {
+            var path = Path.Combine(ThemesDirectory, file); bool exists = File.Exists(path);
+            return new SavedTheme(file, exists, enabled.Contains(file), exists ? Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant() : null);
+        }).ToArray());
         Directory.CreateDirectory(folder);
         foreach (var file in snapshot.Themes.Where(t => t.Existed)) File.Copy(Path.Combine(ThemesDirectory, file.File), Path.Combine(folder, file.File));
         WriteJson(Path.Combine(folder, "snapshot.json"), snapshot);
@@ -171,7 +199,9 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         CheckPath(folder);
         var snapshotPath = Path.Combine(folder, "snapshot.json"); CheckPath(snapshotPath);
         var snapshot = JsonSerializer.Deserialize<Snapshot>(File.ReadAllText(snapshotPath), Catalog.JsonOptions) ?? throw new InvalidDataException("Invalid backup.");
-        if (snapshot.Themes.Length != catalog.Themes.Length || snapshot.Themes.Select(t => t.File).Distinct().Count() != snapshot.Themes.Length || snapshot.Themes.Any(t => !catalog.Themes.Any(theme => theme.File == t.File)))
+        // Existing three-file snapshots remain restorable without changing the new personal slot.
+        if (snapshot.Themes.Length is not (3 or 4) || snapshot.Themes.Select(t => t.File).Distinct().Count() != snapshot.Themes.Length ||
+            snapshot.Themes.Any(t => !ManagedFiles.Contains(t.File)) || catalog.Themes.Any(t => !snapshot.Themes.Any(s => s.File == t.File)))
             throw new InvalidDataException("The backup does not match this launcher.");
         var settings = ReadSettings();
         // Validate every source/destination first; never partially restore an incomplete backup.
@@ -179,6 +209,7 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         {
             CheckPath(Path.Combine(ThemesDirectory, file.File)); CheckPath(Path.Combine(folder, file.File));
             if (file.Existed && !File.Exists(Path.Combine(folder, file.File))) throw new InvalidDataException("A backup file is missing.");
+            if (file.Existed && file.Sha256 is not null) ReleaseDownload.Verify(File.ReadAllBytes(Path.Combine(folder, file.File)), file.Sha256);
         }
         Directory.CreateDirectory(ThemesDirectory);
         foreach (var file in snapshot.Themes)
@@ -187,6 +218,6 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
             if (file.Existed) AtomicWrite(destination, File.ReadAllBytes(Path.Combine(folder, file.File)));
             else if (File.Exists(destination)) File.Delete(destination);
         }
-        WriteEnabled(settings, snapshot.Themes.Where(t => t.Enabled).Select(t => t.File));
+        WriteEnabled(settings, snapshot.Themes.Where(t => t.Enabled).Select(t => t.File), snapshot.Themes.Select(t => t.File).ToArray());
     }
 }

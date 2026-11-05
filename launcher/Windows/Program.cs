@@ -9,10 +9,12 @@ internal static class Program
     static void Main(string[] args)
     {
         ApplicationConfiguration.Initialize();
+        Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+        Application.ThreadException += (_, _) => LauncherStyle.ShowMessage(null, "The launcher encountered an unexpected error. Close it and reopen your saved configuration. Check the manual recovery guide if an operation was interrupted.", "Discord Theme Launcher");
         using var typography = new LauncherStyle.Typography();
         using var instance = new Mutex(true, "Local\\PrimeBuild.DiscordThemeLauncher." + System.Security.Principal.WindowsIdentity.GetCurrent().User!.Value, out bool first);
         if (!first) { LauncherStyle.ShowMessage(null, "The launcher is already open for this Windows user.", "Discord Theme Launcher"); return; }
-        Application.Run(new LauncherForm(args.Contains("--preview")));
+        Application.Run(new BuilderForm(args.Contains("--preview")));
     }
 }
 
@@ -48,7 +50,7 @@ internal sealed class LauncherForm : Form
         Controls.Add(layout); Controls.Add(progress);
         var heading = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false };
         heading.Controls.Add(new Label { Text = "Community themes", Font = LauncherStyle.Font(20, FontStyle.Bold), AutoSize = true });
-        heading.Controls.Add(new Label { Text = "Choose one, two, or all three. Each design appears only in its matching server.", AutoSize = true, ForeColor = LauncherStyle.Muted });
+        heading.Controls.Add(new Label { Text = "Choose original presets. Applying this selection replaces the personal theme slot too.", AutoSize = true, ForeColor = LauncherStyle.Muted });
         layout.Controls.Add(heading, 0, 0);
         var cards = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 1 };
         for (int i = 0; i < 3; i++) cards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.333f));
