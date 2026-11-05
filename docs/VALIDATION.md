@@ -1,78 +1,59 @@
-# Validation — 0.1.0-beta.1
+# Validation - 0.2.0-beta.1
 
-Test date: **2026-11-05**. This is a beta with a deliberately limited desktop support claim.
+Date: **2026-11-05**. This release adds three independently scoped themes and a Windows launcher. The original 0.1 measurements are historical; they are not measurements of the new backgrounds.
 
-## Tested environment
+## Environment
 
-| Component | Version or configuration |
-| --- | --- |
-| OS | Windows 11 Pro, 10.0.26200 |
-| Discord | Stable 663810 (164cf72), host 1.0.9267 x64 |
-| Vencord | Official standalone build, commit `383409e` |
-| Electron / Chromium | 44.10.0 / 152.0.7977.169 |
-| CPU | AMD Ryzen 7 5800X3D, 16 logical processors |
-| GPU | AMD Radeon RX 6950 XT |
-| Target | Public Prime Build server, `1206415718728601600` |
+- Windows 11 Pro 10.0.26200, x64.
+- Discord stable 663810 / host 1.0.9267; official Vencord commit `383409e`.
+- Electron 44.10.0 / Chromium 152.0.7977.169.
+- Ryzen 7 5800X3D, 16 logical processors; Radeon RX 6950 XT.
+- Local build: .NET SDK 10.0.403, Release, self-contained win-x64; bundled runtime 10.0.14.
 
-The official Windows Vencord CLI installer was used without elevation. No custom plugin or source build is needed. The final installation uses the normal Themes folder and native Themes toggle; QuickCSS was restored to its original empty state.
-
-## Actual desktop checks
-
-These checks used the real Discord desktop client, separate from the automated fixture:
+## Actual desktop observations
 
 | Check | Result |
 | --- | --- |
-| Public Prime Build normal text-channel view | Hardware header, dark surfaces, composer and scoped styling visible |
-| Another server while Prime Build remains in the server rail | Original appearance, no Officina header |
-| Home/Friends | Original appearance |
-| Return to Prime Build | Styling resumes |
-| Global User Settings and Vencord Themes while enabled | Original appearance, settings usable |
-| Disable using the native theme toggle | Original appearance returns in Prime Build |
-| Re-enable using the same toggle | Officina resumes |
-| Full quit, move only the theme file out, reopen, return to Prime Build | Original appearance; no residual header or scoped surfaces |
-| Restore the file | Normal local installation restored |
-| Existing inline role/presence colors and media | Retained in the observed view |
+| Portable ZIP extracted and native EXE launched | Passed; no separate runtime installation |
+| Existing standard Discord/Vencord detected | Passed |
+| Select all three and Apply & open Discord | Backup created, all three exact files enabled, Discord reopened |
+| Installed files compared with generated release candidates | SHA-256 matched |
+| QuickCSS | Remained empty and unchanged |
+| Prime Build normal text view | Hardware artwork visible in chat/channel/member panels |
+| Prime Build Dev | Distinct coding surfaces; native forum main-panel artwork also checked after a container-specific fix |
+| FantaFort normal text view | Distinct blue/violet/cyan/yellow arena surfaces and fantasy roster artwork |
+| Home/Friends | Stock appearance |
+| Global account settings with FantaFort selected | Stock appearance, controls usable |
+| Restore previous setup from launcher | Previous 0.1 Prime Build file and enablement recovered; new Dev/FantaFort files removed |
+| Native launcher presentation | Discord-like grays and blurple, embedded Noto Sans fallback, clear disabled checkbox/button text; normal and maximized layouts inspected |
 
-No server setting, bot, permission, message, or member profile was changed. The development server was not used. The Home/Friends test covers the live DM navigation area; individual private conversations were not opened for inspection. Individual DM isolation is also exercised in the synthetic fixture.
+No messages were sent, calls/streams started, or server channels/permissions/settings changed. Only local presentation was modified. Private conversations were not opened for inspection. Published theme screenshots contain synthetic content; the launcher screenshot is the actual app in non-mutating preview mode.
+
+The GUI setup/restore checks used release candidates with the same installer core. Final packaging and CI checks remain the authority for the exact released bytes; minor presentation/readiness refinements followed the first successful transaction.
 
 ## Automated checks
 
-`npm run verify` passes: build, static CSS audit, and **13 Playwright tests**. They use a sanitized fixture with interface structure observed from the current Discord client, and exercise the distributed CSS itself.
+`npm run verify`: **16 Playwright tests** plus generated-CSS audit pass locally. Coverage includes target activation, non-target/DM isolation, missing/hidden/ambiguous selection, changed layout, global portals, role/status colors, removal, reload, offline assets, fixture widths 1024/1280/1920, separate backgrounds, forum-container decoration and text/input-boundary contrast for all three identities.
 
-- Target selection, switching to another server and DM context, and return.
-- Negative cases: unselected server icon, an unrelated message link, missing marker, missing server, changed layout, hidden rail and ambiguous selection.
-- Global portal isolation and preservation of inline role/status/danger colors.
-- Text contrast targets of 4.5:1 and composer boundary contrast of 3:1 for the tested pairs.
-- Disable, stylesheet removal, reload and repeated navigation without accumulated styles.
-- Chromium parsing, embedded artwork and no network-dependent theme assets.
-- Usable fixture layout and composer at widths 1024, 1280 and 1920 pixels.
-- A reproducible sanitized preview using the real release stylesheet.
+`dotnet run --project launcher/Tests/Tests.csproj -c Release -- .`: **19 checks on Windows**. Linux additionally checks symlink refusal. Temporary synthetic profiles cover all/partial/empty selections, exact custom-byte restoration, reversible restoration, unrelated files/preferences/plugins/QuickCSS retained, no unrelated settings in backups, corrupt/missing downloads, malformed settings, unknown IDs, catalog path traversal, backup traversal and installer digest rejection.
 
-The static audit requires all styles inside one guarded `@scope`, checks the target and layout anchors, prohibits external URL dependencies and ongoing animation/backdrop-filter effects, enforces size budgets, and checks the version and SHA-256 checksum. The installable file is **266,534 bytes**; [SHA256SUMS.txt](../SHA256SUMS.txt) is authoritative for its hash.
+`dotnet build launcher/Windows/Launcher.csproj -c Release`: passes with warnings treated as errors. The Windows packaging script produces a self-contained single-file EXE, portable ZIP, three CSS files, catalog and asset checksums. The executable is **NotSigned**; no signing certificate was available. Runtime and font notices are included.
 
-The README preview is synthetic. It does not show real community messages and must not be presented as a native Discord screenshot. Browser fixture tests do not establish support for Discord Web.
+CI repeats theme/core checks on Linux and core/packaging on Windows, using read-only repository permissions. Windows release assets are sourced from the successful commit's CI artifact. Their hashes are published with the release.
 
-## Exploratory idle measurements
+## Performance limits
 
-The same Vencord installation and public text-channel view were sampled with Officina off and on. Three alternating pairs were retained after warm-up, with five seconds of settling before each approximately twenty-second sample. CPU is total Discord process CPU normalized across 16 logical processors; memory is summed across Discord processes. Process identities stayed unchanged within every retained sample.
+The launcher is a setup tool, not a resident Discord plugin. No service, polling, auto-start task or theme runtime JavaScript is added. Backgrounds are static SVG data, with no theme network dependencies or full-window blur.
 
-| Median across three samples | Theme off | Theme on |
-| --- | ---: | ---: |
-| CPU, all logical processors | 0.053% | 0.063% |
-| Private memory | 803.28 MiB | 804.15 MiB |
-| Working set | 1149.95 MiB | 1152.00 MiB |
+The new backgrounds have **not** received controlled CPU/GPU, gaming FPS, frame-time or call-quality benchmarks. The [0.1 report](VALIDATION-0.1.md) and [old idle samples](idle-measurements.json) apply only to that earlier theme candidate. Do not use those small differences to promise zero overhead for this release.
 
-No material idle penalty was apparent in these short observations. The differences are **not a causal overhead estimate**: caching, garbage collection, network activity and sample timing can exceed them. This was a development candidate with the same scoped architecture and artwork; small member-selector refinements followed. Raw retained results and method are in [idle-measurements.json](idle-measurements.json).
+## Remaining coverage
 
-These measurements compare the theme on/off **with Vencord present**. They do not measure Vencord versus stock Discord, gaming performance, GPU load, frame times, or lower-end machines. Initial startup/warm-up samples were excluded because their client/content conditions differed. CSS `:has()` still has rendering cost; the guard is anchored to the recognized app/server-rail subtree, and no mutation observer or polling loop is added by this theme.
+- Fresh-machine automated Vencord installation was not repeated in a clean VM. The same official CLI version was previously used successfully on this host; that does not establish every first-install condition.
+- Windows 10, ARM64, Store/PTB/Canary/custom profiles, unusual paths and low-end machines need further coverage. Automatic setup targets stable/default Windows x64 only.
+- All forum/thread/search/attachment/reply/error states, scaling/high contrast and third-party theme combinations are not exhaustively checked.
+- Gaming, voice/video and screen sharing remain unmeasured.
+- Portals outside the server view, unsupported detached windows and overlays keep their stock behavior.
+- Unsigned executables can trigger Windows trust prompts. No warning bypass or security-setting change is automated.
 
-## Remaining limits
-
-- Calls, video and screen sharing were not started as test traffic; game performance and call quality are unmeasured.
-- Thread, forum, search, attachment, reply and rare error states have not all received live desktop coverage.
-- Non-default UI scaling, accessibility settings, light-mode combinations and arbitrary third-party themes need wider testing.
-- macOS, Linux, mobile, browser installations, game overlays and detached windows are outside first-release support.
-- Portaled menus, profile cards and dialogs outside the selected-server base view keep their stock appearance.
-- Discord changes can invalidate exact layout/class anchors. The theme should then stay off; revalidation is required before broadening those anchors.
-
-See [Compatibility](COMPATIBILITY.md) for coverage and [Installation and removal](INSTALLATION.md) for rollback. Local reversibility is not a guarantee against restrictions associated with an unofficial client modification.
+See [Installation](INSTALLATION.md) for supported paths and recovery, and [Compatibility](COMPATIBILITY.md) for exact scope. Reversible CSS does not remove the terms/account implications of an unofficial client modification.

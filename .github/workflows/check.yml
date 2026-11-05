@@ -20,4 +20,25 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npx playwright install --with-deps chromium
       - run: npm run verify
-      - run: git diff --exit-code -- PrimeBuild.theme.css SHA256SUMS.txt
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet run --project launcher/Tests/Tests.csproj -c Release -- .
+      - run: git diff --exit-code -- PrimeBuild.theme.css PrimeBuildDev.theme.css FantaFort.theme.css catalog.json SHA256SUMS.txt assets/generated
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet run --project launcher/Tests/Tests.csproj -c Release -- .
+      - run: ./scripts/package-windows.ps1
+        shell: pwsh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-release
+          path: dist/release/*
+          if-no-files-found: error
+          retention-days: 14

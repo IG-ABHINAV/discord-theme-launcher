@@ -1,5 +1,5 @@
-name: Theme bug
-description: Report a visual, isolation, or removal problem with Officina.
+name: Theme or launcher bug
+description: Report a visual, isolation, setup, or restoration problem.
 title: '[Bug] '
 labels: [bug]
 body:
@@ -7,7 +7,7 @@ body:
     id: versions
     attributes:
       label: Tested versions
-      description: Discord host/build, Vencord version or commit, Windows version, and Officina version.
+      description: Discord host/build, Vencord version or commit, Windows version, and launcher/theme version.
     validations:
       required: true
   - type: dropdown
@@ -16,6 +16,9 @@ body:
       label: Affected area
       options:
         - Prime Build server view
+        - Prime Build Dev server view
+        - FantaFort server view
+        - Launcher setup or restoration
         - Another server or direct messages
         - Global settings
         - Disabling or removing the theme

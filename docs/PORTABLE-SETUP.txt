@@ -1,0 +1,48 @@
+DISCORD THEME LAUNCHER - WINDOWS X64
+
+1. Extract this entire ZIP to a regular local folder.
+2. Run DiscordThemeLauncher.exe normally, not as Administrator.
+3. Choose Prime Build, Prime Build Dev and/or FantaFort.
+4. If Vencord is missing, choose its official installation option.
+5. Finish calls/streams, save drafts, and tick the restart checkbox.
+6. Click Apply & open Discord.
+
+Unchecked themes managed by this launcher are removed; unrelated themes and
+settings are preserved. Each design appears only in its matching server.
+You still need to belong to a server to view it. The launcher never logs in,
+joins servers, changes permissions, or sends messages.
+
+The included CSS files allow offline setup when Vencord is already installed.
+If a selected CSS file is absent, the launcher fetches its exact release from
+GitHub. Vencord installation needs Internet access. Every download is checked
+against a SHA-256 digest embedded in this launcher version.
+
+RESTORE: Reopen the launcher, tick the restart checkbox, then click Restore
+previous setup. Or deselect all three and apply to remove these themes.
+Backups: %LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\backups
+Themes: %APPDATA%\Vencord\themes
+
+MANUAL RECOVERY: Fully quit Discord, move only the three managed .theme.css
+files outside its Themes folder, then reopen Discord. Do not delete the entire
+Discord or Vencord data folder. Vencord itself is separate: uninstall it using
+its official installer if desired.
+
+This beta targets standard per-user stable Discord and the default Vencord
+profile. PTB, Canary, Store, custom profiles and other platforms need manual
+setup. The launcher is portable and has no background service or auto-start.
+
+The launcher is currently unsigned. Windows may display a security prompt;
+review the source and published checksums before deciding whether to run it.
+No security protection is disabled by this application.
+
+Vencord is an unofficial client modification, prohibited by Discord's terms.
+Rollback of theme files does not guarantee account safety. FantaFort is an
+independent project, not affiliated with or endorsed by Epic Games.
+
+Source, release checksums, support and full instructions:
+https://github.com/PrimeBuild-pc/discord-theme-launcher
+Official Vencord: https://vencord.dev/download/
+
+Typography: installed gg sans when present, otherwise embedded Noto Sans.
+Noto Sans is SIL OFL 1.1; see NotoSans-OFL.txt and the Font license link.
+The launcher is an independent community tool, not an official Discord app.

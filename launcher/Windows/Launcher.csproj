@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AssemblyName>DiscordThemeLauncher</AssemblyName><Product>Discord Theme Launcher</Product><ApplicationManifest>app.manifest</ApplicationManifest>
+    <PublishSingleFile>true</PublishSingleFile><SelfContained>true</SelfContained><IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <DebugType>none</DebugType><EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Core/Core.csproj"/>
+    <EmbeddedResource Include="../../catalog.json" LogicalName="catalog.json"/>
+    <EmbeddedResource Include="../../assets/*-preview.png" LogicalName="%(Filename)%(Extension)"/>
+    <EmbeddedResource Include="../../assets/fonts/*.ttf" LogicalName="%(Filename)%(Extension)"/>
+    <EmbeddedResource Include="../../assets/fonts/OFL.txt" LogicalName="NotoSans-OFL.txt"/>
+  </ItemGroup>
+</Project>

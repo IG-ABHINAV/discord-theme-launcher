@@ -1,6 +1,6 @@
-# Prime Build Discord Theme — Implementation Plan
+# Historical implementation plan — Officina 0.1
 
-Status: approved by Lorenzo on 2026-11-05 and implemented as `0.1.0-beta.1`. The sections below retain the approved plan; final coverage, validation, and limitations are tracked in [Validation](docs/VALIDATION.md).
+Status: historical plan for the original single-server 0.1 beta. The maintainer subsequently authorized three server designs and a Windows launcher. Current scope and implementation are documented in [Architecture](docs/ARCHITECTURE.md), [Compatibility](docs/COMPATIBILITY.md), and [Validation](docs/VALIDATION.md).
 
 Date: 2026-11-05
 

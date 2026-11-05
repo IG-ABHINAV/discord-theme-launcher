@@ -1,9 +1,9 @@
 {
-  "name": "primebuild-discord-theme",
-  "version": "0.1.0-beta.1",
+  "name": "discord-theme-launcher",
+  "version": "0.2.0-beta.1",
   "private": true,
   "type": "module",
-  "description": "Officina: a server-scoped Prime Build Discord desktop theme for Vencord.",
+  "description": "Windows launcher and server-scoped Vencord themes for Prime Build, Prime Build Dev and FantaFort.",
   "license": "MIT",
   "scripts": {
     "build": "node scripts/build.mjs",

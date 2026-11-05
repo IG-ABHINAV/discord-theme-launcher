@@ -1,111 +1,93 @@
-# Prime Build Discord Theme — Officina
+# Discord Theme Launcher
 
-A **server-scoped Discord desktop theme for Vencord**, inspired by PC gaming hardware. Near-black surfaces, Prime Build orange, restrained PCB and heatsink details, and a clean message area.
+**Three server-scoped Discord desktop designs. One Windows launcher.** Maintained by [PrimeBuild-pc](https://github.com/PrimeBuild-pc).
 
-**It activates only while you are viewing the public Prime Build server.** Other servers, direct messages, and global account settings keep their normal appearance. Every interested member installs the theme on their own computer; it does not change the server for everyone automatically.
+Choose **Prime Build**, **Prime Build Dev**, **FantaFort**, or any combination. The launcher prepares the selected themes, backs up the managed files, enables them, and reopens Discord. Each theme appears only in its matching server; other servers and global account settings remain outside its scope.
 
-[Download the theme](https://github.com/PrimeBuild-pc/primebuild-discord-theme/releases/download/v0.1.0-beta.1/PrimeBuild.theme.css) · [Installation and removal](docs/INSTALLATION.md) · [Compatibility](docs/COMPATIBILITY.md) · [Validation](docs/VALIDATION.md) · [Prime Build](https://primebuild.website/)
+**[Download Windows portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.0-beta.1/DiscordThemeLauncher-0.2.0-beta.1-windows-x64-portable.zip)** | [All release assets](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.2.0-beta.1) | [Installation and recovery](docs/INSTALLATION.md) | [Validation](docs/VALIDATION.md)
 
-![Officina's actual stylesheet on a sanitized test fixture: dark Discord-style surfaces, orange channel selection, hardware header, mentions, message cards, and composer](assets/officina-preview.png)
+## Launcher interface
 
-*The preview uses the distributed stylesheet with synthetic content. It is a test fixture, not a screenshot containing community messages. Desktop checks and their limits are recorded separately in [Validation](docs/VALIDATION.md).*
+![Actual Windows launcher preview with Discord-inspired dark surfaces, blurple selection and readable disabled controls](assets/launcher-preview.jpg)
 
-## What you get
+The launcher follows Discord's native dark palette and typography stack. It uses installed **gg sans** when available, otherwise embedded **Noto Sans**, also a Discord fallback. Proprietary Discord fonts are not bundled. Checkboxes, buttons and dialogs retain light, readable text in disabled states. This is an independent community tool, not an official Discord extension.
 
-- One self-contained `PrimeBuild.theme.css` file, with artwork embedded.
-- Automatic activation for the public Prime Build server, with no companion plugin or custom Vencord build required.
-- Coordinated navigation, messages, mentions, links, composer, common cards, member list, and user panel.
-- A local hardware-inspired header using Prime Build's actual logo.
-- Static decoration, no full-window blur, no theme JavaScript, and no external CSS/font/image imports.
-- Immediate removal through the theme toggle. Updates remain your choice when using the recommended local file.
+## Three identities
 
-This initial **beta** targets **Windows Discord desktop with the official Vencord build**. It relies on Discord's current interface structure; see the exact tested configuration and coverage in [Compatibility](docs/COMPATIBILITY.md).
+| Server | Design | Backgrounds and details |
+| --- | --- | --- |
+| Prime Build | **Officina** | Near-black and orange, processor/heatsink artwork, PCB traces, mechanical details |
+| Prime Build Dev | **Workbench** | Prime Build orange with slate surfaces, code editor, terminal and commit/build references |
+| FantaFort | **Arena** | Deep blue, violet, cyan and yellow, angular arena panels, fantasy-roster pitch and tactics |
 
-## Install
+All three customize the **chat background, channel panel, member panel, header, common cards, reactions, composer and navigation states**. Artwork is static and embedded in the CSS. The server icon rail is not redesigned. Role/status colors and useful native controls are retained.
 
-1. Install [Vencord from its official website](https://vencord.dev/download/) if you do not already use it. Follow the Windows instructions; do not run its installer as Administrator.
-2. Download `PrimeBuild.theme.css` from this repository's release assets.
-3. In Discord, open **User Settings → Vencord → Themes → Open Themes Folder**.
-4. Copy the file into that folder and enable **Prime Build — Officina** in the Themes page.
-5. Open the [Prime Build community](https://discord.gg/ERUwSxE79q).
+### Prime Build / Officina
 
-If the file is not listed immediately, refresh the Themes page or restart Discord. The filename must end in `.theme.css`, not `.css.txt`.
+![Officina: hardware artwork in chat and both side panels](assets/officina-preview.png)
 
-No Node.js, build tools, bot, Nitro subscription, server boost, or administrator access is needed to install the theme file. Vencord is a separate prerequisite.
+### Prime Build Dev / Workbench
 
-## Disable or remove
+![Workbench: code editor background, terminal details and Prime Build orange](assets/primebuild-dev-preview.png)
 
-Turn off **Prime Build — Officina** in the Themes page. Your previous appearance returns. Delete or move `PrimeBuild.theme.css` out of the Themes folder to remove it completely.
+### FantaFort / Arena
 
-If a broken style prevents opening settings, fully close Discord, move **only this project's file** out of the Themes folder, and reopen Discord. Instructions for this and optional Vencord removal are in [Installation and removal](docs/INSTALLATION.md).
+![Arena: fantasy league tactics, angular violet panels, cyan and yellow accents](assets/fantafort-preview.png)
 
-## Scope and coverage
+*These previews use the distributed CSS with synthetic content. They are sanitized test fixtures, not community-message screenshots. Actual desktop checks are reported separately.*
 
-The public target server is `1206415718728601600`. The theme requires its server-rail item to be selected within the recognized Discord layout. A link to Prime Build inside a message is not enough to activate it.
+## Quick setup
 
-| Surface | Behavior |
-| --- | --- |
-| Main Prime Build navigation, channel view, messages and composer | Themed |
-| Prime Build member list and user panel | Themed |
-| Common in-view embeds, reactions, quotes and code blocks | Themed; syntax and role/status colors retained |
-| Another server, DMs, Home/Friends | Original appearance |
-| Global user settings, billing, login and security pages | Original appearance |
-| Menus/profile cards/dialogs rendered outside the server view | Original appearance |
-| Detached windows without the recognized server rail | Original appearance |
-| Calls, screen sharing, threads and forum-specific layouts | Limited or not yet live-tested; see compatibility details |
+1. Download and **extract the portable ZIP**. Run `DiscordThemeLauncher.exe` normally, without Administrator privileges.
+2. Select the communities you want to personalize.
+3. If Vencord is missing, explicitly choose **Install official Vencord if it is missing**.
+4. Finish calls/streams, save drafts, and tick the restart checkbox.
+5. Click **Apply & open Discord**.
 
-When the required layout or selection signal is missing, the theme stays off. An incompatible Discord update can therefore make the theme stop appearing instead of making it global.
+The ZIP includes all three small theme files so existing Vencord users can apply their selection offline. The [standalone launcher EXE](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.0-beta.1/DiscordThemeLauncher-0.2.0-beta.1-windows-x64.exe) downloads selected files from its exact release when they are not beside the executable. Both routes check file sizes and SHA-256 hashes embedded in that launcher version.
 
-## Customize
+**Unchecked managed themes are removed.** Other themes, plugins, QuickCSS and unrelated settings are preserved. To remove these designs, deselect all three and apply. To undo an operation, choose **Restore previous setup**. A safety snapshot is retained before restoration too.
 
-The generated CSS has a short customization section near the top, **inside its guarded scope**:
+This beta targets **Windows x64**, standard per-user **stable Discord**, and the default Vencord profile. The launcher bundles .NET, needs no separate runtime, runs only during setup, and adds no service or auto-start task. The ZIP is approximately 45 MiB. No Discord login, token, bot, Nitro, server boost, server permissions, or membership detection is involved. You must already belong to a server to view it.
 
-```css
---pb-accent: #ff6600;
---pb-accent-text: #ff9a57;
---pb-chat: #0d0d0f;
---pb-sidebar: #111113;
---pb-panel: #19191d;
---pb-radius: 6px;
---pb-header-height: 112px;
-```
+## Scope and safety
 
-Edit the local file and save it. Keep the `@scope` condition intact: moving declarations to `:root` or removing the server guard changes the isolation behavior. The original artwork and some orange tints remain part of the Prime Build identity; rebuilding artwork is a maintainer task.
+- Prime Build: `1206415718728601600`.
+- Prime Build Dev: `1537861795090268302`.
+- FantaFort: `1536382143796748389`.
+- Every CSS file has its own selected-server guard. They can be enabled together without competing on the same server.
+- Global settings, billing/security pages, external portals and unsupported detached views keep their stock appearance.
+- The launcher does not join servers, read messages, alter channels/permissions, or send anything to community members.
+- Only the three known theme filenames and their `enabledThemes` entries are managed. Backups store those files and their prior enabled states, not your full settings or credentials.
+- Vencord installation is a separate upstream operation. Its official installer modifies the standard stable client. Theme restoration does not uninstall Vencord.
 
-## Performance and privacy
+Use [Compatibility](docs/COMPATIBILITY.md) for coverage and [Installation](docs/INSTALLATION.md) for defaults, unsupported setups, backups and manual recovery. The launcher refuses elevation, linked profile paths and an obvious unknown client loader; custom installations require the manual route.
 
-The theme contains CSS and embedded artwork. It adds no polling, telemetry, background service, or runtime script. This does **not** imply zero rendering cost or describe the behavior of Vencord or unrelated plugins.
+The executable is **unsigned**. Windows may display a security prompt; review source and release checksums before deciding whether to run it. No security protection is disabled. SHA-256 is an integrity check, not a publisher signature.
 
-Use [Validation](docs/VALIDATION.md) for measured results, the hardware and method used, and untested cases. If you notice stutter, disable the theme first and compare the same view with the same plugins enabled.
+Vencord is an unofficial client modification and [its support page notes the Discord terms implications](https://vencord.dev/support/). Reversible styling does not guarantee account safety. This project is not affiliated with Discord or Vencord. FantaFort is independent and is not endorsed by or affiliated with Epic Games; its theme uses original generic arena/fantasy artwork, not Fortnite game assets.
 
-## Troubleshooting
+## Manual installation
 
-- **Nothing changes:** check the theme toggle, confirm you are in the public Prime Build server, and check the tested Discord layout. Other servers, including similarly named servers, are intentionally excluded.
-- **The header is not visible:** it is part of the channel-list scroller; scroll that list to the top. It is local decoration, not a native server-banner perk.
-- **An area stays standard:** compare it with the coverage table. Portaled menus and account settings deliberately remain outside the theme.
-- **A Discord update breaks the theme:** disable it and [open an issue](https://github.com/PrimeBuild-pc/primebuild-discord-theme/issues) with client/Vencord versions, the affected surface, and a screenshot with private information removed.
-- **Another theme conflicts:** try Officina on its own. Arbitrary combinations of third-party themes are not guaranteed.
+Download only the `.theme.css` files you want from the release, copy them into **User Settings > Vencord > Themes > Open Themes Folder**, and enable them. No launcher or build tools are required for this route. See [Installation and removal](docs/INSTALLATION.md).
 
-Never include account tokens, API keys, private messages, or Vencord cloud credentials in an issue.
+Existing Officina users can keep their current installation or replace `PrimeBuild.theme.css` through the launcher. The repository was renamed from `primebuild-discord-theme`; GitHub redirects its former URL. The original 0.1 beta remains a historical release.
 
 ## Development
 
-The source is `src/PrimeBuild.css`; `npm run build` embeds the original artwork and produces the installable file and checksum. Members download the result; they do not need to build it.
+Themes: Node 22+ and the pinned npm development dependencies. Launcher: .NET 10 SDK; Windows is needed for the native UI and packaging.
 
 ```sh
 npm ci
 npx playwright install chromium
 npm run verify
+dotnet run --project launcher/Tests/Tests.csproj -c Release -- .
 ```
 
-The automated checks audit the CSS boundary, offline assets and size budget, then exercise activation, negative cases, restoration, semantic colors, contrast, and desktop-sized layouts using sanitized fixtures. They are not a replacement for actual Discord desktop checks.
-
-## Important notice
-
-Vencord is an unofficial client modification and [states that using client modifications violates Discord's terms](https://vencord.dev/support/). Simple local rollback is not a guarantee against account restrictions. Prime Build is not affiliated with or endorsed by Discord or Vencord.
+On Windows, run `./scripts/package-windows.ps1` in PowerShell 7 to build the self-contained x64 executable and portable ZIP. CI checks the generated themes, runs browser and installer-core tests, and produces a Windows release artifact. See [Architecture](docs/ARCHITECTURE.md) and [Validation](docs/VALIDATION.md).
 
 ## Maintainer and license
 
-Maintained by [PrimeBuild-pc](https://github.com/PrimeBuild-pc) · [primebuild.website](https://primebuild.website/) · [Community](https://discord.gg/ERUwSxE79q)
+[Prime Build](https://primebuild.website/) | [FantaFort](https://fantafort.com/) | [Issues](https://github.com/PrimeBuild-pc/discord-theme-launcher/issues)
 
-Original theme code and hardware artwork are provided under the [MIT license](LICENSE). The Prime Build name and logo identify this project and its maintainer; the code license does not imply Prime Build's endorsement of modified versions. Logo source: [Prime Build website](https://primebuild.website/). No Zenit Gold code or artwork is included.
+Original code and new vector artwork are provided under [MIT](LICENSE). Prime Build and FantaFort names identify the communities; the license does not imply their endorsement of modified versions. Prime Build logo source: [primebuild.website](https://primebuild.website/). No Zenit Gold code or artwork is included. The portable package includes notices for its bundled .NET runtime and [Noto Sans under SIL OFL 1.1](assets/fonts/OFL.txt). Vencord is downloaded from its official project, not bundled or relicensed here.

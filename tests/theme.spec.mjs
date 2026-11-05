@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
+const catalog = JSON.parse(await readFile(new URL('../catalog.json', import.meta.url), 'utf8'));
 const fixture = new URL('./fixture.html', import.meta.url).href;
 const target = '[data-list-item-id="guildsnav___1206415718728601600"]';
 const theme = fileURLToPath(new URL('../PrimeBuild.theme.css', import.meta.url));
@@ -102,7 +103,7 @@ test('reloading CSS and repeated navigation do not accumulate styles', async ({ 
   }
   await page.reload();
   await expect.poll(() => token(page)).toBe('#ff6600');
-  expect(await page.locator('link[rel="stylesheet"]').count()).toBe(1);
+  expect(await page.locator('link[rel="stylesheet"]').count()).toBe(3);
 });
 
 test('styles parse in Chromium and contain no network-dependent assets', async ({ page }) => {
@@ -134,3 +135,31 @@ test('sanitized preview uses the distributed stylesheet', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 920 });
   await page.screenshot({ path: 'test-results/officina-preview.png', fullPage: true });
 });
+
+for (const profile of catalog.themes) {
+  test(profile.server + ': distinct background on every panel, isolated selection and preview', async ({page}) => {
+    await page.locator('[data-list-item-id="guildsnav___'+profile.guild+'"]').click();
+    const root = page.locator('.base__5e434');
+    expect(await root.evaluate(el=>getComputedStyle(el).getPropertyValue('--pb-profile').trim())).toBe('"'+profile.id+'"');
+    for (const selector of ['.chatContent_f75fb0','.sidebarList__5e434','.membersWrap_c8ffbb']) {
+      expect(await page.locator(selector).evaluate(el=>getComputedStyle(el).backgroundImage)).toContain('data:image/svg+xml;base64,');
+    }
+    // Observed current Discord forum container gets the same server-specific main-panel artwork.
+    await page.locator('.chatContent_f75fb0').evaluate(el => el.classList.replace('chatContent_f75fb0','container_f369db'));
+    expect(await page.locator('.container_f369db').evaluate(el=>getComputedStyle(el).backgroundImage)).toContain('data:image/svg+xml;base64,');
+    await page.locator('.container_f369db').evaluate(el => el.classList.replace('container_f369db','chatContent_f75fb0'));
+    const pairs = await page.locator('.scrollableContainer__74017').evaluate(el=>({border:getComputedStyle(el).borderTopColor,surface:getComputedStyle(el).backgroundColor,text:getComputedStyle(document.querySelector('.markup__75297')).color,chat:getComputedStyle(document.querySelector('.chatContent_f75fb0')).backgroundColor}));
+    const lum = c => c.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0);
+    const ratio = (a,b) => { const v=[lum(a),lum(b)].sort((a,b)=>b-a);return (v[0]+.05)/(v[1]+.05); };
+    expect(ratio(pairs.text,pairs.chat)).toBeGreaterThanOrEqual(4.5);
+    expect(ratio(pairs.border,pairs.surface)).toBeGreaterThanOrEqual(3);
+    await expect(page.locator('.guilds__5e434')).toHaveCSS('background-color','rgb(30, 31, 34)');
+    await page.setViewportSize({width:1440,height:920});
+    const name = profile.id === 'primebuild' ? 'officina' : profile.id;
+    await page.screenshot({path:'test-results/'+name+'-preview.png',fullPage:true});
+    await page.locator('[data-list-item-id="guildsnav___other"]').click();
+    expect(await root.evaluate(el=>getComputedStyle(el).getPropertyValue('--pb-profile').trim())).toBe('');
+    await page.locator('[data-list-item-id="guildsnav___home"]').click();
+    expect(await token(page)).toBe('');
+  });
+}

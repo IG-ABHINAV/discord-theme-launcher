@@ -1,0 +1,5 @@
+[
+  {"id":"primebuild","guild":"1206415718728601600","name":"Prime Build — Officina","server":"Prime Build","file":"PrimeBuild.theme.css","accent":"#ff6600","accentText":"#ffac73","rgb":"255 102 0","chat":"#101013","sidebar":"#141417","panel":"#202024","raised":"#29292e","border":"#424249","muted":"#b6b6c0","tagline":"Hardware, precision, performance.","caption":"HARDWARE LAB / 01"},
+  {"id":"primebuild-dev","guild":"1537861795090268302","name":"Prime Build Dev — Workbench","server":"Prime Build · Dev","file":"PrimeBuildDev.theme.css","accent":"#ff782e","accentText":"#ffb486","rgb":"255 120 46","chat":"#10131b","sidebar":"#121721","panel":"#202631","raised":"#293341","border":"#444e5e","muted":"#b2bfce","tagline":"Commit. Build. Ship.","caption":"DEVELOPER WORKSPACE / 02"},
+  {"id":"fantafort","guild":"1536382143796748389","name":"FantaFort — Arena","server":"FantaFort","file":"FantaFort.theme.css","accent":"#f5db36","accentText":"#ffe985","rgb":"245 219 54","chat":"#10172b","sidebar":"#141b37","panel":"#202b49","raised":"#2b395c","border":"#4b5f83","muted":"#b7c8e5","tagline":"Draft your roster. Own the arena.","caption":"FANTASY LEAGUE / 03"}
+]

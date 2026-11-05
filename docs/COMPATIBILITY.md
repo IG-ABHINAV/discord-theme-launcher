@@ -1,66 +1,49 @@
-# Compatibility and scope
+# Compatibility and coverage
 
-## Architecture decision
+## Independent selected-server scopes
 
-Officina uses the **official Vencord build plus one CSS file**. A custom plugin was evaluated as a possible architecture, but is not required for the first release: the current interface exposes the selected server through a server-rail item with both a guild-specific `data-list-item-id` and `aria-selected="true"`.
-
-The active guard is anchored to Discord's recognized `.base__5e434` layout and its server navigation subtree. All declarations, custom properties, pseudo-elements, and scrollbar changes live inside one CSS `@scope` block. No rule is promoted to `body` or `:root`.
-
-The guard also rejects a hidden/ARIA-hidden rail and a rail with an ambiguous selection. It does not activate just because a target icon, channel link, mention, message, or voice connection exists somewhere in the page.
-
-The exact layout anchor is deliberate: after an incompatible structural update, styling should fail closed. Updating the theme may be needed even if some selectors could still render correctly.
-
-## Target
-
-- Public server: **Prime Build**, guild `1206415718728601600`.
-- First tested platform: Windows Discord desktop, official Vencord.
-- The similarly named development server is not included in the guard and was not used for theme testing.
-- Browser and mobile installations are outside first-release support. Automated browser fixtures are development tools, not a claim of product support for Discord Web.
-
-Exact tested client and environment details are in [Validation](VALIDATION.md).
-
-## Coverage
-
-| Area | Coverage |
+| Theme | Exact server ID |
 | --- | --- |
-| Server navigation, header and channel rows | Implemented |
-| Selected, hover, muted and unread channel treatment | Implemented; preserve native state distinctions |
-| Message area, mentions, links, reply styling and dividers | Implemented |
-| Composer, focus, attachment/reply surfaces | Implemented; some less common states require further live testing |
-| Common in-view embeds and reaction containers | Implemented |
-| Code blocks and quotes | Implemented; preserve syntax colors |
-| Member list and user panel | Implemented; preserve inline role and presence colors |
-| Top bar, common surfaces, scrollbars | Implemented within the recognized Prime Build view |
-| Search/thread/forum-specific surfaces | May inherit scoped surface tokens; not all layouts live-tested |
-| Voice/video and screen-sharing views | May inherit scoped tokens; no calls or streams were started as test traffic |
-| Portaled menus, profile cards and dialogs outside the base view | Stock appearance |
-| Global user/account settings, billing, login and security | Stock appearance |
-| Other servers, Home/Friends and DMs | Stock appearance |
-| Detached windows without the recognized selected-server rail | Stock appearance |
-| Game overlay | Outside the theme's target scope |
+| Prime Build / Officina | `1206415718728601600` |
+| Prime Build Dev / Workbench | `1537861795090268302` |
+| FantaFort / Arena | `1536382143796748389` |
 
-This is a detailed visual theme for the supported server view, not a promise to repaint every possible Discord window.
+Each generated file wraps all rules and custom properties in one native CSS `@scope`. The guard requires the matching selected server-rail item within the recognized `.base__5e434` layout. It rejects hidden/ARIA-hidden rails, missing selection and ambiguous selection. Merely having a server icon or message link is insufficient.
 
-## Why no companion plugin?
+The three CSS files can be enabled together. Only one matching server scope activates. Other servers, Home/DM contexts and global settings remain outside those scopes. Exact layout anchoring is intentional: incompatible Discord updates should make a theme stay off rather than turn global. It still needs maintenance as Discord changes.
 
-A small event-driven plugin could expose more precise context for external windows and portals. However, [Vencord currently requires source builds for custom plugins](https://docs.vencord.dev/installing/custom-plugins/). That would increase installation and maintenance work for every member using the advanced path.
+## Visual coverage
 
-The current CSS path satisfies basic server isolation and main-view coverage. Keep external contexts stock rather than accepting that distribution cost for decorative consistency alone. Revisit a companion if a concrete, useful coverage requirement cannot be met safely in CSS.
+| Surface | Behavior |
+| --- | --- |
+| Normal server text-channel chat | Theme-specific embedded background, coordinated dark surfaces |
+| Channel panel | Dedicated background, branded header, category separators and channel states |
+| Members panel | Dedicated background, retained role/presence colors |
+| Composer, headers, common cards, reactions, links, mentions and code blocks | Coordinated within the selected server scope |
+| Server icon rail | No dedicated redesign; inherited scoped tokens may affect some native accents |
+| Home/Friends, other servers, global account settings | Stock appearance |
+| Portaled menus/profile cards/dialogs outside the base view | Stock appearance |
+| Detached windows without the recognized server rail | Stock appearance |
+| Forum, thread, search, attachment, reply and rare error layouts | Partial inherited styling; not exhaustive live coverage |
+| Voice/video/screen sharing | Not live-tested by starting calls/streams |
+| Overlay, mobile, macOS, Linux and Discord Web installation | Outside first-release support |
 
-## Other themes and settings
+The theme does not add or rename channels, change descriptions, grant permissions, replace member names or insert messages. Background code/arena text is decorative artwork, not a status indicator or community announcement. Channel-list headers are local decoration rather than Discord's native boosted-server banner.
 
-The theme does not change Discord's stored theme preference, font scale, account settings, or another theme's files. It styles the supported Prime Build view as a dark design regardless of the user's normal palette, and releases that scope on navigation away.
+## Launcher support
 
-Arbitrary third-party theme combinations have not been exhaustively tested. If there is a conflict, compare Officina on its own and record the other theme's name and version in a bug report.
+Automatic setup: Windows x64, per-user stable Discord, standard Vencord folder, normal privileges. The installer operation uses official Vencord CLI v1.4.2 with a pinned binary digest. It can still require manual assistance if Discord's installation layout changes or upstream services are unavailable.
+
+Store, PTB, Canary, custom Vencord profiles, obvious unknown loaders and linked profile folders are not automatically modified. Use the manual route in [Installation](INSTALLATION.md). Full Windows 10, clean-machine and low-end hardware coverage is still pending; see [Validation](VALIDATION.md).
+
+## Performance and accessibility
+
+All decorative images are static SVG data embedded in the CSS. No theme JavaScript, polling, remote font/image imports, full-window blur or continuous animation is added. The launcher exits when closed and adds no resident process to Discord. Static backgrounds and CSS relational selectors still have rendering cost.
+
+Tested text/input contrast pairs and desktop fixture widths are recorded in Validation. Scaling, high contrast, large text and other third-party theme combinations need wider testing. If a conflict appears, compare with these themes disabled and preserve the server guard when investigating.
 
 ## Maintenance
 
-After a Discord layout update:
+After a Discord update, inspect the selected-server marker and panel hierarchy in the actual client, update sanitized fixtures only from structural observations, rerun negative isolation cases, verify all three servers, and publish CSS/catalog/checksums together. Never remove the guard as a quick fix.
 
-1. Check the selected-server marker and layout ancestry in the actual client.
-2. Re-run negative scope cases before updating any anchor.
-3. Update the sanitized fixture only from observed UI structure, without copying community messages or account data.
-4. Run `npm run verify`, perform the desktop checks, and record the new tested versions.
-5. Rebuild and publish the CSS and matching checksum together.
-
-Do not fix a missing theme by removing its server guard or adding a global fallback.
+A companion plugin is still unnecessary for supported views. [Vencord custom plugins require source builds](https://docs.vencord.dev/installing/custom-plugins/), which would make installation harder for members. External portals remain stock instead of introducing that dependency.
