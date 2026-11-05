@@ -38,7 +38,7 @@ internal sealed class DiscordClient
 
     public async Task StopAsync()
     {
-        // Explicitly authorized by Apply & open Discord plus the calls/drafts checkbox.
+        // Caller must obtain explicit application/restart confirmation before reaching this operation.
         // Match executable paths, not merely a process name; do not stop PTB/Canary/other users' clients.
         foreach (var process in Process.GetProcessesByName("Discord"))
         {

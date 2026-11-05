@@ -35,6 +35,12 @@ Vencord CLI **1.4.2** is pinned to its official release asset and SHA-256 `15268
 
 The launcher has no account login, membership discovery, Discord token access, telemetry endpoint, auto-start, service, browser injection, or background polling. Ordinary GitHub requests still expose normal request metadata to the hosting provider.
 
+## Preview-to-apply confirmation in beta 4
+
+The main editor always previews changes. Apply availability depends on valid/latest preview and operation state; runtime/setup problems are shown in the overlay instead of an unexplained non-applicable mode. Requesting application is read-only. `OperationConfirmation` captures operation, revision, immutable configuration, setup requirement and problem state under a single-use ID. The host accepts only the exact current confirmation, clears it before execution, and revalidates the runtime. A late setup requirement cannot reuse consent that was not requested. Vencord installation remains an explicit unchecked opt-in in the overlay. Cancel/Esc and stale messages perform no transaction.
+
+The old `--preview` flag now opens the normal confirmation workflow. `--safe-preview` and `BuilderForm(true)` are development-only simulations: confirmation exercises the real UI/host gate but never downloads, saves the last document, changes Discord/Vencord or stops processes. Tests use that path; no live-client application is claimed.
+
 ## Launcher presentation
 
 Version 0.3 beta 2 replaces the long native form with Theme Studio: a bundled offline editor in `launcher/Windows/ui`, served by `StudioSurface`. It has Server, Style, Artwork and Recovery sections, explicit preview-context status, real artwork thumbnails, a visible composer and a fixed apply/restart footer. The host preserves file operations and setup transactions; source-checked, bounded messages carry edit values and named actions. Native file dialogs never accept paths from the page. The editor uses embedded Noto Sans with installed gg sans preferred, classic Discord dark surfaces and the official blurple accent. It identifies itself as an independent Prime Build tool.

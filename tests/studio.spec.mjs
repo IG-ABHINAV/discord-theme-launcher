@@ -20,7 +20,8 @@ async function studio(page){
   });
   await page.addInitScript(()=>{
     let listener,revision=0;
-    const state={type:'state',values:{name:'Your community',guild:'987654321012345678',preset:'primebuild',palette:'primebuild',accent:'#ff6600',surface:'#101013',font:'primebuild',banner:'primebuild',background:'primebuild'},assets:{},dirty:false,saved:false,acknowledged:false,install:false,busy:false,previewMode:true,version:'0.3.0-beta.3',notice:'Preview mode · Discord is never changed.',validation:'',previewId:'1',previewUri:'https://theme-preview.invalid/preview?revision=1',canApply:false,applyReason:'Preview mode cannot apply themes. Close this window and open the EXE normally.',applyAction:'',applyActionLabel:'',canDisable:false,canRestore:false,canInstall:false,installation:'Discord + Vencord ready.'};
+    const state={type:'state',values:{name:'Your community',guild:'987654321012345678',preset:'primebuild',palette:'primebuild',accent:'#ff6600',surface:'#101013',font:'primebuild',banner:'primebuild',background:'primebuild'},assets:{},dirty:false,saved:false,busy:false,version:'0.3.0-beta.4',notice:'Everything stays in preview until you confirm Apply.',validation:'',previewId:'1',previewUri:'https://theme-preview.invalid/preview?revision=1',canApply:true,applyReason:'',applyAction:'',applyActionLabel:'',canDisable:false,canRestore:false,confirmation:null,installation:'Discord + Vencord ready.'};
+    window.testSetupRequired=false;window.testConfirmationProblem='';
     window.patchTestState=patch=>{Object.assign(state,patch);listener?.({data:structuredClone(state)})};
     window.testMessages=[];
     window.chrome={webview:{addEventListener:(_,callback)=>listener=callback,postMessage:message=>{
@@ -28,7 +29,9 @@ async function studio(page){
       if(message.action==='edit')state.values=message.values;
       if(message.action==='preset'){for(const field of['preset','font','palette','banner','background'])state.values[field]=message.value;}
       if(['edit','preset','refresh'].includes(message.action)){state.previewId=String(++revision+1);state.previewUri='https://theme-preview.invalid/preview?revision='+state.previewId+'&preset='+state.values.preset;state.dirty=true;}
-      if(message.action==='acknowledge')state.acknowledged=message.ready;
+      if(['apply','disable','restore'].includes(message.action))state.confirmation={id:'confirmation-'+(++revision),operation:message.action,themeName:state.values.name,guild:state.values.guild,serverName:'Selected server',requiresSetup:window.testSetupRequired,repair:false,problem:window.testConfirmationProblem};
+      if(message.action==='cancelConfirmation'&&message.id===state.confirmation?.id)state.confirmation=null;
+      if(message.action==='confirmOperation'&&message.id===state.confirmation?.id&&!state.confirmation.problem&&(!state.confirmation.requiresSetup||message.allowSetup)){state.confirmation=null;state.notice='Theme applied in the test fixture.'}
       if(message.action==='previewReady'&&message.id!==state.previewId)return;
       queueMicrotask(()=>listener?.({data:structuredClone(state)}));
     }}};
@@ -39,38 +42,70 @@ async function studio(page){
   return requests;
 }
 
-test('disabled Apply explains the missing requirement beside the button',async({page})=>{
+test('editing starts in preview and Apply opens a confirmation without applying',async({page})=>{
   await studio(page);
-  await expect(page.locator('#apply')).toBeDisabled();
-  await expect(page.locator('#apply-reason')).toContainText('Preview mode', {timeout:2000});
-});
-
-test('missing Vencord has a visible setup explanation and opens Recovery',async({page})=>{
-  await studio(page);
-  await page.evaluate(()=>window.patchTestState({previewMode:false,applyReason:'Vencord is required. In Recovery, enable official Vencord installation, or install it manually first.',applyAction:'recovery',applyActionLabel:'Set up Vencord',canInstall:true}));
-  await expect(page.locator('#apply-reason')).toContainText('Vencord is required');
-  await page.getByRole('button',{name:'Set up Vencord',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Your installation',exact:true})).toBeVisible();
-  await expect(page.locator('#install')).toBeEnabled();
-});
-
-test('missing restart acknowledgement points to the checkbox without checking it automatically',async({page})=>{
-  await studio(page);
-  await page.evaluate(()=>window.patchTestState({previewMode:false,applyReason:'Finish calls and save drafts, then tick the restart checkbox to enable Apply.',applyAction:'restart',applyActionLabel:'Restart checkbox'}));
-  await page.getByRole('button',{name:'Restart checkbox',exact:true}).click();
-  await expect(page.locator('#restart-ready')).toBeFocused();
-  await expect(page.locator('#restart-ready')).not.toBeChecked();
-  await expect(page.locator('#apply')).toBeDisabled();
-});
-
-test('native ready state enables Apply and removes stale setup guidance',async({page})=>{
-  await studio(page);
-  await page.evaluate(()=>window.patchTestState({previewMode:false,canApply:true,acknowledged:true,applyReason:'',applyAction:''}));
+  await expect(page.locator('#mode-badge')).toHaveText('Preview');
+  await expect(page.locator('#restart-ready')).toHaveCount(0);
   await expect(page.locator('#apply')).toBeEnabled();
-  await expect(page.locator('#apply-reason')).toBeHidden();
-  await expect(page.locator('#apply-help')).toBeHidden();
   await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
-  expect(await page.evaluate(()=>window.testMessages.at(-1).action)).toBe('apply');
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.locator('#confirmation-theme')).toHaveText('Your community');
+  await expect(page.locator('#confirmation-guild')).toHaveText('987654321012345678');
+  await expect(page.locator('#confirmation-cancel')).toBeFocused();
+  expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='confirmOperation'))).toBe(false);
+  await page.screenshot({path:'.local/studio-confirmation-preview.png'});
+});
+
+test('Back to preview and Escape cancel without sending application confirmation',async({page})=>{
+  await studio(page);
+  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await page.getByRole('button',{name:'Back to preview',exact:true}).click();
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect(page.getByLabel('Theme name',{exact:true})).toHaveValue('Your community');
+  expect(await page.evaluate(()=>window.testMessages.filter(m=>m.action==='confirmOperation').length)).toBe(0);
+});
+
+test('Continue and apply confirms the reviewed operation once',async({page})=>{
+  await studio(page);
+  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await page.getByRole('button',{name:'Continue & apply',exact:true}).click();
+  await expect(page.getByRole('dialog')).toBeHidden();
+  const confirmations=await page.evaluate(()=>window.testMessages.filter(m=>m.action==='confirmOperation'));
+  expect(confirmations).toHaveLength(1);expect(confirmations[0].id).toMatch(/^confirmation-/);expect(confirmations[0].allowSetup).toBe(false);
+});
+
+test('first-time Vencord setup is offered inside the confirmation and requires consent',async({page})=>{
+  await studio(page);await page.evaluate(()=>window.testSetupRequired=true);
+  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await expect(page.locator('#confirmation-install')).not.toBeChecked();
+  await expect(page.getByRole('button',{name:'Continue & apply',exact:true})).toBeDisabled();
+  await page.getByLabel('Install official Vencord for stable Discord',{exact:true}).check();
+  await page.getByRole('button',{name:'Continue & apply',exact:true}).click();
+  expect(await page.evaluate(()=>window.testMessages.find(m=>m.action==='confirmOperation').allowSetup)).toBe(true);
+});
+
+test('unsupported installation is explained inside confirmation and cannot continue',async({page})=>{
+  await studio(page);await page.evaluate(()=>window.testConfirmationProblem='Install the standard Discord desktop client first.');
+  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await expect(page.locator('#confirmation-problem')).toContainText('standard Discord');
+  await expect(page.getByRole('button',{name:'Continue & apply',exact:true})).toBeDisabled();
+  await page.getByRole('button',{name:'Back to preview',exact:true}).click();
+  expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='confirmOperation'))).toBe(false);
+});
+
+test('Recovery disable and restore also require a reviewed confirmation',async({page})=>{
+  await studio(page);await page.evaluate(()=>window.patchTestState({canDisable:true,canRestore:true}));
+  await page.getByRole('button',{name:'Recovery',exact:true}).click();
+  await page.getByRole('button',{name:'Disable personal theme',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Disable your personal theme?',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Back to preview',exact:true}).click();
+  await page.getByRole('button',{name:'Restore previous setup',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Restore the previous setup?',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Continue & restore',exact:true}).click();
+  expect(await page.evaluate(()=>window.testMessages.filter(m=>m.action==='confirmOperation').length)).toBe(1);
 });
 
 test('studio loads real artwork and readable controls without external dependencies',async({page})=>{
@@ -115,14 +150,14 @@ for(const viewport of[{width:1040,height:720},{width:1365,height:900},{width:192
   expect(await page.locator('#banner-cards img').evaluateAll(images=>images.every(image=>image.complete&&image.naturalWidth>0))).toBe(true);
 });
 
-test('preview mode stays non-mutating and edit values flush before saving',async({page})=>{
+test('editing and save actions remain previews until the explicit application confirmation',async({page})=>{
   await studio(page);
   await page.getByLabel('Theme name',{exact:true}).fill('My custom name');
   await page.getByRole('button',{name:'Save',exact:true}).click();
   const actions=await page.evaluate(()=>window.testMessages.map(message=>message.action));
   expect(actions.lastIndexOf('edit')).toBeLessThan(actions.lastIndexOf('save'));
-  await page.getByLabel('Calls finished, drafts saved. Discord may restart.').check();
-  await expect(page.locator('#apply')).toBeDisabled();
-  await page.getByRole('button',{name:'Recovery',exact:true}).click();
-  await expect(page.locator('#disable')).toBeDisabled();await expect(page.locator('#restore')).toBeDisabled();
+  expect(actions).not.toContain('confirmOperation');
+  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await expect(page.locator('#confirmation-theme')).toHaveText('My custom name');
+  await page.getByRole('button',{name:'Back to preview',exact:true}).click();
 });

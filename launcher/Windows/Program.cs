@@ -14,7 +14,9 @@ internal static class Program
         using var typography = new LauncherStyle.Typography();
         using var instance = new Mutex(true, "Local\\PrimeBuild.DiscordThemeLauncher." + System.Security.Principal.WindowsIdentity.GetCurrent().User!.Value, out bool first);
         if (!first) { LauncherStyle.ShowMessage(null, "The launcher is already open for this Windows user.", "Discord Theme Launcher"); return; }
-        Application.Run(new BuilderForm(args.Contains("--preview")));
+        // Normal editing is always a preview until the in-app confirmation is accepted.
+        // --preview remains a compatible way to open that workflow; --safe-preview is for non-mutating QA.
+        Application.Run(new BuilderForm(args.Contains("--safe-preview")));
     }
 }
 

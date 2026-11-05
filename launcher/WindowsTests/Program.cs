@@ -23,25 +23,20 @@ internal static class Program
             try { action(); } catch (Exception e) when (e is InvalidDataException or ArgumentException or ExternalException) { rejected = true; }
             Check(rejected, label);
         }
-        var readyToApply = new ApplyPrerequisites(false, false, false, true, "", true, true, true, false, false, true);
-        Check(ApplyReadiness.Evaluate(readyToApply).CanApply, "valid configuration, client and restart acknowledgement enable Apply");
-        foreach (var (context, expected) in new[] {
-            (readyToApply with { PreviewMode = true }, "Preview mode"),
-            (readyToApply with { Busy = true }, "operation is running"),
-            (readyToApply with { Elevated = true }, "without Administrator"),
-            (readyToApply with { ProfileHealthy = false }, "settings could not be read"),
-            (readyToApply with { Validation = "Select a valid server." }, "Select a valid server."),
-            (readyToApply with { PreviewReady = false }, "preview to finish loading"),
-            (readyToApply with { DiscordFound = false }, "Discord desktop was not found"),
-            (readyToApply with { VencordReady = false }, "Vencord is required"),
-            (readyToApply with { VencordReady = false, NeedsRepair = true }, "Vencord needs repair"),
-            (readyToApply with { Acknowledged = false }, "tick the restart checkbox") })
-        {
-            var result = ApplyReadiness.Evaluate(context);
-            Check(!result.CanApply && result.Reason.Contains(expected, StringComparison.Ordinal), "disabled Apply explains: " + expected);
-        }
-        Check(ApplyReadiness.Evaluate(readyToApply with { VencordReady = false, InstallRequested = true }).CanApply, "explicit Vencord setup consent allows first-time Apply");
-        Check(ApplyReadiness.Evaluate(readyToApply with { VencordReady = false, InstallRequested = true, Acknowledged = false }).Action == "restart", "after Vencord consent the next requirement is the restart checkbox");
+        Check(ApplyReadiness.Evaluate(false, "", true).CanApply, "a valid preview can open confirmation without a separate mode or restart checkbox");
+        Check(!ApplyReadiness.Evaluate(true, "", true).CanApply, "busy operation prevents another confirmation");
+        Check(!ApplyReadiness.Evaluate(false, "Invalid target", true).CanApply, "invalid configuration cannot be confirmed");
+        Check(!ApplyReadiness.Evaluate(false, "", false).CanApply, "unloaded preview cannot be confirmed");
+        var reviewed = new ThemeConfiguration { Name = "Reviewed theme" };
+        OperationConfirmation? pending = OperationConfirmation.Create("apply", 3, reviewed, false, false, "");
+        var token = pending.Id;
+        Check(!OperationConfirmation.TryTake(ref pending, "wrong-token", 3, out _) && pending is not null, "wrong confirmation token cannot consume the reviewed operation");
+        Check(OperationConfirmation.TryTake(ref pending, token, 3, out var approved) && approved!.Configuration == reviewed && pending is null, "confirmation consumes the exact reviewed configuration");
+        Check(!OperationConfirmation.TryTake(ref pending, token, 3, out _), "confirmation cannot be replayed");
+        pending = OperationConfirmation.Create("apply", 3, reviewed, false, false, ""); token = pending.Id;
+        Check(!OperationConfirmation.TryTake(ref pending, token, 4, out _) && pending is null, "editing after review expires the confirmation");
+        pending = OperationConfirmation.Create("apply", 3, reviewed, false, false, "Unsupported client"); token = pending.Id;
+        Check(!OperationConfirmation.TryTake(ref pending, token, 3, out _), "unsupported installation cannot pass confirmation");
         var fixture = Path.Combine(Path.GetTempPath(), "ThemeLauncher-WindowsTests-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(fixture);
         form.Shown += async (_, _) =>
         {
@@ -94,8 +89,47 @@ internal static class Program
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!studio.Ready) await Task.Delay(100, timeout.Token);
                 var studioCore = studio.Controls.OfType<WebView2>().Single().CoreWebView2;
-                Check(await studioCore.ExecuteScriptAsync("document.getElementById('apply').disabled && document.getElementById('disable').disabled && document.getElementById('restore').disabled") == "true", "preview mode disables all Discord mutations in the shipped studio");
-                Check(await studioCore.ExecuteScriptAsync("document.getElementById('apply-reason').textContent.includes('Preview mode') && document.getElementById('apply').getAttribute('aria-describedby')==='apply-reason'") == "true", "actual native studio explains disabled Apply beside the accessible button");
+                async Task StudioState(string predicate)
+                {
+                    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                    while (await studioCore.ExecuteScriptAsync(predicate) != "true") await Task.Delay(50, timeout.Token);
+                }
+                var capturePath = Path.GetFullPath(Path.Combine(".local", "studio-native-preview.png")); Directory.CreateDirectory(Path.GetDirectoryName(capturePath)!);
+                await using (var capture = File.Create(capturePath)) await studioCore.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, capture);
+                foreach (var page in new[] { "style", "art" })
+                {
+                    await studioCore.ExecuteScriptAsync("document.querySelector('[data-page=\"" + page + "\"]').click()");
+                    await Task.Delay(75);
+                    await using var capture = File.Create(Path.GetFullPath(Path.Combine(".local", "studio-native-" + page + ".png")));
+                    await studioCore.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, capture);
+                }
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-page=\"server\"]').click()");
+                Check(await studioCore.ExecuteScriptAsync("!document.getElementById('apply').disabled && !document.getElementById('restart-ready') && document.getElementById('mode-badge').textContent==='Preview'") == "true", "normal preview exposes Apply without a separate restart checkbox");
+                await studioCore.ExecuteScriptAsync("document.getElementById('apply').click()");
+                await StudioState("document.getElementById('operation-confirmation').open");
+                Check(builder.SimulatedOperations == 0 && await studioCore.ExecuteScriptAsync("document.getElementById('confirmation-guild').textContent==='987654321012345678'") == "true", "Apply opens an exact-target confirmation before any operation");
+                Directory.CreateDirectory(Path.GetFullPath(".local"));
+                await using (var capture = File.Create(Path.GetFullPath(Path.Combine(".local", "studio-native-confirmation.png")))) await studioCore.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, capture);
+                await studioCore.ExecuteScriptAsync("document.getElementById('confirmation-cancel').click()");
+                await StudioState("!document.getElementById('operation-confirmation').open");
+                Check(builder.SimulatedOperations == 0, "Back to preview performs no operation");
+                await studioCore.ExecuteScriptAsync("document.getElementById('apply').click()");
+                await StudioState("document.getElementById('operation-confirmation').open");
+                var approvedId = await studioCore.ExecuteScriptAsync("state.confirmation.id");
+                await studioCore.ExecuteScriptAsync("document.getElementById('confirmation-continue').click()");
+                await StudioState("!document.getElementById('operation-confirmation').open && document.getElementById('notice').textContent.includes('Simulation complete')");
+                Check(builder.SimulatedOperations == 1, "Continue and apply runs exactly one safe simulation through the real native flow");
+                await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'confirmOperation',id:" + approvedId + ",allowSetup:false})");
+                Check(builder.SimulatedOperations == 1, "replayed UI confirmation cannot repeat the operation");
+                await studioCore.ExecuteScriptAsync("document.getElementById('apply').click()");
+                await StudioState("document.getElementById('operation-confirmation').open");
+                var expiredId = await studioCore.ExecuteScriptAsync("state.confirmation.id");
+                await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'edit',values:{...state.values,name:'Changed after review'}})");
+                await StudioState("!document.getElementById('operation-confirmation').open && state.values.name==='Changed after review'");
+                await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'confirmOperation',id:" + expiredId + ",allowSetup:false})");
+                Check(builder.SimulatedOperations == 1, "late edits invalidate the native confirmation snapshot");
+                await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'edit',values:{...state.values,name:'Your community'}})");
+                await StudioState("state.values.name==='Your community' && !document.getElementById('apply').disabled");
                 Check(await studioCore.ExecuteScriptAsync("document.querySelector('label[for=guild]').textContent.includes('Server ID') && document.querySelectorAll('[data-preset]').length===3") == "true", "studio exposes labeled server selection and three coordinated presets");
                 Check(await studioCore.ExecuteScriptAsync("[...document.querySelectorAll('.preset-card img')].every(image=>image.complete&&image.naturalWidth>0)") == "true", "actual native studio loads all bundled preset artwork");
                 await studioCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"fantafort\"]').click()");
@@ -131,15 +165,6 @@ internal static class Program
                 await studioCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"primebuild\"]').click()");
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!studio.Ready || await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") != "\"#ff6600\"") await Task.Delay(100, timeout.Token);
-                var capturePath = Path.GetFullPath(Path.Combine(".local", "studio-native-preview.png")); Directory.CreateDirectory(Path.GetDirectoryName(capturePath)!);
-                await using (var capture = File.Create(capturePath)) await studioCore.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, capture);
-                foreach (var page in new[] { "style", "art" })
-                {
-                    await studioCore.ExecuteScriptAsync("document.querySelector('[data-page=\"" + page + "\"]').click()");
-                    await Task.Delay(75);
-                    await using var capture = File.Create(Path.GetFullPath(Path.Combine(".local", "studio-native-" + page + ".png")));
-                    await studioCore.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, capture);
-                }
                 // Edits made by this test are synthetic; do not open the user's unsaved-edits dialog on disposal.
                 builder.Hide();
                 Console.WriteLine($"{checks} Windows checks passed. Fixture: {fixture}");

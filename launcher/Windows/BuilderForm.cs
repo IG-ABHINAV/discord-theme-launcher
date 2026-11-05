@@ -9,29 +9,31 @@ internal sealed record StudioValues(string Name, string Guild, string Preset, st
 
 internal sealed class BuilderForm : Form
 {
-    private readonly bool previewMode;
+    private readonly bool dryRun;
     private readonly DiscordClient client = new();
     private readonly ThemeStore store;
     private readonly StudioSurface surface = new();
     private ThemeConfiguration configuration = new();
     private int revision, renderedRevision = -1;
-    private bool busy, dirty, acknowledged, install, saved;
+    private bool busy, dirty, saved;
+    private OperationConfirmation? confirmation;
+    internal int SimulatedOperations { get; private set; }
     private string? documentPath;
     private string notice = "Design here. Preview here. Apply when you're ready.", validation = "";
     private string DraftPath => Path.Combine(client.StateRoot, "last-configuration.dtheme");
 
-    public BuilderForm(bool preview)
+    public BuilderForm(bool safePreview)
     {
-        previewMode = preview;
+        dryRun = safePreview;
         store = new ThemeStore(client.VencordRoot, client.StateRoot, ThemeCompiler.BundledCatalog);
         BackColor = LauncherStyle.Surface; ForeColor = LauncherStyle.Text; Font = LauncherStyle.Font(); AutoScaleMode = AutoScaleMode.Dpi;
-        Text = "Theme Studio · Discord Theme Launcher — " + ThemeCompiler.BundledCatalog.Version + (preview ? " · Preview" : "");
+        Text = "Theme Studio · Discord Theme Launcher — " + ThemeCompiler.BundledCatalog.Version;
         ClientSize = new Size(1420, 900); MinimumSize = new Size(1020, 700); StartPosition = FormStartPosition.CenterScreen;
         Controls.Add(surface);
         surface.Loaded += Publish;
         surface.MessageReceived += async message => await HandleMessageAsync(message);
         surface.RuntimeUnavailable += ShowRuntimeFallback;
-        if (preview) configuration = new ThemeConfiguration { Name = "Your community", Guild = "987654321012345678" };
+        if (dryRun) configuration = new ThemeConfiguration { Name = "Your community", Guild = "987654321012345678" };
         else if (File.Exists(DraftPath))
         {
             try { var draft = ThemeConfiguration.Load(DraftPath); AssetImport.ValidateImages(draft); configuration = draft; saved = true; }
@@ -68,7 +70,7 @@ internal sealed class BuilderForm : Form
         }
         surface.Controls.Add(actions); actions.BringToFront();
     }
-    private void Changed() { revision++; dirty = true; RenderPreview(); }
+    private void Changed() { confirmation = null; revision++; dirty = true; RenderPreview(); }
     private void RenderPreview()
     {
         try { var value = ReadConfiguration(); validation = ""; renderedRevision = revision; surface.Render(value); }
@@ -77,19 +79,20 @@ internal sealed class BuilderForm : Form
     }
     private void Publish()
     {
-        bool canDisable = false, canRestore = false, healthy = true;
-        try { if (!previewMode && !DiscordClient.Elevated) { canDisable = store.PersonalEnabled; canRestore = store.CanRestore; } }
-        catch { healthy = false; notice = "The Vencord profile could not be read. Check the manual recovery guide."; }
+        bool canDisable = false, canRestore = false;
+        try { if (!dryRun) { canDisable = store.PersonalEnabled; canRestore = store.CanRestore; } }
+        catch { notice = "The Vencord profile could not be read. Check the manual recovery guide."; }
         var patched = client.Patched;
-        var readiness = ApplyReadiness.Evaluate(new ApplyPrerequisites(previewMode, busy, DiscordClient.Elevated, healthy,
-            validation, renderedRevision == revision && surface.Ready, client.Found, patched, client.NeedsRepair, install, acknowledged));
+        var readiness = ApplyReadiness.Evaluate(busy, validation, renderedRevision == revision && surface.Ready);
         surface.Publish(new { type = "state", values = StudioValues.From(configuration), assets = new { font = configuration.CustomFont?.Name, banner = configuration.CustomBanner?.Name, background = configuration.CustomBackground?.Name },
-            busy, dirty, saved, acknowledged, install, previewMode, version = ThemeCompiler.BundledCatalog.Version,
-            notice = previewMode ? "Preview mode · explore, save and share. Discord and Vencord are never changed." : DiscordClient.Elevated ? "Run normally, without Administrator privileges." : notice,
+            busy, dirty, saved, version = ThemeCompiler.BundledCatalog.Version, notice,
             validation, previewId = surface.PreviewId, previewUri = validation.Length == 0 ? surface.PreviewUri : "",
             canApply = readiness.CanApply, applyReason = readiness.Reason, applyAction = readiness.Action, applyActionLabel = readiness.ActionLabel,
-            canDisable = canDisable && !busy, canRestore = canRestore && !busy, canInstall = !busy && !previewMode && !patched,
-            installation = patched ? "Discord + Vencord ready. No installation needed." : client.Found ? "Discord found. Enable official Vencord setup to apply themes." : "Standard Discord desktop was not found for this Windows user." });
+            canDisable = canDisable && !busy, canRestore = canRestore && !busy,
+            confirmation = confirmation is { } pending ? new { pending.Id, pending.Operation, themeName = pending.Configuration?.Name,
+                guild = pending.Configuration?.Guild, serverName = ThemeCompiler.BundledCatalog.Themes.FirstOrDefault(t => t.Guild == pending.Configuration?.Guild)?.Server ?? "Selected server",
+                pending.RequiresSetup, pending.Repair, pending.Problem } : null,
+            installation = patched ? "Discord + Vencord ready. No installation needed." : client.Found ? "Discord found. Apply will offer official Vencord setup if needed." : "Standard Discord desktop was not found for this Windows user." });
     }
 
     private async Task HandleMessageAsync(JsonElement message)
@@ -115,11 +118,19 @@ internal sealed class BuilderForm : Form
                     if (renderedRevision == revision) validation = surface.Ready ? "" : "The design or display font did not load. Choose another font or reload the preview.";
                     Publish(); return;
                 case "refresh": RenderPreview(); return;
-                case "acknowledge": acknowledged = message.GetProperty("ready").GetBoolean(); Publish(); return;
-                case "installation": install = message.GetProperty("install").GetBoolean(); Publish(); return;
+                case "cancelConfirmation":
+                    if (confirmation?.Id == message.GetProperty("id").GetString()) confirmation = null;
+                    Publish(); return;
+                case "confirmOperation":
+                    string confirmationId = message.GetProperty("id").GetString() ?? "";
+                    bool allowSetup = message.TryGetProperty("allowSetup", out var setupConsent) && setupConsent.GetBoolean();
+                    if (confirmation?.Id != confirmationId || confirmation.Problem.Length > 0 || confirmation.RequiresSetup && !allowSetup) return;
+                    allowSetup = confirmation.RequiresSetup && allowSetup;
+                    if (!OperationConfirmation.TryTake(ref confirmation, confirmationId, revision, out var confirmed)) { Publish(); return; }
+                    await OperateAsync(confirmed!, allowSetup); return;
                 case "new":
                     if (!ConfirmDiscard()) return;
-                    configuration = new ThemeConfiguration { Name = "My server theme", Guild = "" }; documentPath = null; dirty = saved = false; revision++; RenderPreview(); return;
+                    confirmation = null; configuration = new ThemeConfiguration { Name = "My server theme", Guild = "" }; documentPath = null; dirty = saved = false; revision++; RenderPreview(); return;
                 case "open": OpenDocument(); return;
                 case "save": SaveDocument(false); return;
                 case "share": SaveDocument(true); return;
@@ -130,8 +141,8 @@ internal sealed class BuilderForm : Form
                 case "importBackground": ImportImage(false); return;
                 case "serverHelp": ServerHelp(); return;
                 case "help": Help(); return;
-                case "presets": using (var form = new LauncherForm(previewMode)) form.ShowDialog(this); Publish(); return;
-                case "apply": case "disable": case "restore": await OperateAsync(action); return;
+                case "presets": using (var form = new LauncherForm(dryRun)) form.ShowDialog(this); Publish(); return;
+                case "apply": case "disable": case "restore": RequestConfirmation(action); return;
             }
         }
         catch (Exception error) when (error is IOException or InvalidDataException or JsonException or ArgumentException or UnauthorizedAccessException or System.Runtime.InteropServices.ExternalException or InvalidOperationException or KeyNotFoundException)
@@ -146,7 +157,7 @@ internal sealed class BuilderForm : Form
         using var dialog = new OpenFileDialog { Filter = "Theme configuration (*.dtheme)|*.dtheme", Title = "Open a configuration and its assets" };
         if (dialog.ShowDialog(this) != DialogResult.OK) return;
         var value = ThemeConfiguration.Load(dialog.FileName); AssetImport.ValidateImages(value);
-        configuration = value; documentPath = dialog.FileName; dirty = false; saved = true; revision++;
+        confirmation = null; configuration = value; documentPath = dialog.FileName; dirty = false; saved = true; revision++;
         notice = "Configuration opened. Review the target server before applying."; RenderPreview();
     }
     private void SaveDocument(bool share)
@@ -158,7 +169,7 @@ internal sealed class BuilderForm : Form
             if (dialog.ShowDialog(this) != DialogResult.OK) return; path = dialog.FileName;
         }
         value.Save(path); if (!share) { documentPath = path; dirty = false; saved = true; }
-        if (!previewMode) value.Save(DraftPath);
+        if (!dryRun) value.Save(DraftPath);
         notice = share ? "Portable copy saved with selected assets and font license. Send it to members yourself; each member applies it locally." : "Your configuration and selected assets are saved together.";
         Publish();
     }
@@ -182,19 +193,49 @@ internal sealed class BuilderForm : Form
         return dialog.ShowDialog(this) == DialogResult.OK;
     }
     private void ServerHelp() => LauncherStyle.ShowMessage(this, "In Discord desktop:\n1. Open User Settings > Advanced > Developer Mode.\n2. Right-click the server icon and choose Copy Server ID.\n3. Paste it into Server ID in the editor.\n\nOr right-click a text channel, choose Copy Channel Link and paste it. Invite links cannot identify the target. You must already belong to the server. No token or credentials are needed.", "Choose your server", true);
-    private void Help() => LauncherStyle.ShowMessage(this, "Choose a target in Server, then explore Style and Artwork. Click a starting preset to load its coordinated font, palette and images. The preview always starts on your target. Other server and DMs show stock Discord on purpose, demonstrating that your theme stays local to the selected server.\n\nSave or Share theme writes a .dtheme file with selected assets and the custom font license. Other members must choose to adopt it themselves. One personal theme can be active at a time. Recovery offers disable, restore and the original multi-server preset manager. Applying original presets replaces the personal slot too.\n\nWindows x64 / standard stable desktop Discord / default Vencord only. Applying, disabling and restoring restart Discord only after your acknowledgement. Vencord is unofficial and has Discord terms/account implications. This independent tool is not affiliated with Discord.\n\nBundled fonts are SIL OFL 1.1. Custom static TTF/OTF imports require editable embedding and redistribution rights plus the license. PNG/JPEG images must fit 8 MiB, 4096 px per side and 16 million pixels. Configurations are limited to 24 MiB. See the repository's Installation, Compatibility and Validation documents for details.", "Theme Studio · Help", true);
+    private void Help() => LauncherStyle.ShowMessage(this, "Choose a target in Server, then explore Style and Artwork. Click a starting preset to load its coordinated font, palette and images. The preview always starts on your target. Other server and DMs show stock Discord on purpose, demonstrating that your theme stays local to the selected server.\n\nSave or Share theme writes a .dtheme file with selected assets and the custom font license. Other members must choose to adopt it themselves. One personal theme can be active at a time. Recovery offers disable, restore and the original multi-server preset manager. Applying original presets replaces the personal slot too.\n\nWindows x64 / standard stable desktop Discord / default Vencord only. Editing is always a preview. Apply opens a review overlay showing the theme and target server. Only Continue & apply starts the operation and authorizes the Discord restart; Back to preview or Escape cancels. Missing Vencord setup is offered in that overlay with explicit consent. Recovery disable/restore use the same confirmation pattern. Vencord is unofficial and has Discord terms/account implications. This independent tool is not affiliated with Discord.\n\nBundled fonts are SIL OFL 1.1. Custom static TTF/OTF imports require editable embedding and redistribution rights plus the license. PNG/JPEG images must fit 8 MiB, 4096 px per side and 16 million pixels. Configurations are limited to 24 MiB. See the repository's Installation, Compatibility and Validation documents for details.", "Theme Studio · Help", true);
 
-    private async Task OperateAsync(string operation)
+    private void RequestConfirmation(string operation)
     {
-        if (busy || previewMode) return;
-        if (!acknowledged) { LauncherStyle.ShowMessage(this, "Finish calls and save drafts, then acknowledge the restart before applying, disabling or restoring.", "Before restarting Discord"); return; }
+        if (busy || confirmation is not null) return;
+        ThemeConfiguration? value = operation == "apply" ? ReadConfiguration() : null;
+        if (value is not null && !ApplyReadiness.Evaluate(busy, validation, renderedRevision == revision && surface.Ready).CanApply) return;
+        string problem = "";
+        bool setup = false, repair = false;
+        if (!dryRun)
+        {
+            try
+            {
+                client.ValidateEnvironment();
+                _ = store.InstalledSelection();
+                setup = !client.Patched; repair = setup && client.NeedsRepair;
+            }
+            catch (Exception error)
+            {
+                problem = error is InvalidOperationException or InvalidDataException ? error.Message : "The client or Vencord profile could not be checked. Review the installation and manual recovery guide.";
+            }
+        }
+        confirmation = OperationConfirmation.Create(operation, revision, value, setup, repair, problem);
+        Publish();
+    }
+
+    private async Task OperateAsync(OperationConfirmation confirmed, bool allowSetup)
+    {
+        if (busy) return;
+        string operation = confirmed.Operation;
+        var value = confirmed.Configuration;
+        if (dryRun)
+        {
+            SimulatedOperations++;
+            notice = "Simulation complete. No Discord or Vencord files or processes were changed.";
+            Publish(); return;
+        }
         bool stopped = false;
         try
         {
-            ThemeConfiguration? value = operation == "apply" ? ReadConfiguration() : null;
             if (value is not null && (!surface.Ready || renderedRevision != revision)) throw new InvalidDataException("Wait for a valid preview of your latest edits before applying.");
             client.ValidateEnvironment(); bool repair = client.NeedsRepair, setup = !client.Patched;
-            if (setup && !install) throw new InvalidOperationException("Choose official Vencord installation / repair in Recovery, or install it manually first.");
+            if (setup && !allowSetup) throw new InvalidOperationException("Vencord now needs installation / repair. Click Apply again and review the setup option before continuing.");
             busy = true; Publish(); byte[]? installer = null;
             if (setup)
             {
@@ -204,7 +245,7 @@ internal sealed class BuilderForm : Form
                 installer = await ReleaseDownload.FetchAsync(http, ReleaseDownload.InstallerUri, ReleaseDownload.InstallerSha256, 32 * 1024 * 1024);
             }
             if (value is not null) await Task.Run(() => value.Save(DraftPath));
-            notice = "Closing Discord after your acknowledgement…"; Publish(); await client.StopAsync(); stopped = true;
+            notice = "Closing Discord after your confirmation…"; Publish(); await client.StopAsync(); stopped = true;
             if (installer is not null) { notice = "Installing / repairing official Vencord…"; Publish(); await client.InstallVencordAsync(installer, repair); }
             notice = "Saving a recovery snapshot and updating managed themes…"; Publish();
             await Task.Run(() => { if (operation == "restore") store.RestoreLast(); else store.ApplyPersonal(value); });
@@ -217,6 +258,6 @@ internal sealed class BuilderForm : Form
             if (stopped) notice += " No automatic retry was made.";
             LauncherStyle.ShowMessage(this, notice, "Operation did not complete");
         }
-        finally { busy = false; acknowledged = false; Publish(); }
+        finally { busy = false; Publish(); }
     }
 }

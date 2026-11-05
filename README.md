@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.3/DiscordThemeLauncher-0.3.0-beta.3-windows-x64-portable.zip"><img src="assets/banners/readme/discord-theme-launcher-1600x480.png" alt="Your server. Your Discord. Create, preview and share a local theme, by Prime Build." width="1600"></a>
+  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.4/DiscordThemeLauncher-0.3.0-beta.4-windows-x64-portable.zip"><img src="assets/banners/readme/discord-theme-launcher-1600x480.png" alt="Your server. Your Discord. Create, preview and share a local theme, by Prime Build." width="1600"></a>
   <h1>Discord Theme Launcher</h1>
   <p><strong>Make your server feel like yours.</strong><br>Create a personal theme for a Discord server you choose, starting from three community designs.</p>
   <p>
@@ -9,7 +9,7 @@
     <a href="https://vencord.dev/download/"><img src="https://img.shields.io/badge/Vencord-required-5865F2" alt="Requires Vencord"></a>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/PrimeBuild-pc/discord-theme-launcher?color=5865F2" alt="MIT license for project code"></a>
   </p>
-  <p><a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.3/DiscordThemeLauncher-0.3.0-beta.3-windows-x64-portable.zip"><strong>Download for Windows</strong></a> &nbsp;·&nbsp; <a href="#quick-setup">Quick setup</a> &nbsp;·&nbsp; <a href="docs/INSTALLATION.md">Installation &amp; recovery</a> &nbsp;·&nbsp; <a href="docs/VALIDATION.md">Validation</a></p>
+  <p><a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.4/DiscordThemeLauncher-0.3.0-beta.4-windows-x64-portable.zip"><strong>Download for Windows</strong></a> &nbsp;·&nbsp; <a href="#quick-setup">Quick setup</a> &nbsp;·&nbsp; <a href="docs/INSTALLATION.md">Installation &amp; recovery</a> &nbsp;·&nbsp; <a href="docs/VALIDATION.md">Validation</a></p>
   <p><sub>Maintained by <a href="https://github.com/PrimeBuild-pc">PrimeBuild-pc</a>. Independent project; not affiliated with Discord or Vencord.</sub></p>
 </div>
 
@@ -44,19 +44,21 @@ Imported images become static PNG without original metadata; imported background
 ## Quick setup
 
 1. Download and **extract the portable ZIP**. Run `DiscordThemeLauncher.exe` normally, without Administrator privileges.
-2. Choose a starting preset. Paste your target **server ID** or **channel link**. **How do I find my server ID?** explains Discord's Developer Mode and Copy Server ID action; invite links are not accepted.
-3. Use **Style** for typography and palette, then **Artwork** for images. Review the **live preview**. The latest layout and display font must load before Apply becomes available.
-4. **Save** your configuration. **Share theme** creates a self-contained `.dtheme` file; sending it to members is up to you.
-5. If needed, open **Recovery** and explicitly select **Install / repair official Vencord if needed**. Finish calls and save drafts, then acknowledge the restart.
-6. Click **Apply to Discord**. The launcher backs up managed files, applies the personal slot and checks Discord startup.
+2. In **Server**, choose a starting design and paste your target **server ID** or **channel link**. **How do I find my server ID?** explains the copy steps; invite links are not accepted.
+3. Customize **Style** and **Artwork**. Editing always stays in preview; choosing a server or changing a design does not modify Discord.
+4. **Save** or **Share theme** if desired. A `.dtheme` file includes selected assets; sending it to members is up to you.
+5. Click **Apply to Discord**. A matching overlay reviews the theme, server and local-client changes. Finish calls/streams and save drafts, then choose **Continue & apply** to authorize application and the Discord restart.
+6. **Back to preview** or Esc cancels without applying. If Vencord is missing/incomplete, the same overlay offers official installation/repair with explicit consent. Unsupported installations are explained there and cannot continue.
 
-**Apply still disabled?** The explanation next to the button identifies the missing requirement. Wait for the preview, then finish calls/save drafts and tick the restart acknowledgement. If Vencord is missing, **Set up Vencord** opens Recovery; explicitly enable official installation/repair there. If standard Discord is not found, install the regular Windows desktop client and reopen the launcher. Preview mode cannot apply themes.
+![Application confirmation inside Theme Studio](assets/launcher-confirmation-preview.png)
 
-One personal theme is active at a time. Applying another configuration replaces that slot. A bundled preset enabled for the same target server is disabled to avoid competition; other bundled servers and unrelated themes remain enabled. **Disable personal theme** removes the slot. **Restore previous setup** recovers preceding managed files and enabled states, retaining unrelated preference changes.
+There is one preview-to-apply workflow. There is no separate preview-only product mode to close/reopen, and no preliminary restart checkbox outside the confirmation. Apply waits only for a valid, loaded preview and an idle operation. Environment and setup checks remain enforced in the confirmation and before execution.
 
-**Recovery > Open original presets** retains the previous multi-server installation flow. Applying that selection replaces the personal slot too; unchecked bundled themes are removed. Existing 0.2.x installations and backups remain supported. See [Installation](docs/INSTALLATION.md) for exact semantics and recovery.
+One personal theme is active at a time. Applying another configuration replaces that slot. A bundled preset enabled for the same target server is disabled to avoid competition; other bundled servers and unrelated themes remain enabled. **Disable personal theme** and **Restore previous setup** in Recovery also ask for confirmation before changing the client. Current unrelated preferences are retained.
 
-The EXE embeds verified preset CSS, artwork and fonts, so the configurator works offline with Vencord already installed. The ZIP also supplies standalone preset CSS and notices. Optional Vencord installation requires Internet access. The **Microsoft Edge WebView2 Runtime** is needed for the embedded preview; if missing, the launcher explains the prerequisite and keeps configuration saving available. It does not silently install the runtime. See [Microsoft's distribution documentation](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution).
+**Recovery > Open original presets** retains the earlier multi-server manager and its own restart acknowledgement. Applying there replaces the personal slot too and removes unchecked bundled themes. Existing configurations and backups remain supported. See [Installation](docs/INSTALLATION.md) for recovery.
+
+The EXE embeds verified CSS, artwork and fonts. With Vencord installed, setup needs no theme download. Optional Vencord installation requires Internet access. **Microsoft Edge WebView2 Runtime** is required for the interface; it is never installed silently. Missing-runtime native Open/Save-copy/Help controls remain available. See [Microsoft's distribution documentation](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution).
 
 ## Three starting points
 

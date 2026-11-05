@@ -6,35 +6,25 @@ The beta launcher targets Windows x64, standard per-user stable Discord in `%LOC
 
 ## Portable launcher (recommended)
 
-1. Download the portable ZIP from the [release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.3) and extract it.
-2. Run `DiscordThemeLauncher.exe` normally.
-3. Choose a starting preset and paste your server ID or a Discord text-channel link. Use **How do I find my server ID?** for the Developer Mode / Copy Server ID steps. Invite links are refused.
-4. Open **Style** for fonts and colors and **Artwork** for banner and background. Inspect the live preview. **Save** and **Share theme** write a `.dtheme` file containing selected assets and the custom font license. **Open configuration** reopens it. If needed, open **Recovery** and explicitly choose **Install / repair official Vencord if needed**.
-5. Finish calls/streams and save drafts, then tick the restart checkbox.
-6. Click **Apply to Discord**. Discord closes during the transaction and is reopened afterwards. The launcher checks startup before confirming success. Personal Apply requires the latest valid preview and loaded display font.
+1. Download/extract the [portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.4), then run the EXE normally.
+2. Select your target in Server and customize the design in Style/Artwork. All editing remains a preview.
+3. Save/share a `.dtheme` configuration if desired.
+4. Click **Apply to Discord**. Review the theme and target server in the overlay. It explains that Discord will restart and changes are local to this client.
+5. Finish calls and save drafts, then choose **Continue & apply**. **Back to preview** or Esc cancels without applying. No separate restart checkbox is required in the editor.
 
-The EXE embeds verified presets, fonts and artwork, so the configurator works offline with Vencord already present. The ZIP also contains standalone preset CSS. The separate **Recovery > Open original presets** manager keeps multi-server selection; if an adjacent file is absent, it fetches the exact pinned release file. Corrupt/mismatched files are refused. Optional Vencord installation needs Internet access.
+Missing/incomplete Vencord is offered in the same confirmation. Its installation/repair checkbox starts unchecked; the upstream installer is downloaded and verified only after consent and Continue. Environment problems (unsupported client, elevation, unreadable profile, unknown loader) are shown in the overlay and prevent continuation. Conditions are checked again before execution. Apply closes only verified stable Discord processes, applies the managed transaction and checks startup.
 
-The embedded preview needs Microsoft Edge WebView2 Runtime. If absent, the launcher explains the prerequisite and still permits configuration saving/sharing. Install it from [Microsoft's official page](https://developer.microsoft.com/microsoft-edge/webview2/) and reopen the launcher; runtime installation is not automated. The application bundles .NET.
+The EXE includes verified preset fonts/artwork/CSS. Normal theme setup works offline with Vencord installed. The original-preset manager can still fetch absent adjacent files from the pinned release. A separate .NET install is unnecessary. WebView2 Runtime is required; if missing, install it from [Microsoft](https://developer.microsoft.com/microsoft-edge/webview2/) and reopen. Runtime installation is never automated.
 
-Images: PNG/JPEG up to 8 MiB each, at most 4096 px per side and 16 million pixels; normalized output must also fit. Fonts: static TTF/OTF up to 2 MiB, redistribution license TXT up to 64,000 bytes and explicit permission confirmation. Restricted embedding, variable fonts, collections, imported WOFF/WOFF2, SVG and GIF are refused. Configurations are limited to 24 MiB. See [Personal configurations](CONFIGURATIONS.md).
+Images: PNG/JPEG up to 8 MiB, 4096 px per side and 16 million pixels; normalized output must fit too. Fonts: static TTF/OTF up to 2 MiB, redistribution license TXT up to 64,000 bytes and explicit rights confirmation. Configurations are limited to 24 MiB. See [Personal configurations](CONFIGURATIONS.md).
 
-The launcher does not detect membership, join a server, log into Discord, access tokens/messages, change server settings, or send messages. It does not install itself, add a service or configure auto-start. You may delete its extracted folder after closing it; backups remain separate.
+The launcher never logs in, accesses tokens/messages, joins a server or changes server settings. The executable is unsigned; review source and published checksums before running. No security warning is bypassed.
 
-The executable is unsigned. Review its source and published checksums before deciding whether to run it. The application never bypasses a Windows warning or disables a security feature.
+## Preview and confirmation
 
-## Apply is greyed out
+Preview is the default editor state, and Apply opens the review overlay. The legacy `--preview` argument opens this same workflow; it no longer traps users in a non-applicable product mode. Development-only `--safe-preview` keeps all client operations as simulations and does not write the last-configuration state.
 
-Choosing a preset alone does not enable Apply. Check the message beside the button:
-
-- **Restart checkbox:** finish calls/save drafts and tick the acknowledgement at the bottom. The helper focuses the checkbox; it never checks it for you.
-- **Set up Vencord:** open Recovery and explicitly enable official installation/repair, or install Vencord manually first. After consent, the next message may request the restart acknowledgement.
-- **Discord not found:** automatic setup requires the standard per-user Windows desktop Discord. Install that client and reopen the launcher; unsupported clients/custom locations remain outside automatic setup.
-- **Preview mode:** close the preview window and open the EXE normally, without `--preview`.
-- **Preview loading/error:** wait for the current design/font, or use Reload preview and review any configuration error.
-- **Administrator / unreadable profile:** run without elevation or follow manual recovery for the profile. The launcher does not bypass these protections.
-
-If the cause remains unclear, report the exact Apply message and the installation status shown in Recovery. No token or credentials are needed for troubleshooting.
+If Apply is disabled, review configuration errors, wait for the latest design/font or reload the preview. If Continue is disabled in the overlay, read its installation problem or explicitly select the offered Vencord setup. Cancel/Esc leaves the client unchanged. Confirmations refer to the exact reviewed configuration revision, are single-use, and expire when edits occur. Repeated/stale confirmation messages cannot repeat a transaction.
 
 ## Apply semantics
 
@@ -49,14 +39,14 @@ Paths:
 - Theme files: `%APPDATA%\Vencord\themes`.
 - Backup history: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\backups`.
 - Recovery reference: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\last-backup.txt`.
-- Last saved/applied configuration: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\last-configuration.dtheme`. This editing document is independent of theme restoration. Preview mode never writes it.
+- Last saved/applied configuration: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\last-configuration.dtheme`. This editing document is independent of theme restoration. Editing alone does not write it; Save, Share or confirmed application can persist it. The development-only safe simulation never writes it.
 - Verified upstream installer, if needed: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\downloads`.
 
 Keep the backup folder if you want to undo earlier changes. Nothing in these local folders is uploaded by the launcher. Downloads are ordinary HTTPS requests to GitHub and its release delivery infrastructure; provider request logging is outside this project.
 
 ## Restore previous setup
 
-Open the launcher, finish calls/save drafts and tick the restart checkbox. Click **Restore previous setup**. The previous managed file bytes and enablement are restored while current unrelated preferences remain intact. A snapshot of the state before restoration is also saved, so the restore operation can itself be undone with the same button.
+Open Recovery and click **Restore previous setup**. Review the overlay, finish calls/save drafts and confirm **Continue & restore**. The previous managed file bytes and enablement are restored while current unrelated preferences remain intact. A snapshot of the state before restoration is also saved, so the restore operation can itself be undone with the same button.
 
 This restores themes, not Vencord's installation or other applications. Historical snapshots remain available in the backup folder.
 
@@ -84,7 +74,7 @@ No Nitro, bot, server boost or server administrator permission is needed. Each m
 Download `SHA256SUMS.txt` from the same release. On Windows:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.3-windows-x64-portable.zip
+Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.4-windows-x64-portable.zip
 ```
 
 Compare it with the corresponding filename in the release checksum file. The repository-root checksum file covers generated themes; the release checksum file also covers the launcher, ZIP and catalog. A hash checks integrity, not publisher identity.

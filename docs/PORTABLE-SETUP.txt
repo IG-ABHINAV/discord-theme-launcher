@@ -1,14 +1,18 @@
 DISCORD THEME LAUNCHER 0.3 - WINDOWS X64
 
 1. Extract the ZIP. Run DiscordThemeLauncher.exe normally, not as Administrator.
-2. Choose a starting preset. Paste your server ID or Discord channel link.
-   "How do I find my server ID?" explains Developer Mode and Copy Server ID.
-3. Use Style and Artwork to customize. Inspect the live preview.
-   Other server and DMs intentionally show stock Discord; your theme stays off
-   outside its target. The composer remains visible while sample messages scroll.
-4. Save a .dtheme configuration. Share theme includes selected assets/licenses.
-5. If needed, open Recovery and select official Vencord installation or repair.
-6. Finish calls, save drafts, acknowledge the restart, then click Apply to Discord.
+2. Choose your server ID / Discord channel link and a starting preset.
+3. Use Style and Artwork to customize. Editing stays in preview by default.
+4. Save or Share theme to keep a .dtheme file with its selected assets/licenses.
+5. Click Apply to Discord. Review the theme and server in the overlay.
+6. Finish calls/streams and save drafts, then choose Continue & apply.
+   Discord restarts only after this confirmation. Back to preview / Esc cancels.
+   Missing Vencord setup is offered in the same overlay with explicit consent.
+
+There is no separate preview-only product mode or external restart checkbox.
+A disabled Apply means the configuration/preview is not ready or an operation
+is running. A blocked Continue explains an unsupported environment or asks
+for consent to the offered official Vencord setup. Do not bypass these checks.
 
 Changes affect your LOCAL CLIENT. Other members must adopt a shared theme
 themselves. No token, login, bot, Nitro, server permissions or credentials.

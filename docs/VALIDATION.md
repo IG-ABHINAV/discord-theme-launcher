@@ -1,4 +1,12 @@
-# Validation - 0.3.0-beta.3
+# Validation - 0.3.0-beta.4
+
+Date: **2026-11-06**. The user confirmed that the friend's application worked; the confusing separate preview-only workflow was the issue. The new main workflow is editing/preview → Apply → in-app confirmation → Continue & apply. The external restart acknowledgement checkbox and non-applicable product mode are removed. Runtime/profile protections and explicit Vencord setup consent remain in the confirmation.
+
+Checks: **57 core, 40 browser and 36 Windows tests**. Browser tests exercise exact-target review, Cancel/Escape, explicit continuation, first-time setup consent, blocked installations and Recovery confirmations. Native tests exercise the real overlay and host, consuming one reviewed snapshot, rejecting replay/stale tokens and confirming via a safe simulation. Cancel/request do not increment the simulated operation count; Continue does exactly once. Existing image/font/isolation and transaction checks pass. Release build has zero warnings/errors and packaging passes.
+
+Screenshots capture the actual embedded Windows renderer, including the confirmation overlay. The main editor stays preview-only until confirmed. `--preview` is now a legacy alias for that workflow; automated checks use `--safe-preview` / the constructor's safe simulation instead. The user's Discord was not restarted or modified. Real confirmed application, clean-VM Vencord setup, signing and exhaustive performance/accessibility/DPI checks remain separate open coverage.
+
+## Inherited validation - 0.3.0-beta.3
 
 Date: **2026-11-05**. A user reported that a friend's Apply button stayed disabled after choosing Prime Build. That machine's exact missing prerequisite has not been established. The confirmed UI defect was that prerequisites could disable Apply without an adjacent explanation.
 
