@@ -4,7 +4,7 @@
 
 `src/profiles.json` defines three identities and exact guild IDs. `src/server-theme.css` contains shared scoped component rules. `scripts/artwork.mjs` produces original header/chat/channel/member SVGs. `scripts/build.mjs` embeds artwork, substitutes each profile, and writes the three standalone theme files, inspectable vector assets, `catalog.json` and theme checksums.
 
-Each output has exactly one selected-server `@scope`. FantaFort additionally registers a uniquely named, embedded data-only `@font-face`; this resource registration contains no selectors, and its font is applied only inside the FantaFort scope. The catalog records file sizes and digests. It is embedded in the launcher, so an existing binary cannot silently switch to a mutable main-branch catalog or a different release. The `--pb-` variable prefix is retained for compatibility with the original Officina source; each active scope gets its own values.
+Each output has exactly one selected-server `@scope`. Each theme additionally registers a uniquely named, embedded data-only `@font-face`; this resource registration contains no selectors, and its font is applied only inside that theme's selected-server scope. The catalog records file sizes and digests. It is embedded in the launcher, so an existing binary cannot silently switch to a mutable main-branch catalog or a different release. The `--pb-` variable prefix is retained for compatibility with the original Officina source; each active scope gets its own values.
 
 The theme audit and Playwright fixtures test the outputs, including all three simultaneous installations. Previews contain synthetic content; fixtures must never copy actual member messages, account data or credentials.
 
@@ -67,3 +67,11 @@ Bangers Regular is embedded unmodified in the FantaFort CSS, together with its f
 The build uses committed glyph outlines for SVG graphic text, avoiding dependencies on font loading inside SVG image contexts. `scripts/extract-font-glyphs.py` can regenerate the map with fontTools 4.63.0; normal builds and member installation do not require Python. The map records the source font's SHA-256 digest, checked during builds.
 
 Ordinary message/composer/username typography and the launcher UI remain unchanged. Disabling the theme or navigating away releases all display-font element styling. The font needs no OS installation and no network requests. Header/league serial numbers and decorative Dev line indices were removed.
+
+## Per-server typography in 0.2.4
+
+The profiles now describe each embedded display face, including its unique CSS alias, file format and mapped weight. Prime Build uses upstream Rajdhani Medium Latin WOFF2, Dev uses upstream JetBrains Mono Medium WOFF2, and FantaFort retains Bangers Regular TTF. Unmodified font files, OFL licenses and exact upstream URLs are committed under assets/fonts. WOFF2 limits the download size without requiring new theme network dependencies.
+
+All three graphics use committed glyph outlines checked against their font bytes. Regenerate a new map with `python scripts/extract-font-glyphs.py assets/fonts/<directory>/<font-file>` and fontTools 4.63.0. SVG labels escape accessibility text independently of their path geometry. Regular build and member setup do not need Python.
+
+The common display rules use different sizes for the compact terminal face and the hardware/arena faces. All font selections stay in the existing server scopes. Messages, authors, composer and the launcher retain their native typography.

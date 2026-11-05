@@ -1,6 +1,6 @@
 {
   "name": "discord-theme-launcher",
-  "version": "0.2.3-beta.1",
+  "version": "0.2.4-beta.1",
   "private": true,
   "type": "module",
   "description": "Windows launcher and server-scoped Vencord themes for Prime Build, Prime Build Dev and FantaFort.",

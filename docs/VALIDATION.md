@@ -1,4 +1,10 @@
-# Validation - 0.2.3-beta.1
+# Validation - 0.2.4-beta.1
+
+**19 theme tests** cover all three embedded display fonts, real font loading, heading/category/channel/member-group application, cross-server/Home font isolation and unchanged message, author and composer typography. The CSS audit checks one uniquely named font resource per output, one guarded visual scope, offline assets, file size and checksums. The 24 Windows launcher-core checks and self-contained Release package build also pass locally; Linux adds its symlink-refusal check in CI.
+
+This release changes display typography and outlined artwork, with no startup or theme-transaction logic changes. Sanitized previews are generated from the distributed CSS; they contain no real messages or member data. The native launcher preview was visually checked. Managed CSS was backed up and atomically hot-reloaded while the same Discord process stayed open. Appearance of the new faces in the native Discord server views was not visually confirmed for this release; earlier native-client observations are inherited evidence below. Controlled performance/game/call benchmarks have not been repeated.
+
+## Inherited validation - 0.2.3-beta.1
 
 This copy-only update replaces the Officina and Workbench theme labels with Build Your Dream and Software House across graphic subtitles, theme metadata and launcher cards. All 17 existing theme tests and the Windows Release package build pass. Regenerated previews and the native launcher in non-mutating preview mode were visually checked. Updated CSS was hot-reloaded without restarting Discord; no setup or server-scope logic changes.
 

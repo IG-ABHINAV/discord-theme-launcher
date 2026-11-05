@@ -49,3 +49,7 @@ The launcher is an independent community tool, not an official Discord app.
 
 FantaFort display lettering uses embedded Bangers (SIL OFL 1.1), with its
 license in Bangers-OFL.txt and in the CSS. No OS font installation is needed.
+
+Prime Build uses embedded Rajdhani; Prime Build Dev uses embedded JetBrains Mono.
+Their SIL OFL licenses are in Rajdhani-OFL.txt / JetBrainsMono-OFL.txt and
+in the CSS. Normal chat text and launcher typography remain native.

@@ -1,5 +1,5 @@
 {
-  "version": "0.2.3-beta.1",
+  "version": "0.2.4-beta.1",
   "repository": "PrimeBuild-pc/discord-theme-launcher",
   "themes": [
     {
@@ -19,8 +19,15 @@
       "muted": "#b6b6c0",
       "tagline": "Hardware, precision, performance.",
       "caption": "HARDWARE LAB",
-      "sha256": "36e62941e577db4bc11692e4ed4df1d5f0dd68101e5125d86945bd4a89bc6299",
-      "bytes": 269805
+      "font": {
+        "name": "Rajdhani",
+        "family": "PrimeBuild Hardware Display",
+        "file": "rajdhani/Rajdhani-Medium-Latin.woff2",
+        "format": "woff2",
+        "weight": 500
+      },
+      "sha256": "0313e4d60a283e1610466e86b4ea746f9303a58ae069ebf3193102b090bcae63",
+      "bytes": 315164
     },
     {
       "id": "primebuild-dev",
@@ -39,8 +46,15 @@
       "muted": "#b2bfce",
       "tagline": "Commit. Build. Ship.",
       "caption": "DEVELOPER WORKSPACE",
-      "sha256": "46e0aa896e1aa991fb4cb5c0781d3fc83890dcdc4adf9f81ba05a99850da3d49",
-      "bytes": 17003
+      "font": {
+        "name": "JetBrains Mono",
+        "family": "PrimeBuild Dev Display",
+        "file": "jetbrains-mono/JetBrainsMono-Medium.woff2",
+        "format": "woff2",
+        "weight": 500
+      },
+      "sha256": "6754790e1166bad649a48a385576ae2de5ce2fe56686f159c9ffee531a8442e0",
+      "bytes": 213995
     },
     {
       "id": "fantafort",
@@ -59,8 +73,15 @@
       "muted": "#b7c8e5",
       "tagline": "Draft your roster. Own the arena.",
       "caption": "FANTASY LEAGUE",
-      "sha256": "ac363867d53002d64c77ed819567363165503fd59e0187c00c574ec38c3a1ea5",
-      "bytes": 204852
+      "font": {
+        "name": "Bangers",
+        "family": "PrimeBuild FantaFort Display",
+        "file": "bangers/Bangers-Regular.ttf",
+        "format": "truetype",
+        "weight": 400
+      },
+      "sha256": "302c3a32f45a80bcd5bd23d2390be1eb0f30d71e219f6a07c1f531f86ccf6e61",
+      "bytes": 204843
     }
   ]
 }

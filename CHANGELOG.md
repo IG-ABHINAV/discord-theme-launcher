@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.4-beta.1 - 2026-11-05
+
+- Added embedded Rajdhani display typography to Prime Build and JetBrains Mono to Prime Build Dev, including graphics, headings, categories, channel names and member groups.
+- Kept message, username, composer and launcher typography native.
+- Reused exact server scopes with one uniquely named font resource per theme and no font/image network dependencies.
+- Added upstream WOFF2 fonts, full OFL notices, provenance and reusable glyph-outline extraction; all three themes remain below 350 KiB each.
+- Extended font-loading, cross-server isolation and native text checks to all three identities.
+
 ## 0.2.3-beta.1 - 2026-11-05
 
 - Renamed Prime Build / Officina to Build Your Dream and Prime Build Dev / Workbench to Software House in artwork, theme metadata, launcher cards and current documentation.

@@ -15,7 +15,14 @@
     "border": "#424249",
     "muted": "#b6b6c0",
     "tagline": "Hardware, precision, performance.",
-    "caption": "HARDWARE LAB"
+    "caption": "HARDWARE LAB",
+    "font": {
+      "name": "Rajdhani",
+      "family": "PrimeBuild Hardware Display",
+      "file": "rajdhani/Rajdhani-Medium-Latin.woff2",
+      "format": "woff2",
+      "weight": 500
+    }
   },
   {
     "id": "primebuild-dev",
@@ -33,7 +40,14 @@
     "border": "#444e5e",
     "muted": "#b2bfce",
     "tagline": "Commit. Build. Ship.",
-    "caption": "DEVELOPER WORKSPACE"
+    "caption": "DEVELOPER WORKSPACE",
+    "font": {
+      "name": "JetBrains Mono",
+      "family": "PrimeBuild Dev Display",
+      "file": "jetbrains-mono/JetBrainsMono-Medium.woff2",
+      "format": "woff2",
+      "weight": 500
+    }
   },
   {
     "id": "fantafort",
@@ -51,6 +65,13 @@
     "border": "#4b5f83",
     "muted": "#b7c8e5",
     "tagline": "Draft your roster. Own the arena.",
-    "caption": "FANTASY LEAGUE"
+    "caption": "FANTASY LEAGUE",
+    "font": {
+      "name": "Bangers",
+      "family": "PrimeBuild FantaFort Display",
+      "file": "bangers/Bangers-Regular.ttf",
+      "format": "truetype",
+      "weight": 400
+    }
   }
 ]

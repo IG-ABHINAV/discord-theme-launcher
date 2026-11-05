@@ -17,6 +17,8 @@ Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE') -Destination (Join-Path $
 Copy-Item -LiteralPath (Join-Path $repoRoot 'docs/PORTABLE-SETUP.txt') -Destination (Join-Path $packageDir 'START-HERE.txt')
 Copy-Item -LiteralPath (Join-Path $repoRoot 'assets/fonts/OFL.txt') -Destination (Join-Path $packageDir 'NotoSans-OFL.txt')
 Copy-Item -LiteralPath (Join-Path $repoRoot 'assets/fonts/bangers/OFL.txt') -Destination (Join-Path $packageDir 'Bangers-OFL.txt')
+Copy-Item -LiteralPath (Join-Path $repoRoot 'assets/fonts/rajdhani/OFL.txt') -Destination (Join-Path $packageDir 'Rajdhani-OFL.txt')
+Copy-Item -LiteralPath (Join-Path $repoRoot 'assets/fonts/jetbrains-mono/OFL.txt') -Destination (Join-Path $packageDir 'JetBrainsMono-OFL.txt')
 # The SDK resolves the bundled runtime version in project.assets.json; ship its notices.
 $assetInfo = Get-Content (Join-Path $repoRoot 'launcher/Windows/obj/project.assets.json') -Raw | ConvertFrom-Json -AsHashtable
 $packageCache = @($assetInfo.packageFolders.Keys)[0]
@@ -37,7 +39,7 @@ foreach ($name in $themeNames) {
 }
 Copy-Item -LiteralPath (Join-Path $repoRoot 'catalog.json') -Destination (Join-Path $releaseDir 'catalog.json')
 $runtimeNoticeNames = @(Get-ChildItem -LiteralPath $packageDir -File | Where-Object { $_.Name -like 'Microsoft.*' } | Select-Object -ExpandProperty FullName)
-$portableFiles = @('DiscordThemeLauncher.exe','LICENSE.txt','START-HERE.txt','NotoSans-OFL.txt','Bangers-OFL.txt') + $themeNames | ForEach-Object { Join-Path $packageDir $_ }
+$portableFiles = @('DiscordThemeLauncher.exe','LICENSE.txt','START-HERE.txt','NotoSans-OFL.txt','Bangers-OFL.txt','Rajdhani-OFL.txt','JetBrainsMono-OFL.txt') + $themeNames | ForEach-Object { Join-Path $packageDir $_ }
 Compress-Archive -LiteralPath ($portableFiles + $runtimeNoticeNames) -DestinationPath (Join-Path $releaseDir $zipName) -Force
 $releaseNames = @($launcherName,$zipName,'catalog.json') + $themeNames
 $hashLines = foreach ($name in $releaseNames) { (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $releaseDir $name)).Hash.ToLowerInvariant() + '  ' + $name }

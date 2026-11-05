@@ -4,7 +4,7 @@
 
 Choose **Prime Build**, **Prime Build Dev**, **FantaFort**, or any combination. The launcher prepares the selected themes, backs up the managed files, enables them, and reopens Discord. Each theme appears only in its matching server; other servers and global account settings remain outside its scope.
 
-**[Download Windows portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.3-beta.1/DiscordThemeLauncher-0.2.3-beta.1-windows-x64-portable.zip)** | [All release assets](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.2.3-beta.1) | [Installation and recovery](docs/INSTALLATION.md) | [Validation](docs/VALIDATION.md)
+**[Download Windows portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.4-beta.1/DiscordThemeLauncher-0.2.4-beta.1-windows-x64-portable.zip)** | [All release assets](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.2.4-beta.1) | [Installation and recovery](docs/INSTALLATION.md) | [Validation](docs/VALIDATION.md)
 
 ## Launcher interface
 
@@ -16,11 +16,11 @@ The launcher follows Discord's native dark palette and typography stack. It uses
 
 | Server | Design | Backgrounds and details |
 | --- | --- | --- |
-| Prime Build | **Build Your Dream** | Near-black and orange, processor/heatsink artwork, PCB traces, mechanical details |
-| Prime Build Dev | **Software House** | Prime Build orange with slate surfaces, code editor, terminal and commit/build references |
+| Prime Build | **Build Your Dream** | Near-black and orange, processor/heatsink artwork, PCB traces, mechanical details, Rajdhani typography |
+| Prime Build Dev | **Software House** | Prime Build orange with slate surfaces, code editor, terminal and commit/build references, JetBrains Mono typography |
 | FantaFort | **Arena** | Deep blue, violet, cyan and yellow, angular arena panels, fantasy-roster pitch and tactics, Bangers display typography |
 
-The server identities are not numbered. FantaFort uses embedded Bangers for its graphic lettering, headings and navigation, giving it a more expressive battle-arena feel while keeping ordinary chat text readable.
+The server identities are not numbered. Each server has its own embedded display font: **Rajdhani** for Prime Build, **JetBrains Mono** for Prime Build Dev and **Bangers** for FantaFort. Graphic lettering, headings, channel navigation and member groups follow that identity; messages, usernames and the composer keep their existing fonts. No font installation or theme font/image downloads are required.
 
 All three customize the **chat background, channel panel, member panel, header, common cards, reactions, composer and navigation states**. Artwork is static and embedded in the CSS. The server icon rail is not redesigned. Role/status colors and useful native controls are retained.
 
@@ -46,7 +46,7 @@ All three customize the **chat background, channel panel, member panel, header, 
 4. Finish calls/streams, save drafts, and tick the restart checkbox.
 5. Click **Apply & open Discord**.
 
-The ZIP includes all three small theme files so existing Vencord users can apply their selection offline. The [standalone launcher EXE](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.3-beta.1/DiscordThemeLauncher-0.2.3-beta.1-windows-x64.exe) downloads selected files from its exact release when they are not beside the executable. Both routes check file sizes and SHA-256 hashes embedded in that launcher version.
+The ZIP includes all three small theme files so existing Vencord users can apply their selection offline. The [standalone launcher EXE](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.2.4-beta.1/DiscordThemeLauncher-0.2.4-beta.1-windows-x64.exe) downloads selected files from its exact release when they are not beside the executable. Both routes check file sizes and SHA-256 hashes embedded in that launcher version.
 
 **Unchecked managed themes are removed.** Other themes, plugins, QuickCSS and unrelated settings are preserved. To remove these designs, deselect all three and apply. To undo an operation, choose **Restore previous setup**. A safety snapshot is retained before restoration too.
 
@@ -92,4 +92,4 @@ On Windows, run `./scripts/package-windows.ps1` in PowerShell 7 to build the sel
 
 [Prime Build](https://primebuild.website/) | [FantaFort](https://fantafort.com/) | [Issues](https://github.com/PrimeBuild-pc/discord-theme-launcher/issues)
 
-Original code and new vector artwork are provided under [MIT](LICENSE). Prime Build and FantaFort names identify the communities; the license does not imply their endorsement of modified versions. Prime Build logo source: [primebuild.website](https://primebuild.website/). No Zenit Gold code or artwork is included. The portable package includes notices for its bundled .NET runtime and [Noto Sans](assets/fonts/OFL.txt) / [Bangers](assets/fonts/bangers/OFL.txt), both under SIL OFL 1.1. Bangers is an independent display face, not the proprietary Fortnite font. Vencord is downloaded from its official project, not bundled or relicensed here.
+Original code and new vector artwork are provided under [MIT](LICENSE). Prime Build and FantaFort names identify the communities; the license does not imply their endorsement of modified versions. Prime Build logo source: [primebuild.website](https://primebuild.website/). No Zenit Gold code or artwork is included. The portable package includes notices for its bundled .NET runtime and [Noto Sans](assets/fonts/OFL.txt), [Bangers](assets/fonts/bangers/OFL.txt), [Rajdhani](assets/fonts/rajdhani/OFL.txt) and [JetBrains Mono](assets/fonts/jetbrains-mono/OFL.txt), all under SIL OFL 1.1. Bangers is an independent display face, not the proprietary Fortnite font. Vencord is downloaded from its official project, not bundled or relicensed here.

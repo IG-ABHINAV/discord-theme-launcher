@@ -1,7 +1,6 @@
 // Original vector artwork. No Epic Games, Fortnite or third-party game assets.
 const svg = (w, h, content) => `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${content}</svg>`;
 const line = (d, stroke, opacity = .25, width = 2) => `<path d="${d}" fill="none" stroke="${stroke}" opacity="${opacity}" stroke-width="${width}"/>`;
-const monoLabel = (x, y, text, color, size = 13) => `<text x="${x}" y="${y}" fill="${color}" font-family="Consolas,monospace" font-size="${size}" letter-spacing="3">${text}</text>`;
 // Outlines keep SVG backgrounds self-contained; SVG-as-image never needs to fetch a font.
 function outlinedLabel(font,x,y,text,color,size) {
   let cursor=0;
@@ -12,12 +11,13 @@ function outlinedLabel(font,x,y,text,color,size) {
     cursor+=glyph.advance;
     return path;
   }).join('');
-  return `<g aria-label="${text}" fill="${color}" transform="translate(${x} ${y}) scale(${size/font.unitsPerEm} ${-size/font.unitsPerEm})">${paths}</g>`;
+  const accessibleText = text.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+  return `<g aria-label="${accessibleText}" fill="${color}" transform="translate(${x} ${y}) scale(${size/font.unitsPerEm} ${-size/font.unitsPerEm})">${paths}</g>`;
 }
 export function artwork(profile, logo, displayFont) {
   const { id, accent: a, chat, sidebar } = profile;
   const hardware = id === 'primebuild', coding = id === 'primebuild-dev';
-  const label = id === 'fantafort' ? (x,y,text,color,size=13) => outlinedLabel(displayFont,x,y,text,color,size) : monoLabel;
+  const label = (x,y,text,color,size=13) => outlinedLabel(displayFont,x,y,text,color,size);
   const title = hardware ? 'PRIME BUILD' : coding ? 'PRIME BUILD / DEV' : 'FANTAFORT';
   const themeName = profile.name.split('—').at(-1).trim().toUpperCase();
   let scene, edge;
@@ -35,6 +35,6 @@ export function artwork(profile, logo, displayFont) {
   const chatArt = svg(1600, 1000, `<rect width="1600" height="1000" fill="${chat}"/>${scene}<defs><linearGradient id="shade"><stop stop-color="${chat}" stop-opacity=".98"/><stop offset=".48" stop-color="${chat}" stop-opacity=".82"/><stop offset="1" stop-color="${chat}" stop-opacity=".2"/></linearGradient></defs><rect width="1600" height="1000" fill="url(#shade)"/>`);
   const sideArt = svg(290, 1024, `<rect width="290" height="1024" fill="${sidebar}"/>${edge}`);
   const membersArt = svg(290, 1024, `<rect width="290" height="1024" fill="${sidebar}"/>${edge}`);
-  const header = svg(440,180, `<rect x="1" y="1" width="438" height="178" rx="9" fill="${chat}" stroke="${a}" stroke-opacity=".4"/><path d="M350 0h90v180H250Z" fill="${coding?'#1a2535':hardware?'#252125':'#31295e'}"/>${hardware?`<image href="${logo}" x="14" y="25" width="78" height="78"/>`:label(20, 75, coding?'&lt;/&gt;':'FF', a, 35)}${label(105, 65, title, '#f7f7fb', coding?19:hardware?27:40)}${label(105, 99, themeName, a, hardware||coding?21:28)}${label(24, 149, profile.caption, '#aab0be', hardware||coding?13:21)}${line('M365 36h48v48h-48ZM350 53h48v48h-48ZM370 119h35', a, .45, 2)}`);
+  const header = svg(440,180, `<rect x="1" y="1" width="438" height="178" rx="9" fill="${chat}" stroke="${a}" stroke-opacity=".4"/><path d="M350 0h90v180H250Z" fill="${coding?'#1a2535':hardware?'#252125':'#31295e'}"/>${hardware?`<image href="${logo}" x="14" y="25" width="78" height="78"/>`:label(20, 75, coding?'</>':'FF', a, 35)}${label(105, 65, title, '#f7f7fb', coding?24:hardware?42:40)}${label(105, 99, themeName, a, hardware?26:coding?22:28)}${label(24, 149, profile.caption, '#aab0be', hardware?17:coding?14:21)}${line('M365 36h48v48h-48ZM350 53h48v48h-48ZM370 119h35', a, .45, 2)}`);
   return { header, chat: chatArt, sidebar: sideArt, members: membersArt };
 }

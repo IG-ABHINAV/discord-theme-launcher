@@ -2,7 +2,7 @@
  * @name FantaFort — Arena
  * @author PrimeBuild
  * @authorLink https://github.com/PrimeBuild-pc
- * @version 0.2.3-beta.1
+ * @version 0.2.4-beta.1
  * @description Draft your roster. Own the arena. Server-scoped desktop theme. Disable to restore.
  * @website https://primebuild.website/
  * @source https://github.com/PrimeBuild-pc/discord-theme-launcher
@@ -327,7 +327,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   ::-webkit-scrollbar-thumb { background-color: #55535b; border-radius: 4px; }
   ::-webkit-scrollbar-track { background-color: transparent; }
 
-  /* Display typography stays in the selected FantaFort server scope. */
+  /* Display typography stays in this selected server scope. */
   .header_f37cb1 h2, .container__9293f :is(h1,h2,.title__9293f), .name__2ea32, .name__29444,
   .membersGroup_c8ffbb, [class^="membersGroup__"], [class*=" membersGroup__"] {
     font-family: "PrimeBuild FantaFort Display", Impact, "Arial Narrow", sans-serif;

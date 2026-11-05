@@ -5,6 +5,7 @@ import postcss from 'postcss';
 
 const root = new URL('../', import.meta.url);
 const catalog = JSON.parse(await readFile(new URL('catalog.json', root), 'utf8'));
+assert.equal(new Set(catalog.themes.map(profile=>profile.font.family)).size, catalog.themes.length, 'Each server must own its font alias');
 const checksums = [];
 for (const profile of catalog.themes) {
   const css = await readFile(new URL(profile.file, root), 'utf8');
@@ -12,10 +13,11 @@ for (const profile of catalog.themes) {
   const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
   assert.ok(css.includes('@version ' + pkg.version), 'Theme and package versions must agree');
   const resources = ast.nodes.filter(node => node.type === 'atrule' && node.name === 'font-face');
-  assert.equal(resources.length, profile.id === 'fantafort' ? 1 : 0, 'Unexpected global font registration');
+  assert.equal(resources.length, 1, 'Each theme needs one audited font registration');
   for (const resource of resources) {
-    assert.equal(resource.nodes.find(n=>n.prop==='font-family')?.value, '"PrimeBuild FantaFort Display"');
-    assert.match(resource.nodes.find(n=>n.prop==='src')?.value ?? '', /^url\("data:font\/ttf;base64,/);
+    assert.equal(resource.nodes.find(n=>n.prop==='font-family')?.value, '"'+profile.font.family+'"');
+    assert.equal(resource.nodes.find(n=>n.prop==='font-weight')?.value, String(profile.font.weight));
+    assert.match(resource.nodes.find(n=>n.prop==='src')?.value ?? '', /^url\("data:font\/(?:ttf|woff2);base64,/);
     assert.ok(resource.nodes.every(n=>n.type==='decl'), 'Font registration cannot contain selectors');
   }
   ast.walkAtRules('font-face', resource => assert.ok(resources.includes(resource), 'Only the audited top-level font resource is allowed'));
