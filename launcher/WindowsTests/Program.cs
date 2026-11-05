@@ -23,6 +23,25 @@ internal static class Program
             try { action(); } catch (Exception e) when (e is InvalidDataException or ArgumentException or ExternalException) { rejected = true; }
             Check(rejected, label);
         }
+        var readyToApply = new ApplyPrerequisites(false, false, false, true, "", true, true, true, false, false, true);
+        Check(ApplyReadiness.Evaluate(readyToApply).CanApply, "valid configuration, client and restart acknowledgement enable Apply");
+        foreach (var (context, expected) in new[] {
+            (readyToApply with { PreviewMode = true }, "Preview mode"),
+            (readyToApply with { Busy = true }, "operation is running"),
+            (readyToApply with { Elevated = true }, "without Administrator"),
+            (readyToApply with { ProfileHealthy = false }, "settings could not be read"),
+            (readyToApply with { Validation = "Select a valid server." }, "Select a valid server."),
+            (readyToApply with { PreviewReady = false }, "preview to finish loading"),
+            (readyToApply with { DiscordFound = false }, "Discord desktop was not found"),
+            (readyToApply with { VencordReady = false }, "Vencord is required"),
+            (readyToApply with { VencordReady = false, NeedsRepair = true }, "Vencord needs repair"),
+            (readyToApply with { Acknowledged = false }, "tick the restart checkbox") })
+        {
+            var result = ApplyReadiness.Evaluate(context);
+            Check(!result.CanApply && result.Reason.Contains(expected, StringComparison.Ordinal), "disabled Apply explains: " + expected);
+        }
+        Check(ApplyReadiness.Evaluate(readyToApply with { VencordReady = false, InstallRequested = true }).CanApply, "explicit Vencord setup consent allows first-time Apply");
+        Check(ApplyReadiness.Evaluate(readyToApply with { VencordReady = false, InstallRequested = true, Acknowledged = false }).Action == "restart", "after Vencord consent the next requirement is the restart checkbox");
         var fixture = Path.Combine(Path.GetTempPath(), "ThemeLauncher-WindowsTests-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(fixture);
         form.Shown += async (_, _) =>
         {
@@ -76,6 +95,7 @@ internal static class Program
                     while (!studio.Ready) await Task.Delay(100, timeout.Token);
                 var studioCore = studio.Controls.OfType<WebView2>().Single().CoreWebView2;
                 Check(await studioCore.ExecuteScriptAsync("document.getElementById('apply').disabled && document.getElementById('disable').disabled && document.getElementById('restore').disabled") == "true", "preview mode disables all Discord mutations in the shipped studio");
+                Check(await studioCore.ExecuteScriptAsync("document.getElementById('apply-reason').textContent.includes('Preview mode') && document.getElementById('apply').getAttribute('aria-describedby')==='apply-reason'") == "true", "actual native studio explains disabled Apply beside the accessible button");
                 Check(await studioCore.ExecuteScriptAsync("document.querySelector('label[for=guild]').textContent.includes('Server ID') && document.querySelectorAll('[data-preset]').length===3") == "true", "studio exposes labeled server selection and three coordinated presets");
                 Check(await studioCore.ExecuteScriptAsync("[...document.querySelectorAll('.preset-card img')].every(image=>image.complete&&image.naturalWidth>0)") == "true", "actual native studio loads all bundled preset artwork");
                 await studioCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"fantafort\"]').click()");

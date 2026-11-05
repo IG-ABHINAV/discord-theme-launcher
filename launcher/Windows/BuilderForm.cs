@@ -81,11 +81,13 @@ internal sealed class BuilderForm : Form
         try { if (!previewMode && !DiscordClient.Elevated) { canDisable = store.PersonalEnabled; canRestore = store.CanRestore; } }
         catch { healthy = false; notice = "The Vencord profile could not be read. Check the manual recovery guide."; }
         var patched = client.Patched;
+        var readiness = ApplyReadiness.Evaluate(new ApplyPrerequisites(previewMode, busy, DiscordClient.Elevated, healthy,
+            validation, renderedRevision == revision && surface.Ready, client.Found, patched, client.NeedsRepair, install, acknowledged));
         surface.Publish(new { type = "state", values = StudioValues.From(configuration), assets = new { font = configuration.CustomFont?.Name, banner = configuration.CustomBanner?.Name, background = configuration.CustomBackground?.Name },
             busy, dirty, saved, acknowledged, install, previewMode, version = ThemeCompiler.BundledCatalog.Version,
             notice = previewMode ? "Preview mode · explore, save and share. Discord and Vencord are never changed." : DiscordClient.Elevated ? "Run normally, without Administrator privileges." : notice,
             validation, previewId = surface.PreviewId, previewUri = validation.Length == 0 ? surface.PreviewUri : "",
-            canApply = healthy && !previewMode && !busy && !DiscordClient.Elevated && acknowledged && renderedRevision == revision && surface.Ready && client.Found && (patched || install),
+            canApply = readiness.CanApply, applyReason = readiness.Reason, applyAction = readiness.Action, applyActionLabel = readiness.ActionLabel,
             canDisable = canDisable && !busy, canRestore = canRestore && !busy, canInstall = !busy && !previewMode && !patched,
             installation = patched ? "Discord + Vencord ready. No installation needed." : client.Found ? "Discord found. Enable official Vencord setup to apply themes." : "Standard Discord desktop was not found for this Windows user." });
     }

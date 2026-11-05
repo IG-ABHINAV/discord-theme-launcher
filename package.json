@@ -1,6 +1,6 @@
 {
   "name": "discord-theme-launcher",
-  "version": "0.3.0-beta.2",
+  "version": "0.3.0-beta.3",
   "private": true,
   "type": "module",
   "description": "Windows theme configurator for a selected Discord server, with portable profiles and community presets.",

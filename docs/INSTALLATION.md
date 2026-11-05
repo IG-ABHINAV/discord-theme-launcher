@@ -6,7 +6,7 @@ The beta launcher targets Windows x64, standard per-user stable Discord in `%LOC
 
 ## Portable launcher (recommended)
 
-1. Download the portable ZIP from the [release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.2) and extract it.
+1. Download the portable ZIP from the [release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.3) and extract it.
 2. Run `DiscordThemeLauncher.exe` normally.
 3. Choose a starting preset and paste your server ID or a Discord text-channel link. Use **How do I find my server ID?** for the Developer Mode / Copy Server ID steps. Invite links are refused.
 4. Open **Style** for fonts and colors and **Artwork** for banner and background. Inspect the live preview. **Save** and **Share theme** write a `.dtheme` file containing selected assets and the custom font license. **Open configuration** reopens it. If needed, open **Recovery** and explicitly choose **Install / repair official Vencord if needed**.
@@ -22,6 +22,19 @@ Images: PNG/JPEG up to 8 MiB each, at most 4096 px per side and 16 million pixel
 The launcher does not detect membership, join a server, log into Discord, access tokens/messages, change server settings, or send messages. It does not install itself, add a service or configure auto-start. You may delete its extracted folder after closing it; backups remain separate.
 
 The executable is unsigned. Review its source and published checksums before deciding whether to run it. The application never bypasses a Windows warning or disables a security feature.
+
+## Apply is greyed out
+
+Choosing a preset alone does not enable Apply. Check the message beside the button:
+
+- **Restart checkbox:** finish calls/save drafts and tick the acknowledgement at the bottom. The helper focuses the checkbox; it never checks it for you.
+- **Set up Vencord:** open Recovery and explicitly enable official installation/repair, or install Vencord manually first. After consent, the next message may request the restart acknowledgement.
+- **Discord not found:** automatic setup requires the standard per-user Windows desktop Discord. Install that client and reopen the launcher; unsupported clients/custom locations remain outside automatic setup.
+- **Preview mode:** close the preview window and open the EXE normally, without `--preview`.
+- **Preview loading/error:** wait for the current design/font, or use Reload preview and review any configuration error.
+- **Administrator / unreadable profile:** run without elevation or follow manual recovery for the profile. The launcher does not bypass these protections.
+
+If the cause remains unclear, report the exact Apply message and the installation status shown in Recovery. No token or credentials are needed for troubleshooting.
 
 ## Apply semantics
 
@@ -71,7 +84,7 @@ No Nitro, bot, server boost or server administrator permission is needed. Each m
 Download `SHA256SUMS.txt` from the same release. On Windows:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.2-windows-x64-portable.zip
+Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.3-windows-x64-portable.zip
 ```
 
 Compare it with the corresponding filename in the release checksum file. The repository-root checksum file covers generated themes; the release checksum file also covers the launcher, ZIP and catalog. A hash checks integrity, not publisher identity.

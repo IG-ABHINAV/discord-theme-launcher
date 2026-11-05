@@ -20,7 +20,8 @@ async function studio(page){
   });
   await page.addInitScript(()=>{
     let listener,revision=0;
-    const state={type:'state',values:{name:'Your community',guild:'987654321012345678',preset:'primebuild',palette:'primebuild',accent:'#ff6600',surface:'#101013',font:'primebuild',banner:'primebuild',background:'primebuild'},assets:{},dirty:false,saved:false,acknowledged:false,install:false,busy:false,previewMode:true,version:'0.3.0-beta.2',notice:'Preview mode · Discord is never changed.',validation:'',previewId:'1',previewUri:'https://theme-preview.invalid/preview?revision=1',canApply:false,canDisable:false,canRestore:false,canInstall:false,installation:'Discord + Vencord ready.'};
+    const state={type:'state',values:{name:'Your community',guild:'987654321012345678',preset:'primebuild',palette:'primebuild',accent:'#ff6600',surface:'#101013',font:'primebuild',banner:'primebuild',background:'primebuild'},assets:{},dirty:false,saved:false,acknowledged:false,install:false,busy:false,previewMode:true,version:'0.3.0-beta.3',notice:'Preview mode · Discord is never changed.',validation:'',previewId:'1',previewUri:'https://theme-preview.invalid/preview?revision=1',canApply:false,applyReason:'Preview mode cannot apply themes. Close this window and open the EXE normally.',applyAction:'',applyActionLabel:'',canDisable:false,canRestore:false,canInstall:false,installation:'Discord + Vencord ready.'};
+    window.patchTestState=patch=>{Object.assign(state,patch);listener?.({data:structuredClone(state)})};
     window.testMessages=[];
     window.chrome={webview:{addEventListener:(_,callback)=>listener=callback,postMessage:message=>{
       window.testMessages.push(message);
@@ -37,6 +38,40 @@ async function studio(page){
   await expect(page.locator('#preview-error')).toBeHidden();
   return requests;
 }
+
+test('disabled Apply explains the missing requirement beside the button',async({page})=>{
+  await studio(page);
+  await expect(page.locator('#apply')).toBeDisabled();
+  await expect(page.locator('#apply-reason')).toContainText('Preview mode', {timeout:2000});
+});
+
+test('missing Vencord has a visible setup explanation and opens Recovery',async({page})=>{
+  await studio(page);
+  await page.evaluate(()=>window.patchTestState({previewMode:false,applyReason:'Vencord is required. In Recovery, enable official Vencord installation, or install it manually first.',applyAction:'recovery',applyActionLabel:'Set up Vencord',canInstall:true}));
+  await expect(page.locator('#apply-reason')).toContainText('Vencord is required');
+  await page.getByRole('button',{name:'Set up Vencord',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Your installation',exact:true})).toBeVisible();
+  await expect(page.locator('#install')).toBeEnabled();
+});
+
+test('missing restart acknowledgement points to the checkbox without checking it automatically',async({page})=>{
+  await studio(page);
+  await page.evaluate(()=>window.patchTestState({previewMode:false,applyReason:'Finish calls and save drafts, then tick the restart checkbox to enable Apply.',applyAction:'restart',applyActionLabel:'Restart checkbox'}));
+  await page.getByRole('button',{name:'Restart checkbox',exact:true}).click();
+  await expect(page.locator('#restart-ready')).toBeFocused();
+  await expect(page.locator('#restart-ready')).not.toBeChecked();
+  await expect(page.locator('#apply')).toBeDisabled();
+});
+
+test('native ready state enables Apply and removes stale setup guidance',async({page})=>{
+  await studio(page);
+  await page.evaluate(()=>window.patchTestState({previewMode:false,canApply:true,acknowledged:true,applyReason:'',applyAction:''}));
+  await expect(page.locator('#apply')).toBeEnabled();
+  await expect(page.locator('#apply-reason')).toBeHidden();
+  await expect(page.locator('#apply-help')).toBeHidden();
+  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  expect(await page.evaluate(()=>window.testMessages.at(-1).action)).toBe('apply');
+});
 
 test('studio loads real artwork and readable controls without external dependencies',async({page})=>{
   const requests=await studio(page);

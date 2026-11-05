@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.2/DiscordThemeLauncher-0.3.0-beta.2-windows-x64-portable.zip"><img src="assets/banners/readme/discord-theme-launcher-1600x480.png" alt="Your server. Your Discord. Create, preview and share a local theme, by Prime Build." width="1600"></a>
+  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.3/DiscordThemeLauncher-0.3.0-beta.3-windows-x64-portable.zip"><img src="assets/banners/readme/discord-theme-launcher-1600x480.png" alt="Your server. Your Discord. Create, preview and share a local theme, by Prime Build." width="1600"></a>
   <h1>Discord Theme Launcher</h1>
   <p><strong>Make your server feel like yours.</strong><br>Create a personal theme for a Discord server you choose, starting from three community designs.</p>
   <p>
@@ -9,7 +9,7 @@
     <a href="https://vencord.dev/download/"><img src="https://img.shields.io/badge/Vencord-required-5865F2" alt="Requires Vencord"></a>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/PrimeBuild-pc/discord-theme-launcher?color=5865F2" alt="MIT license for project code"></a>
   </p>
-  <p><a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.2/DiscordThemeLauncher-0.3.0-beta.2-windows-x64-portable.zip"><strong>Download for Windows</strong></a> &nbsp;·&nbsp; <a href="#quick-setup">Quick setup</a> &nbsp;·&nbsp; <a href="docs/INSTALLATION.md">Installation &amp; recovery</a> &nbsp;·&nbsp; <a href="docs/VALIDATION.md">Validation</a></p>
+  <p><a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.3/DiscordThemeLauncher-0.3.0-beta.3-windows-x64-portable.zip"><strong>Download for Windows</strong></a> &nbsp;·&nbsp; <a href="#quick-setup">Quick setup</a> &nbsp;·&nbsp; <a href="docs/INSTALLATION.md">Installation &amp; recovery</a> &nbsp;·&nbsp; <a href="docs/VALIDATION.md">Validation</a></p>
   <p><sub>Maintained by <a href="https://github.com/PrimeBuild-pc">PrimeBuild-pc</a>. Independent project; not affiliated with Discord or Vencord.</sub></p>
 </div>
 
@@ -49,6 +49,8 @@ Imported images become static PNG without original metadata; imported background
 4. **Save** your configuration. **Share theme** creates a self-contained `.dtheme` file; sending it to members is up to you.
 5. If needed, open **Recovery** and explicitly select **Install / repair official Vencord if needed**. Finish calls and save drafts, then acknowledge the restart.
 6. Click **Apply to Discord**. The launcher backs up managed files, applies the personal slot and checks Discord startup.
+
+**Apply still disabled?** The explanation next to the button identifies the missing requirement. Wait for the preview, then finish calls/save drafts and tick the restart acknowledgement. If Vencord is missing, **Set up Vencord** opens Recovery; explicitly enable official installation/repair there. If standard Discord is not found, install the regular Windows desktop client and reopen the launcher. Preview mode cannot apply themes.
 
 One personal theme is active at a time. Applying another configuration replaces that slot. A bundled preset enabled for the same target server is disabled to avoid competition; other bundled servers and unrelated themes remain enabled. **Disable personal theme** removes the slot. **Restore previous setup** recovers preceding managed files and enabled states, retaining unrelated preference changes.
 

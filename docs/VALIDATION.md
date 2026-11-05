@@ -1,4 +1,14 @@
-# Validation - 0.3.0-beta.2
+# Validation - 0.3.0-beta.3
+
+Date: **2026-11-05**. A user reported that a friend's Apply button stayed disabled after choosing Prime Build. That machine's exact missing prerequisite has not been established. The confirmed UI defect was that prerequisites could disable Apply without an adjacent explanation.
+
+A new browser regression failed on the missing explanation, then passed after the fix. Apply now derives its enabled state and explanation from one readiness result: preview mode, active operation, elevation, unreadable profile, invalid configuration, unloaded preview, missing desktop Discord, missing/incomplete Vencord or absent restart acknowledgement. Setup/reload/focus actions guide the user without automatically consenting to installation or restart.
+
+Local checks: **57 core checks, 38 browser tests and 36 Windows checks**. Windows tests cover every blocking state, ready-state enablement, explicit first-time Vencord consent, the next restart requirement and the actual native studio's accessible explanation. Browser tests cover setup navigation, focusing the unchecked restart checkbox, clearing stale guidance when ready and the existing preview/layout/isolation cases. Release compilation and packaging pass. The user's working Discord was not restarted or modified.
+
+The previous limits remain: this is not validation on the friend's machine or a clean-VM first installation. No support was added for unsupported Discord variants/custom installations; safety conditions remain enforced. The executable is unsigned.
+
+## Inherited validation - 0.3.0-beta.2
 
 Date: **2026-11-05**. This update redesigns the configurator as Theme Studio and corrects the confusing preview workflow reported in beta 1. The selected-server guard and managed-theme transaction model remain intact. No operation was applied to the user's real Discord/Vencord profile; Discord process IDs and start times remained unchanged.
 
