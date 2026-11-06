@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0-beta.6 - 2026-11-06
+
+- Repair a Discord install that still loads Vencord when `patcher.js` is missing, instead of opening the JavaScript error window.
+- On startup, download and verify the official Vencord installer, close the broken client, repair stable Discord, and open it only after the runtime files are present.
+- If that repair does not finish, restore the local official `app.asar` backup so Discord can start.
+
 ## 0.3.0-beta.5 - 2026-11-06
 
 - Added Italian, Spanish and Russian to the launcher interface. English remains the default.

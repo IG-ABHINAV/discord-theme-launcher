@@ -1,4 +1,12 @@
-# Validation - 0.3.0-beta.5
+# Validation - 0.3.0-beta.6
+
+Date: **2026-11-06**. A patched stable Discord client was opening a JavaScript error because `app.asar` required `%APPDATA%\Vencord\dist\patcher.js` and that file was absent. The launcher now detects that stub, runs the pinned official Vencord CLI repair, and does not start Discord while the required module is missing. If the repair does not finish, it restores the local `_app.asar` backup.
+
+Checks: **61 core, 41 browser and 37 Windows tests**. Core checks cover a missing absolute `patcher.js`, restoration of the official package, refusal of a tiny backup, and leaving an existing `patcher.js` in place. Browser and Windows checks are unchanged. Release compilation has zero warnings/errors.
+
+On this machine the official CLI 1.4.2 repair was run after closing the error processes. `patcher.js` and the other runtime files were present afterward, and a Discord window titled with " - Discord" opened. The new launcher startup path calls that same verified installer. Safe-preview and the automated Windows tests do not write the real Discord profile. Clean-VM first install, signing and exhaustive accessibility/performance coverage remain open.
+
+## Inherited validation - 0.3.0-beta.5
 
 Date: **2026-11-06**. The launcher interface now includes Italian, Spanish and Russian. English remains the default. The choice is stored for the Windows user and is not part of a shared `.dtheme` file. Documentation stays in English.
 

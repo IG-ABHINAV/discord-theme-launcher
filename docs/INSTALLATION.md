@@ -6,7 +6,7 @@ The beta launcher targets Windows x64, standard per-user stable Discord in `%LOC
 
 ## Portable launcher (recommended)
 
-1. Download/extract the [portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.5), then run the EXE normally.
+1. Download/extract the [portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.6), then run the EXE normally.
 2. Select your target in Server and customize the design in Style/Artwork. All editing remains a preview.
 3. Save/share a `.dtheme` configuration if desired.
 4. Click **Apply to Discord**. Review the theme and target server in the overlay. It explains that Discord will restart and changes are local to this client.
@@ -74,14 +74,14 @@ No Nitro, bot, server boost or server administrator permission is needed. Each m
 Download `SHA256SUMS.txt` from the same release. On Windows:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.5-windows-x64-portable.zip
+Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.6-windows-x64-portable.zip
 ```
 
 Compare it with the corresponding filename in the release checksum file. The repository-root checksum file covers generated themes; the release checksum file also covers the launcher, ZIP and catalog. A hash checks integrity, not publisher identity.
 
 ## Missing Vencord runtime or startup error
 
-If a recognized Vencord loader is present but `patcher.js`, `preload.js`, `renderer.js` or `renderer.css` is missing, empty or unreadable, the launcher offers **Repair official Vencord (incomplete installation)**. Explicitly select it before applying. The official installer is invoked with its repair operation; themes and unrelated settings remain separate.
+If a recognized Vencord loader is present but `patcher.js`, `preload.js`, `renderer.js` or `renderer.css` is missing, empty or unreadable, opening the launcher repairs that install. It downloads the pinned official CLI, closes the broken Discord window, runs the official repair, and opens Discord only after those files are readable. If the repair does not finish and Discord kept an official `_app.asar` backup, that backup is restored so Discord can start instead of showing the missing-module error. The preset manager still offers **Repair official Vencord (incomplete installation)** and waits for an explicit selection. Themes and unrelated settings remain separate.
 
 A native Error window or an unconfirmed startup produces an error message rather than a success banner. No automatic second launch follows a failure. A generic loading/login window can require manual verification after the timeout; this is not proof that Discord crashed.
 

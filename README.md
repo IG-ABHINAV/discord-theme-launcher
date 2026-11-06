@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.5/DiscordThemeLauncher-0.3.0-beta.5-windows-x64-portable.zip"><img src="assets/banners/readme/discord-theme-launcher-1600x480.png" alt="Discord Theme Launcher. Free community themes you can install locally for a server you choose." width="1600"></a>
+  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.6/DiscordThemeLauncher-0.3.0-beta.6-windows-x64-portable.zip"><img src="assets/banners/readme/discord-theme-launcher-1600x480.png" alt="Discord Theme Launcher. Free community themes you can install locally for a server you choose." width="1600"></a>
   <h1>Discord Theme Launcher</h1>
   <p><strong>Free community themes, ready to install.</strong><br>A Windows launcher for Discord themes members make and share. Install a preset or make your own, and apply it locally to a server you choose. The collection starts with Prime Build, Prime Build Dev and FantaFort.</p>
   <p>
@@ -9,7 +9,7 @@
     <a href="https://vencord.dev/download/"><img src="https://img.shields.io/badge/Vencord-required-5865F2" alt="Requires Vencord"></a>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/PrimeBuild-pc/discord-theme-launcher?color=5865F2" alt="MIT license for project code"></a>
   </p>
-  <p><a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.5/DiscordThemeLauncher-0.3.0-beta.5-windows-x64-portable.zip"><strong>Download for Windows</strong></a> &nbsp;·&nbsp; <a href="#quick-setup">Quick setup</a> &nbsp;·&nbsp; <a href="docs/INSTALLATION.md">Installation &amp; recovery</a> &nbsp;·&nbsp; <a href="docs/VALIDATION.md">Validation</a></p>
+  <p><a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.6/DiscordThemeLauncher-0.3.0-beta.6-windows-x64-portable.zip"><strong>Download for Windows</strong></a> &nbsp;·&nbsp; <a href="#quick-setup">Quick setup</a> &nbsp;·&nbsp; <a href="docs/INSTALLATION.md">Installation &amp; recovery</a> &nbsp;·&nbsp; <a href="docs/VALIDATION.md">Validation</a></p>
   <p><sub>Maintained by <a href="https://github.com/PrimeBuild-pc">PrimeBuild-pc</a>. Independent project; not affiliated with Discord or Vencord.</sub></p>
 </div>
 

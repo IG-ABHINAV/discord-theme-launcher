@@ -47,7 +47,12 @@ internal sealed class BuilderForm : Form
             Size = new Size(Math.Min(Width, area.Width - 16), Math.Min(Height, area.Height - 16));
             Location = new Point(area.Left + (area.Width - Width) / 2, area.Top + (area.Height - Height) / 2);
         };
-        Shown += async (_, _) => { LauncherStyle.DarkCaption(this); await surface.InitializeAsync(); };
+        Shown += async (_, _) =>
+        {
+            LauncherStyle.DarkCaption(this);
+            try { await surface.InitializeAsync(); }
+            finally { if (!dryRun) await RepairUnbootableAsync(); }
+        };
         RenderPreview();
     }
 
@@ -92,7 +97,7 @@ internal sealed class BuilderForm : Form
             confirmation = confirmation is { } pending ? new { pending.Id, pending.Operation, themeName = pending.Configuration?.Name,
                 guild = pending.Configuration?.Guild, serverName = ThemeCompiler.BundledCatalog.Themes.FirstOrDefault(t => t.Guild == pending.Configuration?.Guild)?.Server ?? UiText.Text("Selected server"),
                 pending.RequiresSetup, pending.Repair, problem = UiText.Text(pending.Problem) } : null,
-            installation = UiText.Text(patched ? "Discord + Vencord ready. No installation needed." : client.Found ? "Discord found. Apply will offer official Vencord setup if needed." : "Standard Discord desktop was not found for this Windows user."),
+            installation = UiText.Text(patched ? "Discord + Vencord ready. No installation needed." : client.Unbootable ? "Discord cannot start because Vencord's patcher.js is missing. The launcher repairs it with the official installer." : client.Found ? "Discord found. Apply will offer official Vencord setup if needed." : "Standard Discord desktop was not found for this Windows user."),
             language = UiText.Current });
     }
 
@@ -225,6 +230,33 @@ internal sealed class BuilderForm : Form
         }
         confirmation = OperationConfirmation.Create(operation, revision, value, setup, repair, problem);
         Publish();
+    }
+
+    private async Task RepairUnbootableAsync()
+    {
+        if (busy || !client.Found || !client.Unbootable) return;
+        busy = true;
+        notice = "Discord cannot start because Vencord's patcher.js is missing. Downloading the official installer…";
+        Publish();
+        try
+        {
+            client.ValidateEnvironment();
+            using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(90) };
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("PrimeBuild-DiscordThemeLauncher/" + ThemeCompiler.BundledCatalog.Version);
+            var installer = await ReleaseDownload.FetchAsync(http, ReleaseDownload.InstallerUri, ReleaseDownload.InstallerSha256, 32 * 1024 * 1024);
+            notice = "Closing the broken Discord window and repairing official Vencord…"; Publish();
+            await client.StopAsync();
+            await client.InstallVencordAsync(installer, true);
+            notice = "Opening Discord…"; Publish();
+            await client.OpenAsync();
+            notice = "Vencord repaired. Discord startup confirmed.";
+        }
+        catch (Exception error)
+        {
+            notice = error is InvalidOperationException or InvalidDataException ? error.Message : error is HttpRequestException ? "The download could not finish. Check your connection and the release page, then retry." : "Vencord repair could not finish. Check the connection and the manual recovery guide.";
+            LauncherStyle.ShowMessage(this, UiText.Text(notice), UiText.Text("Vencord repair"));
+        }
+        finally { busy = false; Publish(); }
     }
 
     private async Task OperateAsync(OperationConfirmation confirmed, bool allowSetup)

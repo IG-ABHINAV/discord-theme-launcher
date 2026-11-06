@@ -11,7 +11,9 @@ internal sealed class DiscordClient
     private string Update => Path.Combine(Root, "Update.exe");
     public bool Found => File.Exists(Update);
     private string? LatestApp => Directory.Exists(Root) ? Directory.EnumerateDirectories(Root, "app-*").Where(d => Version.TryParse(Path.GetFileName(d)[4..], out _)).OrderByDescending(d => Version.Parse(Path.GetFileName(d)[4..])).FirstOrDefault() : null;
-    private string Asar => LatestApp is string app ? Path.Combine(app, "resources", "app.asar") : "";
+    private string? Resources => LatestApp is string app ? Path.Combine(app, "resources") : null;
+    private string Asar => Resources is string dir ? Path.Combine(dir, "app.asar") : "";
+    public bool Unbootable => VencordInstallation.StubIsUnbootable(Asar);
     public bool NeedsRepair => VencordInstallation.HasLoader(Asar) && !Patched;
     public bool Patched
     {
@@ -70,11 +72,28 @@ internal sealed class DiscordClient
         try { await process.WaitForExitAsync(timeout.Token); }
         catch (OperationCanceledException) { process.Kill(true); throw new InvalidOperationException("The official installer timed out. Retry or use the official manual installer."); }
         await Task.WhenAll(output, error);
-        if (process.ExitCode != 0 || !Patched) throw new InvalidOperationException("The official Vencord installer did not complete. Use the official manual installer, then reopen this launcher.");
+        if (process.ExitCode != 0 || !Patched)
+        {
+            var restored = false;
+            try { if (Resources is string dir) restored = VencordInstallation.TryRestoreOriginal(dir); }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+            throw new InvalidOperationException(restored
+                ? "The official Vencord installer did not complete. Official Discord files were restored so Discord can open. Retry the install before applying a theme."
+                : "The official Vencord installer did not complete. Use the official manual installer, then reopen this launcher.");
+        }
     }
 
     public async Task OpenAsync()
     {
+        if (Unbootable)
+        {
+            var restored = false;
+            try { if (Resources is string dir) restored = VencordInstallation.TryRestoreOriginal(dir); }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+            throw new InvalidOperationException(restored
+                ? "Discord was not opened. Vencord's patcher.js is missing, so the official Discord backup was restored. Install Vencord again before applying a theme."
+                : "Vencord is incomplete. Missing or unreadable: " + string.Join(", ", VencordInstallation.MissingRuntimeFiles(VencordRoot)) + ". Choose Repair official Vencord before reopening Discord.");
+        }
         if (NeedsRepair) throw new InvalidOperationException("Vencord is incomplete. Missing or unreadable: " + string.Join(", ", VencordInstallation.MissingRuntimeFiles(VencordRoot)) + ". Choose Repair official Vencord before reopening Discord.");
         var start = new ProcessStartInfo(Update) { UseShellExecute = false, CreateNoWindow = true };
         start.ArgumentList.Add("--processStart"); start.ArgumentList.Add("Discord.exe");
