@@ -85,7 +85,7 @@ If a recognized Vencord loader is present but `patcher.js`, `preload.js`, `rende
 
 A native Error window or an unconfirmed startup produces an error message rather than a success banner. No automatic second launch follows a failure. A generic loading/login window can require manual verification after the timeout; this is not proof that Discord crashed.
 
-If Discord already reopened successfully, do not assume a repair is still necessary. Check the current installation and avoid repeatedly restarting a working client. The [startup incident report](STARTUP-INCIDENT.md) distinguishes the observed failure from the confirmed launcher validation defect.
+If Discord already reopened successfully, do not assume a repair is still necessary. Check the current installation and avoid repeatedly restarting a working client.
 
 ## Updates
 

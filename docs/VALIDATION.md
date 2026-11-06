@@ -82,7 +82,7 @@ The patch adds runtime completeness and startup-result checks. The regression fi
 
 The live installation was read-only checked after the user successfully reopened Discord: all required runtime files were readable/nonempty, patcher resolution and patcher/preload syntax checks passed, and a loaded Friends window was present. No repair or restart of that working client was needed. A native startup window does not prove stability beyond that observation.
 
-The full automated first-install/repair path and every possible startup error remain outside exhaustive live coverage. See [startup incident and regression evidence](STARTUP-INCIDENT.md). The report below records the inherited 0.2.0 desktop/package checks separately; those are not claims that the 0.2.1 monitor was tested by restarting the user's working Discord.
+The full automated first-install/repair path and every possible startup error remain outside exhaustive live coverage. The report below records the inherited 0.2.0 desktop/package checks separately; those are not claims that the 0.2.1 monitor was tested by restarting the user's working Discord.
 
 ## Inherited validation - 0.2.0-beta.1
 
@@ -131,7 +131,7 @@ CI repeats theme/core checks on Linux and core/packaging on Windows, using read-
 
 The launcher is a setup tool, not a resident Discord plugin. No service, polling, auto-start task or theme runtime JavaScript is added. Backgrounds are static SVG data, with no theme network dependencies or full-window blur.
 
-The new backgrounds have **not** received controlled CPU/GPU, gaming FPS, frame-time or call-quality benchmarks. The [0.1 report](VALIDATION-0.1.md) and [old idle samples](idle-measurements.json) apply only to that earlier theme candidate. Do not use those small differences to promise zero overhead for this release.
+The new backgrounds have **not** received controlled CPU/GPU, gaming FPS, frame-time or call-quality benchmarks. Earlier short idle samples belong to an older theme candidate and are not a promise of zero overhead.
 
 ## Remaining coverage
 

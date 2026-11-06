@@ -69,7 +69,7 @@ A loader marker plus renderer.js is insufficient: Electron's main process also n
 
 Recognized incomplete Vencord installations offer upstream `--repair --branch stable`; small unrecognized loaders remain refused. Startup observation is limited to process path, window handle and title. A loaded title ending in " - Discord" is accepted; a native "Error" title fails; generic/splash windows keep waiting for up to 40 seconds. No messages, tokens or renderer state are inspected. A successful window check cannot guarantee future stability.
 
-After an operation fails, there is no automatic retry/relaunch. Theme-transaction restoration remains the responsibility of the existing snapshot mechanism. Original user incident evidence and regression limits are documented in STARTUP-INCIDENT.md.
+After an operation fails, there is no automatic retry/relaunch. Theme-transaction restoration remains the responsibility of the existing snapshot mechanism.
 
 ## FantaFort typography in 0.2.2
 
