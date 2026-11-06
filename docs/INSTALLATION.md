@@ -6,7 +6,7 @@ The beta launcher targets Windows x64, standard per-user stable Discord in `%LOC
 
 ## Portable launcher (recommended)
 
-1. Download/extract the [portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.4), then run the EXE normally.
+1. Download/extract the [portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.5), then run the EXE normally.
 2. Select your target in Server and customize the design in Style/Artwork. All editing remains a preview.
 3. Save/share a `.dtheme` configuration if desired.
 4. Click **Apply to Discord**. Review the theme and target server in the overlay. It explains that Discord will restart and changes are local to this client.
@@ -74,7 +74,7 @@ No Nitro, bot, server boost or server administrator permission is needed. Each m
 Download `SHA256SUMS.txt` from the same release. On Windows:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.4-windows-x64-portable.zip
+Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.5-windows-x64-portable.zip
 ```
 
 Compare it with the corresponding filename in the release checksum file. The repository-root checksum file covers generated themes; the release checksum file also covers the launcher, ZIP and catalog. A hash checks integrity, not publisher identity.

@@ -40,24 +40,24 @@ internal static class AssetImport
 
     public static ThemeAsset? Font(IWin32Window owner)
     {
-        using var file = new OpenFileDialog { Title = "Import a static font licensed for embedding and sharing", Filter = "Static fonts (*.ttf;*.otf)|*.ttf;*.otf", CheckFileExists = true };
+        using var file = new OpenFileDialog { Title = UiText.Text("Import a static font licensed for embedding and sharing"), Filter = UiText.Text("Static fonts (*.ttf;*.otf)") + "|*.ttf;*.otf", CheckFileExists = true };
         if (file.ShowDialog(owner) != DialogResult.OK) return null;
         ThemeStore.CheckPath(file.FileName);
         if (new FileInfo(file.FileName).Length > 2 * 1024 * 1024) throw new InvalidDataException("Fonts must be at most 2 MiB.");
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (extension is not (".ttf" or ".otf")) throw new InvalidDataException("Choose a static TTF or OTF font.");
-        using var license = new OpenFileDialog { Title = "Select this font's redistribution license (TXT)", Filter = "License text (*.txt)|*.txt", CheckFileExists = true };
+        using var license = new OpenFileDialog { Title = UiText.Text("Select this font's redistribution license (TXT)"), Filter = UiText.Text("License text (*.txt)") + "|*.txt", CheckFileExists = true };
         if (license.ShowDialog(owner) != DialogResult.OK) return null;
         ThemeStore.CheckPath(license.FileName);
         if (new FileInfo(license.FileName).Length > 64000) throw new InvalidDataException("The font license must be at most 64,000 bytes.");
         var asset = ThemeAsset.Create(Path.GetFileName(file.FileName), extension == ".ttf" ? "font/ttf" : "font/otf", File.ReadAllBytes(file.FileName), File.ReadAllText(license.FileName));
         ThemeConfiguration.ValidateAsset(asset, true);
-        using var dialog = new Form { Text = "Font license", BackColor = LauncherStyle.Surface, ForeColor = LauncherStyle.Text, Font = LauncherStyle.Font(), ClientSize = new Size(640, 500), StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false };
+        using var dialog = new Form { Text = UiText.Text("Font license"), BackColor = LauncherStyle.Surface, ForeColor = LauncherStyle.Text, Font = LauncherStyle.Font(), ClientSize = new Size(640, 500), StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false };
         var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(20), RowCount = 3, ColumnCount = 1 };
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 70)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
         var text = new TextBox { Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, Dock = DockStyle.Fill, Text = asset.License.ReplaceLineEndings(Environment.NewLine), BackColor = LauncherStyle.Base, ForeColor = LauncherStyle.Text };
-        var consent = new DiscordCheckBox { Text = "I have permission to embed and redistribute this font\nand its license with shared theme configurations.", Dock = DockStyle.Fill };
-        var accept = new DiscordButton { Text = "Import font", Primary = true, Dock = DockStyle.Right, Width = 140, Enabled = false, DialogResult = DialogResult.OK };
+        var consent = new DiscordCheckBox { Text = UiText.Text("I have permission to embed and redistribute this font\nand its license with shared theme configurations."), Dock = DockStyle.Fill };
+        var accept = new DiscordButton { Text = UiText.Text("Import font"), Primary = true, Dock = DockStyle.Right, Width = 140, Enabled = false, DialogResult = DialogResult.OK };
         consent.CheckedChanged += (_, _) => accept.Enabled = consent.Checked;
         layout.Controls.Add(text, 0, 0); layout.Controls.Add(consent, 0, 1); layout.Controls.Add(accept, 0, 2); dialog.Controls.Add(layout);
         dialog.Shown += (_, _) => LauncherStyle.DarkCaption(dialog);

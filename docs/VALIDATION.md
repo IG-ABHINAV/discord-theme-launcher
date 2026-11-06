@@ -1,4 +1,12 @@
-# Validation - 0.3.0-beta.4
+# Validation - 0.3.0-beta.5
+
+Date: **2026-11-06**. The launcher interface now includes Italian, Spanish and Russian. English remains the default. The choice is stored for the Windows user and is not part of a shared `.dtheme` file. Documentation stays in English.
+
+Checks: **57 core, 41 browser and 37 Windows tests**. Browser tests start in English and switch through Italian, Spanish and Russian, including the apply action and a translated heading, then return to English. Native tests switch the real WebView2 editor the same way and restore English before later checks. The 1040×720 layout still keeps the composer and primary action visible with the language menu. Existing confirmation, isolation and transaction checks pass. Release compilation has zero warnings/errors and packaging passes.
+
+The user's Discord was not restarted or modified. Real confirmed application, clean-VM Vencord setup, signing and exhaustive performance/accessibility/DPI checks remain separate open coverage. Safe-preview and Windows tests do not write the saved language file.
+
+## Inherited validation - 0.3.0-beta.4
 
 Date: **2026-11-06**. The user confirmed that the friend's application worked; the confusing separate preview-only workflow was the issue. The new main workflow is editing/preview → Apply → in-app confirmation → Continue & apply. The external restart acknowledgement checkbox and non-applicable product mode are removed. Runtime/profile protections and explicit Vencord setup consent remain in the confirmation.
 

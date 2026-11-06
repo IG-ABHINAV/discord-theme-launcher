@@ -11,7 +11,7 @@ internal sealed class StudioSurface : Panel
     internal const string Origin = "https://theme-preview.invalid/";
     private readonly WebView2 web = new() { Dock = DockStyle.Fill, DefaultBackgroundColor = LauncherStyle.Surface };
     private readonly List<Stream> staticResponses = [], previewResponses = [];
-    private readonly Label fallback = new() { Dock = DockStyle.Fill, ForeColor = LauncherStyle.Text, Padding = new Padding(36), Text = "Opening Theme Studio…" };
+    private readonly Label fallback = new() { Dock = DockStyle.Fill, ForeColor = LauncherStyle.Text, Padding = new Padding(36), Text = UiText.Text("Opening Theme Studio…") };
     private string previewHtml = "";
     private bool loaded;
     private ulong rootNavigation;
@@ -55,7 +55,7 @@ internal sealed class StudioSurface : Panel
                 {
                     var path = uri.AbsolutePath;
                     if (path == "/preview" && e.Request.Uri == PreviewUri) { bytes = Encoding.UTF8.GetBytes(previewHtml); mime = "text/html"; allowed = true; }
-                    else if (path is "/" or "/studio.css" or "/studio.js")
+                    else if (path is "/" or "/studio.css" or "/studio.js" or "/i18n.js")
                     { bytes = Resource(path == "/" ? "ui/studio.html" : "ui/" + path[1..]); mime = path == "/" ? "text/html" : path.EndsWith("css") ? "text/css" : "text/javascript"; allowed = true; }
                     else if (path is "/font/regular.ttf" or "/font/bold.ttf")
                     { bytes = Resource(path.Contains("regular") ? "NotoSans-Regular.ttf" : "NotoSans-Bold.ttf"); mime = "font/ttf"; allowed = true; }
@@ -74,7 +74,7 @@ internal sealed class StudioSurface : Panel
             {
                 if (e.NavigationId != rootNavigation) return;
                 loaded = e.IsSuccess; fallback.Visible = !loaded;
-                if (loaded) Loaded?.Invoke(); else fallback.Text = "Theme Studio could not load. Reopen the application; your saved configurations are safe.";
+                if (loaded) Loaded?.Invoke(); else fallback.Text = UiText.Text("Theme Studio could not load. Reopen the application; your saved configurations are safe.");
             };
             core.WebMessageReceived += (_, e) =>
             {
@@ -99,7 +99,7 @@ internal sealed class StudioSurface : Panel
         catch (Exception error) when (error is WebView2RuntimeNotFoundException or System.Runtime.InteropServices.COMException or InvalidOperationException)
         {
             fallback.Visible = true; web.Visible = false;
-            fallback.Text = "Theme Studio needs Microsoft Edge WebView2 Runtime. Install it from Microsoft's official WebView2 download page, then reopen the launcher. Your saved .dtheme files remain safe.\n\nhttps://developer.microsoft.com/microsoft-edge/webview2/";
+            fallback.Text = UiText.Text(UiText.WebViewMissing);
             RuntimeUnavailable?.Invoke();
         }
     }

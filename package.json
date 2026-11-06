@@ -1,6 +1,6 @@
 {
   "name": "discord-theme-launcher",
-  "version": "0.3.0-beta.4",
+  "version": "0.3.0-beta.5",
   "private": true,
   "type": "module",
   "description": "Windows launcher for free community Discord themes. Install a preset or make your own, and apply it locally to a server you choose.",
@@ -8,7 +8,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "check": "node scripts/check-theme.mjs",
-    "check:ui": "node --check launcher/Windows/ui/studio.js",
+    "check:ui": "node --check launcher/Windows/ui/i18n.js && node --check launcher/Windows/ui/studio.js",
     "test": "playwright test",
     "test:core": "dotnet run --project launcher/Tests/Tests.csproj -c Release -- .",
     "verify": "npm run build && npm run check && npm run check:ui && npm run test:core && npm test"

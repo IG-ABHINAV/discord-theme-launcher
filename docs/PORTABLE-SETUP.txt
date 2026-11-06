@@ -1,6 +1,8 @@
 DISCORD THEME LAUNCHER 0.3 - WINDOWS X64
 
 1. Extract the ZIP. Run DiscordThemeLauncher.exe normally, not as Administrator.
+   The interface is English by default. Italian, Spanish and Russian are in the
+   header language menu. These instructions stay in English.
 2. Choose your server ID / Discord channel link and a starting preset.
 3. Use Style and Artwork to customize. Editing stays in preview by default.
 4. Save or Share theme to keep a .dtheme file with its selected assets/licenses.

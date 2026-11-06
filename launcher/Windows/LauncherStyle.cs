@@ -79,7 +79,7 @@ internal static class LauncherStyle
         var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(24), RowCount = 2, ColumnCount = 1 };
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 52));
         Control copy = longText ? new TextBox { Text = message.ReplaceLineEndings(Environment.NewLine), Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, BackColor = Base, ForeColor = Text, BorderStyle = BorderStyle.None, Dock = DockStyle.Fill } : new Label { Text = message, Dock = DockStyle.Fill, ForeColor = Text };
-        var close = new DiscordButton { Text = "Got it", Primary = true, AutoSize = true, Padding = new Padding(18, 8, 18, 8), Anchor = AnchorStyles.Right, DialogResult = DialogResult.OK };
+        var close = new DiscordButton { Text = UiText.Text("Got it"), Primary = true, AutoSize = true, Padding = new Padding(18, 8, 18, 8), Anchor = AnchorStyles.Right, DialogResult = DialogResult.OK };
         layout.Controls.Add(copy, 0, 0); layout.Controls.Add(close, 0, 1); dialog.Controls.Add(layout);
         dialog.AcceptButton = close; dialog.CancelButton = close;
         dialog.Shown += (_, _) => { DarkCaption(dialog); if (copy is TextBox textBox) textBox.Select(0, 0); close.Focus(); };

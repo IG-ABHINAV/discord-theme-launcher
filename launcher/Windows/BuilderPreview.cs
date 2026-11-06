@@ -7,7 +7,7 @@ namespace CommunityThemes;
 internal sealed class BuilderPreview : Panel
 {
     private readonly WebView2 web = new() { Dock = DockStyle.Fill, DefaultBackgroundColor = LauncherStyle.Base };
-    private readonly Label fallback = new() { Text = "Preparing local preview…", Dock = DockStyle.Fill, ForeColor = LauncherStyle.Muted, Padding = new Padding(24) };
+    private readonly Label fallback = new() { Text = UiText.Text("Preparing local preview…"), Dock = DockStyle.Fill, ForeColor = LauncherStyle.Muted, Padding = new Padding(24) };
     private string html = "";
     private readonly List<Stream> responses = [];
     private string currentUri = "https://theme-preview.invalid/";
@@ -59,14 +59,14 @@ internal sealed class BuilderPreview : Panel
                 Ready = e.IsSuccess && fontLoaded;
                 foreach (var response in responses) response.Dispose(); responses.Clear();
                 fallback.Visible = !Ready;
-                if (!Ready) fallback.Text = "Preview or display font could not load. Choose a supported font and rebuild the preview before applying.";
+                if (!Ready) fallback.Text = UiText.Text("Preview or display font could not load. Choose a supported font and rebuild the preview before applying.");
                 PreviewReady?.Invoke(this, EventArgs.Empty);
             };
             if (html.Length > 0) core.Navigate(currentUri);
         }
         catch (Exception e) when (e is WebView2RuntimeNotFoundException or System.Runtime.InteropServices.COMException or InvalidOperationException)
         {
-            web.Visible = false; fallback.Text = "The local preview needs Microsoft Edge WebView2 Runtime.\nInstall it from Microsoft's official WebView2 download page, then reopen the launcher.\nYour configuration can still be saved and shared.";
+            web.Visible = false; fallback.Text = UiText.Text(UiText.PreviewWebViewMissing);
         }
     }
 

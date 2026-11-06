@@ -162,6 +162,15 @@ internal static class Program
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!studio.Ready || await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") != "\"#f5db36\"") await Task.Delay(100, timeout.Token);
                 Check(true, "rapid studio preset changes settle on the latest selected design");
+                await studioCore.ExecuteScriptAsync("document.getElementById('language').value='it';document.getElementById('language').dispatchEvent(new Event('change'))");
+                await StudioState("document.documentElement.lang==='it' && document.getElementById('apply').textContent.includes('Applica su Discord')");
+                await studioCore.ExecuteScriptAsync("document.getElementById('language').value='es';document.getElementById('language').dispatchEvent(new Event('change'))");
+                await StudioState("document.documentElement.lang==='es' && document.getElementById('apply').textContent.includes('Aplicar en Discord')");
+                await studioCore.ExecuteScriptAsync("document.getElementById('language').value='ru';document.getElementById('language').dispatchEvent(new Event('change'))");
+                await StudioState("document.documentElement.lang==='ru' && document.getElementById('apply').textContent.includes('Применить в Discord')");
+                await studioCore.ExecuteScriptAsync("document.getElementById('language').value='en';document.getElementById('language').dispatchEvent(new Event('change'))");
+                await StudioState("document.documentElement.lang==='en' && document.getElementById('apply').textContent.includes('Apply to Discord') && document.querySelector('label[for=guild]').textContent.includes('Server ID')");
+                Check(true, "studio switches among English, Italian, Spanish and Russian, then returns to English");
                 await studioCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"primebuild\"]').click()");
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!studio.Ready || await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") != "\"#ff6600\"") await Task.Delay(100, timeout.Token);

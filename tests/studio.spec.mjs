@@ -9,7 +9,7 @@ async function studio(page){
     if(url.origin!==origin){await route.abort();return;}
     let path,contentType;
     if(url.pathname==='/'){path='launcher/Windows/ui/studio.html';contentType='text/html';}
-    else if(['/studio.js','/studio.css'].includes(url.pathname)){path='launcher/Windows/ui'+url.pathname;contentType=url.pathname.endsWith('js')?'text/javascript':'text/css';}
+    else if(['/studio.js','/studio.css','/i18n.js'].includes(url.pathname)){path='launcher/Windows/ui'+url.pathname;contentType=url.pathname.endsWith('js')?'text/javascript':'text/css';}
     else if(url.pathname.startsWith('/font/')){path='assets/fonts/NotoSans-'+(url.pathname.includes('bold')?'Bold':'Regular')+'.ttf';contentType='font/ttf';}
     else if(url.pathname.startsWith('/art/')){const parts=url.pathname.split('/');path='assets/generated/'+parts[2]+'-'+parts[3]+'.svg';contentType='image/svg+xml';}
     else if(url.pathname==='/preview'){path='.local/builder-fixtures/'+(url.searchParams.get('preset')||'primebuild')+'.html';contentType='text/html';}
@@ -20,7 +20,7 @@ async function studio(page){
   });
   await page.addInitScript(()=>{
     let listener,revision=0;
-    const state={type:'state',values:{name:'Your community',guild:'987654321012345678',preset:'primebuild',palette:'primebuild',accent:'#ff6600',surface:'#101013',font:'primebuild',banner:'primebuild',background:'primebuild'},assets:{},dirty:false,saved:false,busy:false,version:'0.3.0-beta.4',notice:'Everything stays in preview until you confirm Apply.',validation:'',previewId:'1',previewUri:'https://theme-preview.invalid/preview?revision=1',canApply:true,applyReason:'',applyAction:'',applyActionLabel:'',canDisable:false,canRestore:false,confirmation:null,installation:'Discord + Vencord ready.'};
+    const state={type:'state',values:{name:'Your community',guild:'987654321012345678',preset:'primebuild',palette:'primebuild',accent:'#ff6600',surface:'#101013',font:'primebuild',banner:'primebuild',background:'primebuild'},assets:{},dirty:false,saved:false,busy:false,version:'0.3.0-beta.5',language:'en',notice:'Everything stays in preview until you confirm Apply.',validation:'',previewId:'1',previewUri:'https://theme-preview.invalid/preview?revision=1',canApply:true,applyReason:'',applyAction:'',applyActionLabel:'',canDisable:false,canRestore:false,confirmation:null,installation:'Discord + Vencord ready.'};
     window.testSetupRequired=false;window.testConfirmationProblem='';
     window.patchTestState=patch=>{Object.assign(state,patch);listener?.({data:structuredClone(state)})};
     window.testMessages=[];
@@ -32,6 +32,7 @@ async function studio(page){
       if(['apply','disable','restore'].includes(message.action))state.confirmation={id:'confirmation-'+(++revision),operation:message.action,themeName:state.values.name,guild:state.values.guild,serverName:'Selected server',requiresSetup:window.testSetupRequired,repair:false,problem:window.testConfirmationProblem};
       if(message.action==='cancelConfirmation'&&message.id===state.confirmation?.id)state.confirmation=null;
       if(message.action==='confirmOperation'&&message.id===state.confirmation?.id&&!state.confirmation.problem&&(!state.confirmation.requiresSetup||message.allowSetup)){state.confirmation=null;state.notice='Theme applied in the test fixture.'}
+      if(message.action==='language'&&['en','it','es','ru'].includes(message.value))state.language=message.value;
       if(message.action==='previewReady'&&message.id!==state.previewId)return;
       queueMicrotask(()=>listener?.({data:structuredClone(state)}));
     }}};
@@ -160,4 +161,28 @@ test('editing and save actions remain previews until the explicit application co
   await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
   await expect(page.locator('#confirmation-theme')).toHaveText('My custom name');
   await page.getByRole('button',{name:'Back to preview',exact:true}).click();
+});
+
+test('interface defaults to English and can switch to Italian, Spanish and Russian',async({page})=>{
+  await studio(page);
+  await expect(page.locator('#language')).toHaveValue('en');
+  await expect(page.locator('html')).toHaveAttribute('lang','en');
+  const catalog=await page.evaluate(()=>{
+    const keys=Object.keys(I18N.en);
+    return ['it','es','ru'].every(code=>keys.every(key=>typeof I18N[code][key]==='string'&&I18N[code][key].length>0)&&keys.length===Object.keys(I18N[code]).length);
+  });
+  expect(catalog).toBe(true);
+  await page.locator('#language').selectOption('it');
+  await expect(page.locator('html')).toHaveAttribute('lang','it');
+  await expect(page.getByRole('button',{name:'Applica su Discord',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Il tuo server. Il tuo stile.'})).toBeVisible();
+  await page.locator('#language').selectOption('es');
+  await expect(page.getByRole('button',{name:'Aplicar en Discord',exact:true})).toBeVisible();
+  await page.locator('#language').selectOption('ru');
+  await expect(page.locator('html')).toHaveAttribute('lang','ru');
+  await expect(page.getByRole('button',{name:'Применить в Discord',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Ваш сервер. Ваш стиль.'})).toBeVisible();
+  await page.locator('#language').selectOption('en');
+  await expect(page.getByRole('button',{name:'Apply to Discord',exact:true})).toBeVisible();
+  await expect(page.getByLabel('Server ID or channel link')).toBeVisible();
 });

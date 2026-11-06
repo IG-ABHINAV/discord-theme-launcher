@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0-beta.5 - 2026-11-06
+
+- Added Italian, Spanish and Russian to the launcher interface. English remains the default.
+- Kept documentation, release notes and setup instructions in English.
+- Saved the interface language for the Windows user without changing `.dtheme` files.
+
 ## 0.2.4-beta.1 - 2026-11-05
 
 - Added embedded Rajdhani display typography to Prime Build and JetBrains Mono to Prime Build Dev, including graphics, headings, categories, channel names and member groups.

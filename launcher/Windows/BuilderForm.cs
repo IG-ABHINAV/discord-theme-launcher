@@ -27,7 +27,7 @@ internal sealed class BuilderForm : Form
         dryRun = safePreview;
         store = new ThemeStore(client.VencordRoot, client.StateRoot, ThemeCompiler.BundledCatalog);
         BackColor = LauncherStyle.Surface; ForeColor = LauncherStyle.Text; Font = LauncherStyle.Font(); AutoScaleMode = AutoScaleMode.Dpi;
-        Text = "Theme Studio · Discord Theme Launcher — " + ThemeCompiler.BundledCatalog.Version;
+        Text = UiText.Format("Theme Studio · Discord Theme Launcher — {0}", ThemeCompiler.BundledCatalog.Version);
         ClientSize = new Size(1420, 900); MinimumSize = new Size(1020, 700); StartPosition = FormStartPosition.CenterScreen;
         Controls.Add(surface);
         surface.Loaded += Publish;
@@ -64,8 +64,8 @@ internal sealed class BuilderForm : Form
         var actions = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 70, Padding = new Padding(30, 8, 0, 0), BackColor = LauncherStyle.Surface };
         foreach (var (label, action) in new (string, Action)[] { ("Open configuration", OpenDocument), ("Save a copy", () => SaveDocument(true)), ("Help", Help) })
         {
-            var button = new DiscordButton { Text = label, AutoSize = true, Padding = new Padding(12, 7, 12, 7) };
-            button.Click += (_, _) => { try { action(); } catch { LauncherStyle.ShowMessage(this, "The configuration could not be processed. Check the format, size and permissions.", "Configuration action"); } };
+            var button = new DiscordButton { Text = UiText.Text(label), AutoSize = true, Padding = new Padding(12, 7, 12, 7) };
+            button.Click += (_, _) => { try { action(); } catch { LauncherStyle.ShowMessage(this, UiText.Text("The configuration could not be processed. Check the format, size and permissions."), UiText.Text("Configuration action")); } };
             actions.Controls.Add(button);
         }
         surface.Controls.Add(actions); actions.BringToFront();
@@ -85,14 +85,15 @@ internal sealed class BuilderForm : Form
         var patched = client.Patched;
         var readiness = ApplyReadiness.Evaluate(busy, validation, renderedRevision == revision && surface.Ready);
         surface.Publish(new { type = "state", values = StudioValues.From(configuration), assets = new { font = configuration.CustomFont?.Name, banner = configuration.CustomBanner?.Name, background = configuration.CustomBackground?.Name },
-            busy, dirty, saved, version = ThemeCompiler.BundledCatalog.Version, notice,
-            validation, previewId = surface.PreviewId, previewUri = validation.Length == 0 ? surface.PreviewUri : "",
-            canApply = readiness.CanApply, applyReason = readiness.Reason, applyAction = readiness.Action, applyActionLabel = readiness.ActionLabel,
+            busy, dirty, saved, version = ThemeCompiler.BundledCatalog.Version, notice = UiText.Text(notice),
+            validation = UiText.Text(validation), previewId = surface.PreviewId, previewUri = validation.Length == 0 ? surface.PreviewUri : "",
+            canApply = readiness.CanApply, applyReason = UiText.Text(readiness.Reason), applyAction = readiness.Action, applyActionLabel = readiness.ActionLabel.Length == 0 ? "" : UiText.Text(readiness.ActionLabel),
             canDisable = canDisable && !busy, canRestore = canRestore && !busy,
             confirmation = confirmation is { } pending ? new { pending.Id, pending.Operation, themeName = pending.Configuration?.Name,
-                guild = pending.Configuration?.Guild, serverName = ThemeCompiler.BundledCatalog.Themes.FirstOrDefault(t => t.Guild == pending.Configuration?.Guild)?.Server ?? "Selected server",
-                pending.RequiresSetup, pending.Repair, pending.Problem } : null,
-            installation = patched ? "Discord + Vencord ready. No installation needed." : client.Found ? "Discord found. Apply will offer official Vencord setup if needed." : "Standard Discord desktop was not found for this Windows user." });
+                guild = pending.Configuration?.Guild, serverName = ThemeCompiler.BundledCatalog.Themes.FirstOrDefault(t => t.Guild == pending.Configuration?.Guild)?.Server ?? UiText.Text("Selected server"),
+                pending.RequiresSetup, pending.Repair, problem = UiText.Text(pending.Problem) } : null,
+            installation = UiText.Text(patched ? "Discord + Vencord ready. No installation needed." : client.Found ? "Discord found. Apply will offer official Vencord setup if needed." : "Standard Discord desktop was not found for this Windows user."),
+            language = UiText.Current });
     }
 
     private async Task HandleMessageAsync(JsonElement message)
@@ -104,6 +105,13 @@ internal sealed class BuilderForm : Form
             switch (action)
             {
                 case "loaded": Publish(); return;
+                case "language":
+                    var code = message.GetProperty("value").GetString();
+                    if (!UiText.Supported(code)) return;
+                    UiText.Use(code);
+                    if (!dryRun) UiText.Save(client.StateRoot);
+                    Text = UiText.Format("Theme Studio · Discord Theme Launcher — {0}", ThemeCompiler.BundledCatalog.Version);
+                    Publish(); return;
                 case "edit":
                     var edits = message.GetProperty("values").Deserialize<StudioValues>(Catalog.JsonOptions) ?? throw new InvalidDataException("Invalid editor values.");
                     var strings = new[] { edits.Name, edits.Guild, edits.Preset, edits.Palette, edits.Accent, edits.Surface, edits.Font, edits.Banner, edits.Background };
@@ -148,13 +156,13 @@ internal sealed class BuilderForm : Form
         catch (Exception error) when (error is IOException or InvalidDataException or JsonException or ArgumentException or UnauthorizedAccessException or System.Runtime.InteropServices.ExternalException or InvalidOperationException or KeyNotFoundException)
         {
             notice = error is InvalidDataException ? error.Message : "The action could not finish. Check the file's format, size and permissions. Your saved configurations are safe.";
-            LauncherStyle.ShowMessage(this, notice, "Could not complete this action"); Publish();
+            LauncherStyle.ShowMessage(this, UiText.Text(notice), UiText.Text("Could not complete this action")); Publish();
         }
     }
     private void OpenDocument()
     {
         if (!ConfirmDiscard()) return;
-        using var dialog = new OpenFileDialog { Filter = "Theme configuration (*.dtheme)|*.dtheme", Title = "Open a configuration and its assets" };
+        using var dialog = new OpenFileDialog { Filter = UiText.Text("Theme configuration (*.dtheme)") + "|*.dtheme", Title = UiText.Text("Open a configuration and its assets") };
         if (dialog.ShowDialog(this) != DialogResult.OK) return;
         var value = ThemeConfiguration.Load(dialog.FileName); AssetImport.ValidateImages(value);
         confirmation = null; configuration = value; documentPath = dialog.FileName; dirty = false; saved = true; revision++;
@@ -165,7 +173,7 @@ internal sealed class BuilderForm : Form
         var value = ReadConfiguration(); string? path = share ? null : documentPath;
         if (path is null)
         {
-            using var dialog = new SaveFileDialog { Filter = "Theme configuration (*.dtheme)|*.dtheme", DefaultExt = "dtheme", AddExtension = true, FileName = "My-server-theme.dtheme", Title = share ? "Share a copy with embedded assets" : "Save your configuration" };
+            using var dialog = new SaveFileDialog { Filter = UiText.Text("Theme configuration (*.dtheme)") + "|*.dtheme", DefaultExt = "dtheme", AddExtension = true, FileName = "My-server-theme.dtheme", Title = UiText.Text(share ? "Share a copy with embedded assets" : "Save your configuration") };
             if (dialog.ShowDialog(this) != DialogResult.OK) return; path = dialog.FileName;
         }
         value.Save(path); if (!share) { documentPath = path; dirty = false; saved = true; }
@@ -175,7 +183,7 @@ internal sealed class BuilderForm : Form
     }
     private void ImportImage(bool banner)
     {
-        using var dialog = new OpenFileDialog { Filter = "Images (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg", Title = "Import an image you have permission to use and share" };
+        using var dialog = new OpenFileDialog { Filter = UiText.Text("Images (*.png;*.jpg;*.jpeg)") + "|*.png;*.jpg;*.jpeg", Title = UiText.Text("Import an image you have permission to use and share") };
         if (dialog.ShowDialog(this) != DialogResult.OK) return;
         var asset = AssetImport.Image(dialog.FileName);
         configuration = banner ? configuration with { Banner = "custom", CustomBanner = asset } : configuration with { Background = "custom", CustomBackground = asset };
@@ -184,16 +192,16 @@ internal sealed class BuilderForm : Form
     private bool ConfirmDiscard()
     {
         if (!dirty) return true;
-        using var dialog = new Form { Text = "Unsaved configuration", BackColor = LauncherStyle.Surface, ForeColor = LauncherStyle.Text, Font = LauncherStyle.Font(), ClientSize = new Size(520, 180), StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false, FormBorderStyle = FormBorderStyle.FixedDialog };
-        var text = new Label { Text = "This configuration has unsaved edits. Save it before continuing if you want to keep them.", Dock = DockStyle.Top, Height = 90, Padding = new Padding(24) };
+        using var dialog = new Form { Text = UiText.Text("Unsaved configuration"), BackColor = LauncherStyle.Surface, ForeColor = LauncherStyle.Text, Font = LauncherStyle.Font(), ClientSize = new Size(520, 180), StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false, FormBorderStyle = FormBorderStyle.FixedDialog };
+        var text = new Label { Text = UiText.Text("This configuration has unsaved edits. Save it before continuing if you want to keep them."), Dock = DockStyle.Top, Height = 90, Padding = new Padding(24) };
         var row = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 60, Padding = new Padding(24, 0, 0, 0) };
-        var keep = new DiscordButton { Text = "Keep editing", Primary = true, AutoSize = true, Padding = new Padding(12, 7, 12, 7), DialogResult = DialogResult.Cancel };
-        var discard = new DiscordButton { Text = "Discard edits", AutoSize = true, Padding = new Padding(12, 7, 12, 7), DialogResult = DialogResult.OK };
+        var keep = new DiscordButton { Text = UiText.Text("Keep editing"), Primary = true, AutoSize = true, Padding = new Padding(12, 7, 12, 7), DialogResult = DialogResult.Cancel };
+        var discard = new DiscordButton { Text = UiText.Text("Discard edits"), AutoSize = true, Padding = new Padding(12, 7, 12, 7), DialogResult = DialogResult.OK };
         row.Controls.Add(keep); row.Controls.Add(discard); dialog.Controls.Add(text); dialog.Controls.Add(row); dialog.CancelButton = keep; dialog.AcceptButton = keep; dialog.Shown += (_, _) => LauncherStyle.DarkCaption(dialog);
         return dialog.ShowDialog(this) == DialogResult.OK;
     }
-    private void ServerHelp() => LauncherStyle.ShowMessage(this, "In Discord desktop:\n1. Open User Settings > Advanced > Developer Mode.\n2. Right-click the server icon and choose Copy Server ID.\n3. Paste it into Server ID in the editor.\n\nOr right-click a text channel, choose Copy Channel Link and paste it. Invite links cannot identify the target. You must already belong to the server. No token or credentials are needed.", "Choose your server", true);
-    private void Help() => LauncherStyle.ShowMessage(this, "Choose a target in Server, then explore Style and Artwork. Click a starting preset to load its coordinated font, palette and images. The preview always starts on your target. Other server and DMs show stock Discord on purpose, demonstrating that your theme stays local to the selected server.\n\nSave or Share theme writes a .dtheme file with selected assets and the custom font license. Other members must choose to adopt it themselves. One personal theme can be active at a time. Recovery offers disable, restore and the original multi-server preset manager. Applying original presets replaces the personal slot too.\n\nWindows x64 / standard stable desktop Discord / default Vencord only. Editing is always a preview. Apply opens a review overlay showing the theme and target server. Only Continue & apply starts the operation and authorizes the Discord restart; Back to preview or Escape cancels. Missing Vencord setup is offered in that overlay with explicit consent. Recovery disable/restore use the same confirmation pattern. Vencord is unofficial and has Discord terms/account implications. This independent tool is not affiliated with Discord.\n\nBundled fonts are SIL OFL 1.1. Custom static TTF/OTF imports require editable embedding and redistribution rights plus the license. PNG/JPEG images must fit 8 MiB, 4096 px per side and 16 million pixels. Configurations are limited to 24 MiB. See the repository's Installation, Compatibility and Validation documents for details.", "Theme Studio · Help", true);
+    private void ServerHelp() => LauncherStyle.ShowMessage(this, UiText.Text(UiText.ServerHelpBody), UiText.Text(UiText.ServerHelpTitle), true);
+    private void Help() => LauncherStyle.ShowMessage(this, UiText.Text(UiText.HelpBody), UiText.Text(UiText.HelpTitle), true);
 
     private void RequestConfirmation(string operation)
     {
@@ -256,7 +264,7 @@ internal sealed class BuilderForm : Form
         {
             notice = error is InvalidDataException or InvalidOperationException ? error.Message : "Setup could not finish. Check the profile, disk space and manual recovery guide.";
             if (stopped) notice += " No automatic retry was made.";
-            LauncherStyle.ShowMessage(this, notice, "Operation did not complete");
+            LauncherStyle.ShowMessage(this, UiText.Text(notice), UiText.Text("Operation did not complete"));
         }
         finally { busy = false; Publish(); }
     }
