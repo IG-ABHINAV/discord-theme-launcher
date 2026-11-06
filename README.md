@@ -1,7 +1,7 @@
 <div align="center">
-  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.4/DiscordThemeLauncher-0.3.0-beta.4-windows-x64-portable.zip"><img src="assets/banners/readme/discord-theme-launcher-1600x480.png" alt="Your server. Your Discord. Create, preview and share a local theme, by Prime Build." width="1600"></a>
+  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/download/v0.3.0-beta.4/DiscordThemeLauncher-0.3.0-beta.4-windows-x64-portable.zip"><img src="assets/banners/readme/discord-theme-launcher-1600x480.png" alt="Discord Theme Launcher. Free community themes you can install locally for a server you choose." width="1600"></a>
   <h1>Discord Theme Launcher</h1>
-  <p><strong>Make your server feel like yours.</strong><br>Create a personal theme for a Discord server you choose, starting from three community designs.</p>
+  <p><strong>Free community themes, ready to install.</strong><br>A Windows launcher for Discord themes members make and share. Install a preset or make your own, and apply it locally to a server you choose. The collection starts with Prime Build, Prime Build Dev and FantaFort.</p>
   <p>
     <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/actions/workflows/check.yml"><img src="https://github.com/PrimeBuild-pc/discord-theme-launcher/actions/workflows/check.yml/badge.svg?branch=main" alt="Theme checks and Windows build"></a>
     <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases"><img src="https://img.shields.io/github/v/release/PrimeBuild-pc/discord-theme-launcher?include_prereleases&amp;label=release&amp;color=5865F2" alt="Latest release, including betas"></a>
