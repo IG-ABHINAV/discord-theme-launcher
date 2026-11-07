@@ -26,8 +26,8 @@ for (const profile of catalog.themes) {
   assert.equal(top.length, 1, 'All styling must be inside one guarded scope');
   assert.equal(top[0].type, 'atrule');
   assert.equal(top[0].name, 'scope');
-  assert.match(top[0].params, /^\(\.base__5e434:has\(/);
-  assert.ok(top[0].params.includes('> .content__5e434 > .sidebar__5e434 > nav'));
+  assert.ok(top[0].params.startsWith('(:is(.base__5e434, .base_pog62O):has('));
+  assert.ok(top[0].params.includes('> :is(.content__5e434, .content_pog62O) > :is(.sidebar__5e434, .sidebar_pog62O) > nav'));
   assert.ok(top[0].params.includes('[data-list-id="guildsnav"]'));
   assert.ok(top[0].params.includes('[data-list-item-id="guildsnav___'+profile.guild+'"][aria-selected="true"]'));
   for (const other of catalog.themes.filter(t => t.id !== profile.id)) assert.ok(!top[0].params.includes(other.guild));

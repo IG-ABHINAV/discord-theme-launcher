@@ -1,8 +1,10 @@
 # Compatibility and coverage
 
+Theme Studio includes neutral Fluent Dark, four credited community entries and [compatible downloaded CSS import](BETTERDISCORD-IMPORT.md). Import is a bounded subset: source design and supported variables are retained, unsupported constructs/resources are reported before accepting a file, and arbitrary resources are never fetched. The standalone files below remain the original three communities; Zenit is retargeted through the editor with no implicit server.
+
 ## Independent selected-server scopes
 
-The 0.3 configurator can retarget any included design to a supplied server ID or Discord channel link. One personal theme is active at a time; original presets may remain enabled on other servers. Standalone preset CSS keeps these fixed targets:
+The 0.3 configurator can retarget any included design to a supplied server ID or Discord channel link. One personal theme is active at a time; Apply disables other launcher presets, preserving their files and external themes. The editor supports multiple explicit server targets and guarded per-chat DM targets; see [target scopes](TARGETS.md). Standalone preset CSS keeps these fixed targets:
 
 | Theme | Exact server ID |
 | --- | --- |
@@ -23,7 +25,8 @@ The three CSS files can be enabled together. Only one matching server scope acti
 | Members panel | Dedicated background, retained role/presence colors |
 | Composer, headers, common cards, reactions, links, mentions and code blocks | Coordinated within the selected server scope |
 | Server icon rail | No dedicated redesign; inherited scoped tokens may affect some native accents |
-| Home/Friends, other servers, global account settings | Stock appearance |
+| Home/Friends, untargeted servers/DMs, global account settings | Stock appearance from these themes; external themes may still apply |
+| Explicitly selected private chats | Personal theme only while supported visible message markers identify the selected chat |
 | Portaled menus/profile cards/dialogs outside the base view | Stock appearance |
 | Detached windows without the recognized server rail | Stock appearance |
 | Forum, thread, search, attachment, reply and rare error layouts | Partial inherited styling; not exhaustive live coverage |
@@ -42,7 +45,7 @@ Store, PTB, Canary, custom Vencord profiles, obvious unknown loaders and linked 
 
 ## Performance and accessibility
 
-All decorative images are static embedded data: SVG for bundled designs and normalized PNG for imports. No theme JavaScript, polling, remote font/image imports, full-window blur or continuous animation is added. The launcher exits when closed and adds no resident process to Discord. Static backgrounds and CSS relational selectors still have rendering cost.
+Images are embedded: trusted SVG for original presets, normalized PNG for custom artwork, and bounded PNG/JPEG/WebP for CSS imports. No theme JavaScript, polling or remote resource fetching is added. Imported named animations are preserved under unique names; Zenit's gold-line animation and reduced-motion rule are retained. Its backdrop filter is contained to the selected pane. Imported designs do not inherit the original presets' effect budget. The launcher exits when closed and adds no resident process to Discord.
 
 Tested text/input contrast pairs and desktop fixture widths are recorded in Validation. Scaling, high contrast, large text and other third-party theme combinations need wider testing. If a conflict appears, compare with these themes disabled and preserve the server guard when investigating.
 
@@ -52,4 +55,4 @@ After a Discord update, inspect the selected-server marker and panel hierarchy i
 
 A companion plugin is still unnecessary for supported views. [Vencord custom plugins require source builds](https://docs.vencord.dev/installing/custom-plugins/), which would make installation harder for members. External portals remain stock instead of introducing that dependency.
 
-The launcher interface defaults to English. Italian, Spanish and Russian are optional and do not change theme files or documentation. Prime Build uses Rajdhani, Prime Build Dev uses JetBrains Mono and FantaFort uses Bangers for display lettering, server/channel headings, channel names and member groups. Normal messages, usernames and input retain their existing fonts. The font and artwork are embedded; no font installation is required. Rajdhani uses the upstream Latin WOFF2 subset, including Italian accents; other scripts/languages fall back to available native fonts when a glyph is absent. JetBrains Mono uses the upstream full Medium WOFF2. Font details and licenses are recorded under assets/fonts.
+The interface defaults to English; Italian, Spanish, Russian and German persist independently of theme files. Original presets use Rajdhani, JetBrains Mono and Bangers for display lettering while messages/input stay native. Fluent Dark uses native typography. Zenit retains its author typography with offline Montserrat. Fonts require no system installation; missing glyphs use native fallbacks. Font licenses are adjacent to source assets. See [current validation](THEME-STUDIO-VALIDATION.md); native accessibility smoke checks cover editor navigation; Windows reboot and exhaustive assistive-technology coverage remain pending.

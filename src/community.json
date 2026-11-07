@@ -1,0 +1,66 @@
+[
+  {
+    "id": "primebuild",
+    "name": "Prime Build",
+    "author": "Prime Build",
+    "authorUrl": "https://github.com/PrimeBuild-pc",
+    "source": "https://github.com/PrimeBuild-pc/discord-theme-launcher",
+    "license": "MIT",
+    "version": "0.3.0-beta.8",
+    "adapter": "preset",
+    "capabilities": [
+      "palette",
+      "font",
+      "banner",
+      "background"
+    ]
+  },
+  {
+    "id": "primebuild-dev",
+    "name": "Prime Build Dev",
+    "author": "Prime Build",
+    "authorUrl": "https://github.com/PrimeBuild-pc",
+    "source": "https://github.com/PrimeBuild-pc/discord-theme-launcher",
+    "license": "MIT",
+    "version": "0.3.0-beta.8",
+    "adapter": "preset",
+    "capabilities": [
+      "palette",
+      "font",
+      "banner",
+      "background"
+    ]
+  },
+  {
+    "id": "fantafort",
+    "name": "FantaFort",
+    "author": "Prime Build",
+    "authorUrl": "https://github.com/PrimeBuild-pc",
+    "source": "https://github.com/PrimeBuild-pc/discord-theme-launcher",
+    "license": "MIT",
+    "version": "0.3.0-beta.8",
+    "adapter": "preset",
+    "capabilities": [
+      "palette",
+      "font",
+      "banner",
+      "background"
+    ]
+  },
+  {
+    "id": "zenit-gold",
+    "name": "Zenit Gold — by JACKPOT71",
+    "author": "JACKPOT71",
+    "authorUrl": "https://github.com/JACKPOT71",
+    "source": "https://github.com/JACKPOT71/zenit-gold",
+    "license": "MIT",
+    "version": "2.2.1",
+    "revision": "64cc7a1eaf77dc3b081d5fd0637d8dc165b273c6",
+    "sha256": "3a196069c3fe38a9c2831e95955ba50d31381c2e7a9ae2878583049e24d61006",
+    "adapter": "reviewed-css",
+    "capabilities": [
+      "variables"
+    ],
+    "adaptation": "Server pane adaptation by Theme Studio; upstream artwork and gold design by JACKPOT71."
+  }
+]

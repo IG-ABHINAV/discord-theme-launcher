@@ -97,7 +97,12 @@ internal sealed class DiscordCheckBox : CheckBox
         SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
         ForeColor = LauncherStyle.Text; Cursor = Cursors.Hand; UseMnemonic = false;
     }
-    public override Size GetPreferredSize(Size proposedSize) => new(TextRenderer.MeasureText(Text, Font).Width + 34, Math.Max(26, Font.Height + 6));
+    public override Size GetPreferredSize(Size proposedSize)
+    {
+        int width = proposedSize.Width > 34 ? proposedSize.Width - 34 : 560;
+        var text = TextRenderer.MeasureText(Text, Font, new Size(width, int.MaxValue), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix);
+        return new Size(text.Width + 34, Math.Max(26, text.Height + 6));
+    }
     protected override void OnCheckedChanged(EventArgs e) { base.OnCheckedChanged(e); Invalidate(); }
     protected override void OnEnabledChanged(EventArgs e) { base.OnEnabledChanged(e); Cursor = Enabled ? Cursors.Hand : Cursors.Default; Invalidate(); }
     protected override void OnMouseEnter(EventArgs e) { base.OnMouseEnter(e); hover = true; Invalidate(); }
@@ -113,7 +118,7 @@ internal sealed class DiscordCheckBox : CheckBox
             using var pen = new Pen(Color.White, 2.2f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
             e.Graphics.DrawLines(pen, [new PointF(box.Left + 5, box.Top + 10), new PointF(box.Left + 9, box.Top + 14), new PointF(box.Left + 16, box.Top + 6)]);
         }
-        TextRenderer.DrawText(e.Graphics, Text, Font, new Rectangle(31, 0, Math.Max(0, Width - 33), Height), Enabled ? LauncherStyle.Text : Color.FromArgb(211, 212, 220), TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+        TextRenderer.DrawText(e.Graphics, Text, Font, new Rectangle(31, 0, Math.Max(0, Width - 33), Height), Enabled ? LauncherStyle.Text : Color.FromArgb(211, 212, 220), TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix);
         if (Focused && ShowFocusCues) ControlPaint.DrawFocusRectangle(e.Graphics, Rectangle.Inflate(ClientRectangle, -1, -1), LauncherStyle.Text, BackColor);
     }
 }

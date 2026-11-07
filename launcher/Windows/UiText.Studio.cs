@@ -1,0 +1,116 @@
+namespace CommunityThemes;
+
+internal static partial class UiText
+{
+    private static readonly Dictionary<string, Dictionary<string, string>> StudioCopy = new()
+    {
+        ["it"] = new()
+        {
+            ["The session could not be saved. Check disk space and permissions, then try closing again."] = "Impossibile salvare la sessione. Controlla lo spazio sul disco e i permessi, poi riprova a chiudere.",
+            ["Selected targets"] = "Destinazioni selezionate",
+            ["Theme applied. Discord startup confirmed. Changes are local to you."] = "Tema applicato. Avvio di Discord confermato. Le modifiche sono locali.",
+            ["Choose at least one server or DM chat."] = "Scegli almeno un server o una chat DM.",
+            ["Choose a darker panel color to keep text readable."] = "Scegli un colore dei pannelli più scuro per mantenere il testo leggibile.",
+            ["Theme saved in your local templates."] = "Tema salvato nei tuoi modelli locali.",
+            ["Use a name of 1–80 characters."] = "Usa un nome da 1 a 80 caratteri.",
+            ["Choose at most 16 servers or DM chats."] = "Scegli al massimo 16 server o chat DM.",
+            ["Invalid theme targets."] = "Destinazioni del tema non valide.",
+            ["Save each target as a unique channel or server ID."] = "Salva ogni destinazione come ID univoco di un server o canale.",
+            ["Use a DM channel ID or an https://discord.com/channels/@me/channel link."] = "Usa l’ID del canale DM o un link https://discord.com/channels/@me/canale.",
+
+            ["Downloading and verifying the selected font…"] = "Download e verifica del font selezionato…",
+            ["Font ready. It is saved with the theme and its license."] = "Font pronto. Viene salvato nel tema insieme alla licenza.",
+            ["The font could not be loaded. Your previous font is unchanged. Check your connection and retry."] = "Impossibile caricare il font. Il font precedente è rimasto invariato. Controlla la connessione e riprova.",
+
+            ["Choose a target server before applying."] = "Scegli un server prima di applicare.",
+            ["Theme files"] = "File dei temi",
+            ["Import a theme"] = "Importa un tema",
+            ["Import a folder"] = "Importa una cartella",
+            ["My server theme"] = "Il tema del mio server",
+            ["Choose a folder with at most 100 theme files."] = "Scegli una cartella con al massimo 100 file di temi.",
+            ["Theme styling disabled. Files preserved. Discord startup confirmed."] = "Temi disattivati. File conservati. Avvio di Discord confermato.",
+            ["Invalid backup styling settings."] = "Impostazioni dei temi nel backup non valide.",
+        },
+        ["es"] = new()
+        {
+            ["The session could not be saved. Check disk space and permissions, then try closing again."] = "No se pudo guardar la sesión. Comprueba el espacio en disco y los permisos y vuelve a intentar cerrar.",
+            ["Selected targets"] = "Destinos seleccionados",
+            ["Theme applied. Discord startup confirmed. Changes are local to you."] = "Tema aplicado. Inicio de Discord confirmado. Los cambios son locales.",
+            ["Choose at least one server or DM chat."] = "Elige al menos un servidor o chat DM.",
+            ["Choose a darker panel color to keep text readable."] = "Elige paneles más oscuros para mantener el texto legible.",
+            ["Theme saved in your local templates."] = "Tema guardado en tus plantillas locales.",
+            ["Use a name of 1–80 characters."] = "Usa un nombre de 1 a 80 caracteres.",
+            ["Choose at most 16 servers or DM chats."] = "Elige como máximo 16 servidores o chats DM.",
+            ["Invalid theme targets."] = "Destinos del tema no válidos.",
+            ["Save each target as a unique channel or server ID."] = "Guarda cada destino como ID único de canal o servidor.",
+            ["Use a DM channel ID or an https://discord.com/channels/@me/channel link."] = "Usa el ID del canal DM o un enlace https://discord.com/channels/@me/canal.",
+
+            ["Downloading and verifying the selected font…"] = "Descargando y verificando la fuente…",
+            ["Font ready. It is saved with the theme and its license."] = "Fuente lista. Se guarda con el tema y su licencia.",
+            ["The font could not be loaded. Your previous font is unchanged. Check your connection and retry."] = "No se pudo cargar la fuente. La anterior no ha cambiado. Comprueba la conexión y reintenta.",
+
+            ["Choose a target server before applying."] = "Elige un servidor antes de aplicar.",
+            ["Theme files"] = "Archivos de temas",
+            ["Import a theme"] = "Importar un tema",
+            ["Import a folder"] = "Importar una carpeta",
+            ["My server theme"] = "El tema de mi servidor",
+            ["Choose a folder with at most 100 theme files."] = "Elige una carpeta con un máximo de 100 temas.",
+            ["Theme styling disabled. Files preserved. Discord startup confirmed."] = "Temas desactivados. Archivos conservados. Inicio de Discord confirmado.",
+            ["Invalid backup styling settings."] = "Ajustes de temas del respaldo no válidos.",
+        },
+        ["ru"] = new()
+        {
+            ["The session could not be saved. Check disk space and permissions, then try closing again."] = "Не удалось сохранить сеанс. Проверьте свободное место на диске и права доступа, затем повторите закрытие.",
+            ["Selected targets"] = "Выбранные цели",
+            ["Theme applied. Discord startup confirmed. Changes are local to you."] = "Тема применена. Запуск Discord подтверждён. Изменения локальные.",
+            ["Choose at least one server or DM chat."] = "Выбери хотя бы один сервер или личный чат.",
+            ["Choose a darker panel color to keep text readable."] = "Выбери более тёмные панели, чтобы текст оставался читаемым.",
+            ["Theme saved in your local templates."] = "Тема сохранена в локальных шаблонах.",
+            ["Use a name of 1–80 characters."] = "Используй название от 1 до 80 символов.",
+            ["Choose at most 16 servers or DM chats."] = "Выбери не более 16 серверов или личных чатов.",
+            ["Invalid theme targets."] = "Недопустимые цели темы.",
+            ["Save each target as a unique channel or server ID."] = "Сохрани каждую цель как уникальный ID канала или сервера.",
+            ["Use a DM channel ID or an https://discord.com/channels/@me/channel link."] = "Используй ID личного канала или ссылку https://discord.com/channels/@me/канал.",
+
+            ["Downloading and verifying the selected font…"] = "Загрузка и проверка шрифта…",
+            ["Font ready. It is saved with the theme and its license."] = "Шрифт готов. Он сохраняется в теме вместе с лицензией.",
+            ["The font could not be loaded. Your previous font is unchanged. Check your connection and retry."] = "Не удалось загрузить шрифт. Предыдущий шрифт не изменён. Проверь подключение и повтори.",
+
+            ["Choose a target server before applying."] = "Выбери сервер перед применением.",
+            ["Theme files"] = "Файлы тем",
+            ["Import a theme"] = "Импортировать тему",
+            ["Import a folder"] = "Импортировать папку",
+            ["My server theme"] = "Тема моего сервера",
+            ["Choose a folder with at most 100 theme files."] = "Выбери папку, содержащую не более 100 тем.",
+            ["Theme styling disabled. Files preserved. Discord startup confirmed."] = "Темы отключены. Файлы сохранены. Запуск Discord подтверждён.",
+            ["Invalid backup styling settings."] = "Недопустимые настройки тем в резервной копии.",
+        },
+        ["de"] = new()
+        {
+            ["The session could not be saved. Check disk space and permissions, then try closing again."] = "Die Sitzung konnte nicht gespeichert werden. Prüfe den freien Speicherplatz und die Berechtigungen und versuche erneut, das Programm zu schließen.",
+            ["Selected targets"] = "Ausgewählte Ziele",
+            ["Theme applied. Discord startup confirmed. Changes are local to you."] = "Design angewendet. Discord-Start bestätigt. Änderungen gelten nur lokal.",
+            ["Choose at least one server or DM chat."] = "Wähle mindestens einen Server oder DM-Chat.",
+            ["Choose a darker panel color to keep text readable."] = "Wähle eine dunklere Bereichsfarbe, damit der Text lesbar bleibt.",
+            ["Theme saved in your local templates."] = "Design in deinen lokalen Vorlagen gespeichert.",
+            ["Use a name of 1–80 characters."] = "Verwende einen Namen mit 1–80 Zeichen.",
+            ["Choose at most 16 servers or DM chats."] = "Wähle höchstens 16 Server oder DM-Chats.",
+            ["Invalid theme targets."] = "Ungültige Designziele.",
+            ["Save each target as a unique channel or server ID."] = "Speichere jedes Ziel als eindeutige Kanal- oder Server-ID.",
+            ["Use a DM channel ID or an https://discord.com/channels/@me/channel link."] = "Verwende eine DM-Kanal-ID oder einen Link https://discord.com/channels/@me/kanal.",
+
+            ["Downloading and verifying the selected font…"] = "Ausgewählte Schrift wird geladen und geprüft…",
+            ["Font ready. It is saved with the theme and its license."] = "Schrift bereit. Sie wird mit dem Design und ihrer Lizenz gespeichert.",
+            ["The font could not be loaded. Your previous font is unchanged. Check your connection and retry."] = "Die Schrift konnte nicht geladen werden. Die bisherige Schrift bleibt erhalten. Prüfe die Verbindung und versuche es erneut.",
+
+            ["Choose a target server before applying."] = "Wähle vor dem Anwenden einen Server.",
+            ["Theme files"] = "Designdateien",
+            ["Import a theme"] = "Design importieren",
+            ["Import a folder"] = "Ordner importieren",
+            ["My server theme"] = "Mein Serverdesign",
+            ["Choose a folder with at most 100 theme files."] = "Wähle einen Ordner mit höchstens 100 Designdateien.",
+            ["Theme styling disabled. Files preserved. Discord startup confirmed."] = "Designs deaktiviert. Dateien erhalten. Discord-Start bestätigt.",
+            ["Invalid backup styling settings."] = "Ungültige Designeinstellungen in der Sicherung.",
+        },
+    };
+}

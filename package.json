@@ -1,9 +1,9 @@
 {
   "name": "discord-theme-launcher",
-  "version": "0.3.0-beta.6",
+  "version": "0.3.0-beta.11",
   "private": true,
   "type": "module",
-  "description": "Windows launcher for free community Discord themes. Install a preset or make your own, and apply it locally to a server you choose.",
+  "description": "Create, edit, preview and share Discord themes for the server you choose, with compatible BetterDiscord theme import and backup/restore.",
   "license": "MIT",
   "scripts": {
     "build": "node scripts/build.mjs",

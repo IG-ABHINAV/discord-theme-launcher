@@ -13,8 +13,12 @@ internal sealed class StudioSurface : Panel
     private readonly List<Stream> staticResponses = [], previewResponses = [];
     private readonly Label fallback = new() { Dock = DockStyle.Fill, ForeColor = LauncherStyle.Text, Padding = new Padding(36), Text = UiText.Text("Opening Theme Studio…") };
     private string previewHtml = "";
+    private ThemeConfiguration? artwork;
+    internal Func<string, ThemeAsset?>? LocalImageRequested;
+    public void SetArtwork(ThemeConfiguration value) => artwork = value;
     private bool loaded;
     private ulong rootNavigation;
+    public bool Available => loaded;
     public bool Ready { get; private set; }
     public string PreviewId { get; private set; } = "";
     public string PreviewUri => Origin + "preview?revision=" + PreviewId;
@@ -57,13 +61,26 @@ internal sealed class StudioSurface : Panel
                     if (path == "/preview" && e.Request.Uri == PreviewUri) { bytes = Encoding.UTF8.GetBytes(previewHtml); mime = "text/html"; allowed = true; }
                     else if (path is "/" or "/studio.css" or "/studio.js" or "/i18n.js")
                     { bytes = Resource(path == "/" ? "ui/studio.html" : "ui/" + path[1..]); mime = path == "/" ? "text/html" : path.EndsWith("css") ? "text/css" : "text/javascript"; allowed = true; }
+                    else if (path == "/app-icon.svg")
+                    { bytes = Resource("ui/app-icon.svg"); mime = "image/svg+xml"; allowed = true; }
                     else if (path is "/font/regular.ttf" or "/font/bold.ttf")
                     { bytes = Resource(path.Contains("regular") ? "NotoSans-Regular.ttf" : "NotoSans-Bold.ttf"); mime = "font/ttf"; allowed = true; }
+                    else if (path.StartsWith("/selected-art/", StringComparison.Ordinal) || path.StartsWith("/local-image/", StringComparison.Ordinal))
+                    {
+                        ThemeAsset? asset = null;
+                        try
+                        {
+                            if (path.StartsWith("/local-image/", StringComparison.Ordinal)) asset = LocalImageRequested?.Invoke(path[13..]);
+                            else asset = path == "/selected-art/banner" ? artwork?.CustomBanner : path == "/selected-art/background" ? artwork?.CustomBackground : null;
+                            if (asset is not null) { ThemeConfiguration.ValidateAsset(asset, false); bytes = asset.Data; mime = asset.MediaType; allowed = true; }
+                        }
+                        catch (Exception error) when (error is IOException or InvalidDataException or UnauthorizedAccessException or JsonException) { }
+                    }
                     else if (path.StartsWith("/art/", StringComparison.Ordinal))
                     {
                         var parts = path.Split('/');
-                        if (parts.Length == 4 && ThemeConfiguration.Presets.Contains(parts[2]) && parts[3] is "header" or "chat")
-                        { var data = ThemeCompiler.ArtworkDataUri(parts[2], parts[3]); bytes = Convert.FromBase64String(data[(data.IndexOf(',') + 1)..]); mime = "image/svg+xml"; allowed = true; }
+                        if (parts.Length == 4 && CommunityGallery.Designs.Any(d => d.Id == parts[2]) && parts[3] is "header" or "chat")
+                        { var data = ThemeCompiler.ArtworkDataUri(parts[2], parts[3]); bytes = Convert.FromBase64String(data[(data.IndexOf(',') + 1)..]); mime = data[5..data.IndexOf(';')]; allowed = true; }
                     }
                 }
                 var response = new MemoryStream(bytes);
@@ -110,6 +127,10 @@ internal sealed class StudioSurface : Panel
     public void Publish(object state)
     {
         if (loaded && web.CoreWebView2.Source == Origin) web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(state, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+    }
+    public async Task PrepareCloseAsync()
+    {
+        if (Available) await web.CoreWebView2.ExecuteScriptAsync("flushEdits();send('closeReady',{paletteName:document.getElementById('palette-name').value})");
     }
 
     protected override void Dispose(bool disposing)

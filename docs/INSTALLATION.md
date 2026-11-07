@@ -1,12 +1,14 @@
 # Installation, updates and recovery
 
+Theme Studio beta.11 starts at Home with create, import and template actions. One Editor contains Server, Style, Artwork and Files. Import individual .dtheme/.theme.css files or a folder and review compatibility. Save without a server; select a target before applying. German and the other supported languages cover the synthetic preview as well as controls. Submission uses a user-operated GitHub issue form after an embedded explanation.
+
 ## Supported automatic setup
 
 The beta launcher targets Windows x64, standard per-user stable Discord in `%LOCALAPPDATA%\Discord`, and default Vencord data in `%APPDATA%\Vencord`. Windows 11 is the live-tested platform. PTB, Canary, Microsoft Store, custom profiles, linked profile paths, other client modifications and other operating systems require manual installation. The launcher refuses to run its setup elevated. No separate .NET installation is needed.
 
 ## Portable launcher (recommended)
 
-1. Download/extract the [portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.6), then run the EXE normally.
+1. Download/extract the [portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.11), then run the EXE normally.
 2. Select your target in Server and customize the design in Style/Artwork. All editing remains a preview.
 3. Save/share a `.dtheme` configuration if desired.
 4. Click **Apply to Discord**. Review the theme and target server in the overlay. It explains that Discord will restart and changes are local to this client.
@@ -14,7 +16,7 @@ The beta launcher targets Windows x64, standard per-user stable Discord in `%LOC
 
 Missing/incomplete Vencord is offered in the same confirmation. Its installation/repair checkbox starts unchecked; the upstream installer is downloaded and verified only after consent and Continue. Environment problems (unsupported client, elevation, unreadable profile, unknown loader) are shown in the overlay and prevent continuation. Conditions are checked again before execution. Apply closes only verified stable Discord processes, applies the managed transaction and checks startup.
 
-The EXE includes verified preset fonts/artwork/CSS. Normal theme setup works offline with Vencord installed. The original-preset manager can still fetch absent adjacent files from the pinned release. A separate .NET install is unnecessary. WebView2 Runtime is required; if missing, install it from [Microsoft](https://developer.microsoft.com/microsoft-edge/webview2/) and reopen. Runtime installation is never automated.
+The EXE includes verified preset fonts/artwork/CSS. Normal theme setup works offline with Vencord installed. A separate .NET install is unnecessary. WebView2 Runtime is required; if missing, install it from [Microsoft](https://developer.microsoft.com/microsoft-edge/webview2/) and reopen. Runtime installation is never automated.
 
 Images: PNG/JPEG up to 8 MiB, 4096 px per side and 16 million pixels; normalized output must fit too. Fonts: static TTF/OTF up to 2 MiB, redistribution license TXT up to 64,000 bytes and explicit rights confirmation. Configurations are limited to 24 MiB. See [Personal configurations](CONFIGURATIONS.md).
 
@@ -28,31 +30,31 @@ If Apply is disabled, review configuration errors, wait for the latest design/fo
 
 ## Apply semantics
 
-Personal Apply replaces the single `PersonalServer.theme.css` slot and disables a bundled preset targeting the same server, retaining its bytes. Other server presets and unrelated themes remain enabled. **Disable personal theme** removes only the personal slot; it does not automatically re-enable a previously conflicting preset. Use Restore to recover that state.
+Personal Apply replaces the single `PersonalServer.theme.css` slot and disables other launcher presets, retaining their bytes. External themes remain enabled. Shared configurations affect only the installing user's client.
 
-**Recovery > Open original presets** retains the old multi-selection flow: checked presets are installed/enabled, unchecked presets removed/disabled, and the personal slot removed. Other themes, plugins, QuickCSS, online theme links and preferences are preserved by both flows. Shared configurations affect only the installing user's client; each member must adopt a shared file independently.
+Recovery offers **Restore Discord**, with a choice between launcher themes only or all local/online themes and QuickCSS. Files and plugins are preserved. A safety snapshot is written before updating settings. Alternatively choose a previous setup from the history and confirm its restoration.
 
-The four managed files are backed up before changes, including local edits. New snapshots record exact bytes, file existence, enablement and SHA-256; full settings and credentials are not copied. All existing backup sources are checked before restoration. Failed transactions attempt restoration and keep the recovery reference. Older three-file snapshots remain usable and leave the personal slot intact.
+Snapshots record managed file bytes, existence, enablement and SHA-256. A full styling reset additionally records only enabledThemes, themeLinks and useQuickCss, because that action explicitly changes those fields. Plugins, credentials and unrelated preferences are not copied or reverted. All sources are checked before restoration. Old three-file backups remain usable and leave the personal slot intact.
 
 Paths:
 
 - Theme files: `%APPDATA%\Vencord\themes`.
 - Backup history: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\backups`.
 - Recovery reference: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\last-backup.txt`.
-- Last saved/applied configuration: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\last-configuration.dtheme`. This editing document is independent of theme restoration. Editing alone does not write it; Save, Share or confirmed application can persist it. The development-only safe simulation never writes it.
+- Last saved/applied configuration: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\last-configuration.dtheme`. This editing document is independent of theme restoration. Editing alone does not write it; local Save or confirmed application can persist it. Exporting a copy does not mark the local profile saved. The development-only safe simulation never writes it.
+- Session state: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\studio-session.json`. A clean exit restores the document, local identity, editor section and preview context. Unsaved edits, including pending palette names, offer Save and close, Discard or Keep editing.
+- Reusable themes, palettes and images: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\library`.
 - Verified upstream installer, if needed: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\downloads`.
 
 Keep the backup folder if you want to undo earlier changes. Nothing in these local folders is uploaded by the launcher. Downloads are ordinary HTTPS requests to GitHub and its release delivery infrastructure; provider request logging is outside this project.
 
 ## Restore previous setup
 
-Open Recovery and click **Restore previous setup**. Review the overlay, finish calls/save drafts and confirm **Continue & restore**. The previous managed file bytes and enablement are restored while current unrelated preferences remain intact. A snapshot of the state before restoration is also saved, so the restore operation can itself be undone with the same button.
+Open Recovery, select a previously applied setup and choose **Restore selected setup**. Review the embedded confirmation and finish calls before continuing. A new safety snapshot makes the restoration reversible. This restores themes, not the Vencord installation.
 
-This restores themes, not Vencord's installation or other applications. Historical snapshots remain available in the backup folder.
+## Disable themes
 
-## Remove these themes
-
-Use **Disable personal theme** for the personal slot. To remove every managed theme, open **Recovery > Open original presets**, deselect all and apply after restart acknowledgement. Or disable and move individual files manually. Managed names:
+Choose **Recovery → Restore Discord**, select launcher themes only or all themes, and click Apply. It disables styling without deleting CSS, QuickCSS or runtime files. Managed names:
 
 - `PrimeBuild.theme.css`
 - `PrimeBuildDev.theme.css`
@@ -74,14 +76,14 @@ No Nitro, bot, server boost or server administrator permission is needed. Each m
 Download `SHA256SUMS.txt` from the same release. On Windows:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.6-windows-x64-portable.zip
+Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.11-windows-x64-portable.zip
 ```
 
 Compare it with the corresponding filename in the release checksum file. The repository-root checksum file covers generated themes; the release checksum file also covers the launcher, ZIP and catalog. A hash checks integrity, not publisher identity.
 
 ## Missing Vencord runtime or startup error
 
-If a recognized Vencord loader is present but `patcher.js`, `preload.js`, `renderer.js` or `renderer.css` is missing, empty or unreadable, opening the launcher repairs that install. It downloads the pinned official CLI, closes the broken Discord window, runs the official repair, and opens Discord only after those files are readable. If the repair does not finish and Discord kept an official `_app.asar` backup, that backup is restored so Discord can start instead of showing the missing-module error. The preset manager still offers **Repair official Vencord (incomplete installation)** and waits for an explicit selection. Themes and unrelated settings remain separate.
+If a recognized Vencord loader is present but `patcher.js`, `preload.js`, `renderer.js` or `renderer.css` is missing, empty or unreadable, opening the launcher repairs that install. It downloads the pinned official CLI, closes the broken Discord window, runs the official repair, and opens Discord only after those files are readable. If the repair does not finish and Discord kept an official `_app.asar` backup, that backup is restored so Discord can start instead of showing the missing-module error. Themes and unrelated settings remain separate.
 
 A native Error window or an unconfirmed startup produces an error message rather than a success banner. No automatic second launch follows a failure. A generic loading/login window can require manual verification after the timeout; this is not proof that Discord crashed.
 

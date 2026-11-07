@@ -1,0 +1,4 @@
+interface:
+  display_name: ".NET Desktop Architect"
+  short_description: "Architecture checks for .NET desktop apps"
+  default_prompt: "Use $dotnet-desktop-architect to review a Windows desktop C# app for architecture, quality, packaging, and Windows 11 compatibility."

@@ -3,7 +3,15 @@ import { createHash } from 'node:crypto';
 import { artwork } from './artwork.mjs';
 
 const root = new URL('../', import.meta.url);
+const copy = JSON.parse(await readFile(new URL('launcher/Windows/ui/studio-copy.json', root), 'utf8'));
+const german = JSON.parse(await readFile(new URL('launcher/Windows/ui/studio-de.json', root), 'utf8'));
+const i18nFile = new URL('launcher/Windows/ui/i18n.js', root);
+const i18n = (await readFile(i18nFile, 'utf8')).split('// Generated studio copy')[0].trimEnd();
+await writeFile(i18nFile, i18n + '\n// Generated studio copy; edit studio-copy.json and studio-de.json.\n' +
+  'for(const [code,copy] of Object.entries(' + JSON.stringify(copy) + '))Object.assign(I18N[code],copy);\nI18N.de=' + JSON.stringify(german) + ';\n');
 const source = await readFile(new URL('src/server-theme.css', root), 'utf8');
+// Exact aliases observed in stable Discord on 2026-11-07. Unknown layouts still fail closed.
+const discordClasses = JSON.parse(await readFile(new URL('src/discord-classes.json', root), 'utf8'));
 const profiles = JSON.parse(await readFile(new URL('src/profiles.json', root), 'utf8'));
 const {version} = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 const logo = await readFile(new URL('assets/prime-build-logo.png', root));
@@ -49,10 +57,11 @@ for (const p of profiles) {
   }
   let css = source;
   for (const [key, value] of Object.entries(values)) css = css.replaceAll('__'+key+'__', value);
+  css = css.replace(/\.([A-Za-z][\w-]*)/g, (selector, name) => discordClasses[name] ? `:is(${selector}, .${discordClasses[name]})` : selector);
   if (/__[A-Z][A-Z_]+__/.test(css)) throw Error('Unresolved template placeholder');
   await writeFile(new URL(p.file, root), css);
   const sha256 = createHash('sha256').update(css).digest('hex');
-  catalog.themes.push({...p, sha256, bytes:Buffer.byteLength(css)});
+  catalog.themes.push({...p, author:'Prime Build', source:'https://github.com/PrimeBuild-pc/discord-theme-launcher', license:'MIT', capabilities:['palette','font','banner','background'], sha256, bytes:Buffer.byteLength(css)});
   checksums.push(sha256+'  '+p.file);
   console.log('Built '+p.file+' ('+Buffer.byteLength(css)+' bytes)');
 }

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release Windows App"
+  short_description: "Prepare Windows app releases safely"
+  default_prompt: "Use $release-windows-app to prepare a Windows application release with versioning, changelog, signing, installer, smoke tests, antivirus checks, and GitHub Release assets."

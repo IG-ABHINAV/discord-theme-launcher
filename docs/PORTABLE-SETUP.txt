@@ -1,15 +1,25 @@
-DISCORD THEME LAUNCHER 0.3 - WINDOWS X64
+THEME STUDIO / DISCORD THEME LAUNCHER 0.3.0-beta.11 - WINDOWS X64
 
-1. Extract the ZIP. Run DiscordThemeLauncher.exe normally, not as Administrator.
-   The interface is English by default. Italian, Spanish and Russian are in the
-   header language menu. These instructions stay in English.
-2. Choose your server ID / Discord channel link and a starting preset.
-3. Use Style and Artwork to customize. Editing stays in preview by default.
-4. Save or Share theme to keep a .dtheme file with its selected assets/licenses.
-5. Click Apply to Discord. Review the theme and server in the overlay.
-6. Finish calls/streams and save drafts, then choose Continue & apply.
-   Discord restarts only after this confirmation. Back to preview / Esc cancels.
-   Missing Vencord setup is offered in the same overlay with explicit consent.
+1. Extract the ZIP and run DiscordThemeLauncher.exe without Administrator rights.
+2. Home offers Create a theme, Import a theme, and Choose a template.
+3. Editor contains Server, Style, Artwork and Files beside the preview.
+   Import .dtheme/.theme.css or a folder. Review compatibility before accepting.
+4. Save profiles locally under Templates > My themes, or export a .dtheme copy.
+   Style saves named three-color palettes; Artwork saves reusable images.
+   Add multiple server IDs or optional DM channel/message links. DM styling
+   needs a visible message from that chat; missing markers leave it unchanged.
+   Target selection is
+   optional until you apply. Propose a theme explains the GitHub issue process;
+   you attach and submit it yourself. No automatic upload or PR is created.
+5. Choose a target server, click Apply to Discord, review and confirm the restart.
+   Missing Vencord setup is offered with explicit consent when needed.
+6. Recovery > Restore Discord asks whether to disable launcher themes only or
+   all local/online themes and QuickCSS. Files and plugins are preserved. You
+   can also select a previously applied setup from history.
+
+English, Italian, Spanish, Russian and German are in the language menu.
+Synthetic preview content follows that language; authored theme names remain.
+Help and confirmations are overlays within this application.
 
 There is no separate preview-only product mode or external restart checkbox.
 A disabled Apply means the configuration/preview is not ready or an operation
@@ -21,13 +31,10 @@ themselves. No token, login, bot, Nitro, server permissions or credentials.
 The launcher never joins servers, reads messages or changes server settings.
 
 One personal theme is active at a time. Apply replaces that slot and disables
-a bundled theme targeting the same server. Other server presets remain enabled.
-Disable personal theme removes the slot. Restore previous setup recovers the
-last managed files/enablement; the restore is itself reversible.
-
-Recovery > Open original presets opens the previous multi-server setup. Applying that selection
-replaces the personal slot too and removes unchecked bundled themes. Unrelated
-themes, plugins, QuickCSS, online theme links and preferences are preserved.
+all other launcher themes. Their files and external themes remain intact.
+Recovery disables styling without deleting theme files. Full reset also disables
+online links and QuickCSS; a snapshot allows undoing that choice. Plugins
+and unrelated preferences are preserved in both reset modes.
 
 The EXE embeds verified preset CSS/fonts/artwork. Vencord users can configure
 offline. Optional upstream Vencord installation requires Internet access.
@@ -42,7 +49,11 @@ FONTS: static TTF/OTF <=2 MiB, license TXT <=64,000 bytes, editable embedding
 and redistribution rights required. Restricted fonts, variable fonts, font
 collections and imported WOFF/WOFF2 are rejected. Bundled fonts include notices.
 CONFIGURATIONS: .dtheme, <=24 MiB, selected assets embedded with SHA-256.
-Files contain data rather than arbitrary CSS/scripts. Review the target before
+Compatible CSS imports include original source/provenance and validated edits,
+rechecked on reopen/apply. Scripts and arbitrary resources are refused. See
+CSS-IMPORT-COMPATIBILITY.md. Original CSS export retains exact source bytes;
+it may be global when installed directly elsewhere. Share .dtheme for the
+server-targeted workflow. Review the target before
 applying a file from someone else. A checksum is not a publisher signature.
 
 Backups: %LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\backups
@@ -66,3 +77,7 @@ Discord terms/account implications. FantaFort is independent of Epic Games.
 Source, compatibility, recovery, licenses and validation:
 https://github.com/PrimeBuild-pc/discord-theme-launcher
 Official Vencord: https://vencord.dev/download/
+
+The studio resumes the document and section used on your last clean exit.
+Unsaved edits prompt Save and close, Discard or Keep editing. Saved theme,
+palette and image buttons show a check and disable redundant saves.

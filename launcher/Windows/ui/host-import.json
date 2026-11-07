@@ -1,0 +1,164 @@
+[
+  [
+    "Choose a target server before applying or saving.",
+    "Scegli un server prima di applicare o salvare.",
+    "Elige un servidor antes de aplicar o guardar.",
+    "Выберите сервер перед применением или сохранением."
+  ],
+  [
+    "Import a downloaded BetterDiscord theme",
+    "Importa un tema BetterDiscord scaricato",
+    "Importar un tema BetterDiscord descargado",
+    "Импорт скачанной темы BetterDiscord"
+  ],
+  [
+    "Choose a downloaded .theme.css file up to 2 MiB.",
+    "Scegli un file .theme.css scaricato fino a 2 MiB.",
+    "Elige un archivo .theme.css descargado de hasta 2 MiB.",
+    "Выберите скачанный файл .theme.css размером до 2 МиБ."
+  ],
+  [
+    "Export original CSS",
+    "Esporta il CSS originale",
+    "Exportar CSS original",
+    "Экспорт исходного CSS"
+  ],
+  [
+    "Use an HTTPS destination without credentials.",
+    "Usa una destinazione HTTPS senza credenziali.",
+    "Usa un destino HTTPS sin credenciales.",
+    "Используйте HTTPS-адрес без учётных данных."
+  ],
+  [
+    "Unknown community design.",
+    "Design della comunità sconosciuto.",
+    "Diseño de la comunidad desconocido.",
+    "Неизвестный дизайн сообщества."
+  ],
+  [
+    "This community adapter is not supported.",
+    "Questo adattamento della comunità non è supportato.",
+    "Esta adaptación de la comunidad no es compatible.",
+    "Эта адаптация сообщества не поддерживается."
+  ],
+  [
+    "Imported theme metadata exceeds supported limits.",
+    "I metadati del tema importato superano i limiti supportati.",
+    "Los metadatos del tema importado superan los límites admitidos.",
+    "Метаданные импортированной темы превышают допустимые пределы."
+  ],
+  [
+    "The stylesheet is not valid UTF-8 or contains a damaged embedded resource.",
+    "Il foglio di stile non è UTF-8 valido o contiene una risorsa incorporata danneggiata.",
+    "La hoja de estilos no es UTF-8 válido o contiene un recurso incrustado dañado.",
+    "Таблица стилей содержит недопустимый UTF-8 или повреждённый встроенный ресурс."
+  ],
+  [
+    "Server adaptation: document roots map to the selected server pane. Fixed layers are clipped to it; detached settings and popouts keep their normal appearance.",
+    "Adattamento al server: le radici del documento vengono associate al pannello del server scelto. I livelli fissi restano al suo interno; impostazioni e finestre separate mantengono l’aspetto normale.",
+    "Adaptación al servidor: las raíces del documento se asignan al panel del servidor elegido. Las capas fijas se limitan a ese panel; los ajustes y ventanas separados conservan su aspecto normal.",
+    "Адаптация для сервера: корни документа сопоставляются панели выбранного сервера. Фиксированные слои ограничены этой панелью; отдельные настройки и всплывающие окна сохраняют обычный вид."
+  ],
+  [
+    "External or active CSS resources are unsupported. Embed licensed images/fonts locally; no resource was downloaded.",
+    "Le risorse CSS esterne o attive non sono supportate. Incorpora localmente immagini e font con licenza; nessuna risorsa è stata scaricata.",
+    "Los recursos CSS externos o activos no son compatibles. Incrusta imágenes y fuentes con licencia localmente; no se ha descargado ningún recurso.",
+    "Внешние или активные ресурсы CSS не поддерживаются. Встройте лицензированные изображения и шрифты локально; ресурсы не скачивались."
+  ],
+  [
+    "Only embedded PNG, JPEG, WebP, TTF and WOFF2 resources are supported. Relative paths, SVG and network URLs are blocked.",
+    "Sono supportate solo risorse incorporate PNG, JPEG, WebP, TTF e WOFF2. Percorsi relativi, SVG e URL di rete sono bloccati.",
+    "Solo se admiten recursos incrustados PNG, JPEG, WebP, TTF y WOFF2. Las rutas relativas, SVG y direcciones de red están bloqueadas.",
+    "Поддерживаются только встроенные PNG, JPEG, WebP, TTF и WOFF2. Относительные пути, SVG и сетевые адреса блокируются."
+  ],
+  [
+    "Embedded resource is damaged or oversized.",
+    "La risorsa incorporata è danneggiata o troppo grande.",
+    "El recurso incrustado está dañado o es demasiado grande.",
+    "Встроенный ресурс повреждён или слишком велик."
+  ],
+  [
+    "Embedded resource signature does not match its declared format.",
+    "La firma della risorsa incorporata non corrisponde al formato dichiarato.",
+    "La firma del recurso incrustado no coincide con su formato declarado.",
+    "Сигнатура встроенного ресурса не соответствует заявленному формату."
+  ],
+  [
+    "Embedded images must have valid dimensions up to 4096 × 4096 and 16 million pixels.",
+    "Le immagini incorporate devono avere dimensioni valide entro 4096 × 4096 e 16 milioni di pixel.",
+    "Las imágenes incrustadas deben tener dimensiones válidas de hasta 4096 × 4096 y 16 millones de píxeles.",
+    "Встроенные изображения должны иметь допустимые размеры до 4096 × 4096 и 16 миллионов пикселей."
+  ],
+  [
+    "Unsupported document-root selector. Keep html/body/:root/#app-mount at the beginning of a selector, without CSS nesting.",
+    "Selettore di radice non supportato. Mantieni html/body/:root/#app-mount all’inizio del selettore, senza CSS annidato.",
+    "Selector de raíz no compatible. Mantén html/body/:root/#app-mount al principio del selector, sin CSS anidado.",
+    "Неподдерживаемый корневой селектор. html/body/:root/#app-mount должны быть в начале селектора, без вложенности CSS."
+  ],
+  [
+    "Fixed backgrounds and decorations are contained inside the selected server pane.",
+    "Sfondi e decorazioni fissi sono contenuti nel pannello del server scelto.",
+    "Los fondos y decoraciones fijos se limitan al panel del servidor elegido.",
+    "Фиксированные фоны и украшения ограничены панелью выбранного сервера."
+  ],
+  [
+    "A stylesheet-level @import needs a reviewed offline adapter. Download a self-contained CSS design instead. No resource was fetched.",
+    "Un @import a livello di foglio di stile richiede un adattamento offline verificato. Scarica invece un design CSS autonomo. Nessuna risorsa è stata recuperata.",
+    "Un @import de hoja de estilos requiere una adaptación sin conexión verificada. Descarga un diseño CSS autónomo. No se ha obtenido ningún recurso.",
+    "@import на уровне таблицы стилей требует проверенной локальной адаптации. Скачайте самостоятельный CSS-дизайн. Ресурсы не загружались."
+  ],
+  [
+    "The stylesheet exposes too many editable variables (maximum 128).",
+    "Il foglio di stile espone troppe variabili modificabili (massimo 128).",
+    "La hoja de estilos tiene demasiadas variables editables (máximo 128).",
+    "В таблице стилей слишком много редактируемых переменных (не более 128)."
+  ],
+  [
+    "Unsupported imported variable edit. Use the color or numeric controls shown in the compatibility review.",
+    "Modifica della variabile importata non supportata. Usa i controlli colore o numerici mostrati nella verifica di compatibilità.",
+    "Cambio de variable importada no compatible. Usa los controles de color o numéricos de la revisión de compatibilidad.",
+    "Изменение импортированной переменной не поддерживается. Используйте поля цвета или чисел из проверки совместимости."
+  ],
+  [
+    "Unsupported or malformed CSS syntax. Use a self-contained stylesheet without nesting or escaped identifiers.",
+    "Sintassi CSS non supportata o errata. Usa un foglio di stile autonomo senza annidamento o identificatori con escape.",
+    "Sintaxis CSS no compatible o incorrecta. Usa una hoja de estilos autónoma sin anidamiento ni identificadores con escapes.",
+    "Неподдерживаемый или некорректный CSS. Используйте самостоятельную таблицу стилей без вложенности и экранированных идентификаторов."
+  ],
+  [
+    "Unsupported stylesheet rule: {0}. @media, @supports, @container and named animations are supported; global registrations and nested CSS need a reviewed adapter.",
+    "Regola di stile non supportata: {0}. Sono supportati @media, @supports, @container e animazioni con nome; registrazioni globali e CSS annidato richiedono un adattamento verificato.",
+    "Regla de estilo no compatible: {0}. Se admiten @media, @supports, @container y animaciones con nombre; los registros globales y CSS anidado requieren una adaptación verificada.",
+    "Неподдерживаемое правило: {0}. Поддерживаются @media, @supports, @container и именованные анимации; глобальные регистрации и вложенный CSS требуют проверенной адаптации."
+  ],
+  [
+    "This CSS can remove server containment. all resets, unbounded containment and indirect display values require a reviewed adapter.",
+    "Questo CSS può rimuovere i limiti del server. Reset all, contenimento non limitato e valori display indiretti richiedono un adattamento verificato.",
+    "Este CSS puede eliminar los límites del servidor. Los reinicios all, la contención sin límites y valores display indirectos requieren una adaptación verificada.",
+    "Этот CSS может убрать границы сервера. Сброс all, неограниченный contain и косвенные значения display требуют проверенной адаптации."
+  ],
+  [
+    "Document-root layout changes cannot preserve the server pane bounds. Move layout rules to a descendant selector or use a reviewed adapter.",
+    "Le modifiche al layout della radice non possono conservare i limiti del pannello server. Sposta le regole su un selettore discendente o usa un adattamento verificato.",
+    "Los cambios de diseño en la raíz no conservan los límites del panel del servidor. Mueve las reglas a un selector descendiente o usa una adaptación verificada.",
+    "Изменения расположения корня не сохраняют границы панели сервера. Перенесите правила на дочерний селектор или используйте проверенную адаптацию."
+  ],
+  [
+    "bytes · embedded",
+    "byte · incorporata",
+    "bytes · incrustado",
+    "байт · встроено"
+  ],
+  [
+    "reviewed bundled font",
+    "font incluso verificato",
+    "fuente incluida verificada",
+    "проверенный встроенный шрифт"
+  ],
+  [
+    "Embedded images exceed the combined 32 million pixel preview budget. Use fewer or smaller images.",
+    "Le immagini incorporate superano insieme il limite di anteprima di 32 milioni di pixel. Usa meno immagini o immagini più piccole.",
+    "Las imágenes incrustadas superan el límite conjunto de vista previa de 32 millones de píxeles. Usa menos imágenes o más pequeñas.",
+    "Встроенные изображения превышают общий лимит предпросмотра в 32 миллиона пикселей. Используйте меньше изображений или уменьшите их."
+  ]
+]
