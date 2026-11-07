@@ -32,8 +32,8 @@ public static class ThemeCompiler
     public static string Compile(ThemeConfiguration config)
     {
         config.Validate();
-        var preset = BundledCatalog.Themes.Single(t => t.Id == config.Preset);
-        string css = PresetCss(config.Preset);
+        var preset = BundledCatalog.Themes.Single(t => t.Id == (config.Preset == "fluent" ? "primebuild" : config.Preset));
+        string css = PresetCss(preset.Id);
         css = css[css.IndexOf("@scope", StringComparison.Ordinal)..].Replace(preset.Guild, config.Guild);
         string face = "";
         if (config.Font == "custom")
@@ -84,6 +84,12 @@ public static class ThemeCompiler
             css = css.Insert(last, "\n  :is(.chatContent_f75fb0, .chatContent_z_gUBg), :is(.container_f369db, .container_BkGrJJ) { background-image: linear-gradient(#101013ed, #101013ed), var(--pb-chat-art); background-size: cover; background-position: center; }\n");
         }
         css = Set(css, "profile", "\"personal\"");
+        if (config.Preset == "fluent")
+        {
+            css = Set(css, "header-height", config.Banner == "none" ? "56px" : "112px");
+            // Neutral headings use Discord's native sizing as well as its native family.
+            css = Regex.Replace(css, @"font-size:\s*(?:22|18|16)px;", "font-size: inherit;");
+        }
         return "/* @name Personal Server Theme\n * @author PrimeBuild\n * @version " + BundledCatalog.Version + "\n * Local client styling for server " + config.Guild + ". Generated from a validated .dtheme configuration.\n */\n" + face + css;
     }
 

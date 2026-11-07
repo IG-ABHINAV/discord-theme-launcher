@@ -78,7 +78,13 @@ internal sealed class BuilderForm : Form
     private void Changed() { confirmation = null; revision++; dirty = true; RenderPreview(); }
     private void RenderPreview()
     {
-        try { var value = ReadConfiguration(); validation = ""; renderedRevision = revision; surface.Render(value); }
+        try
+        {
+            // A synthetic target lets a new design render without choosing a real server implicitly.
+            var value = configuration.Guild.Length == 0 ? configuration with { Guild = "987654321012345678" } : ReadConfiguration();
+            validation = configuration.Guild.Length == 0 ? "Choose a target server before applying or saving." : "";
+            renderedRevision = revision; surface.Render(value);
+        }
         catch (InvalidDataException error) { validation = error.Message; renderedRevision = -1; }
         Publish();
     }
@@ -91,7 +97,7 @@ internal sealed class BuilderForm : Form
         var readiness = ApplyReadiness.Evaluate(busy, validation, renderedRevision == revision && surface.Ready);
         surface.Publish(new { type = "state", values = StudioValues.From(configuration), assets = new { font = configuration.CustomFont?.Name, banner = configuration.CustomBanner?.Name, background = configuration.CustomBackground?.Name },
             busy, dirty, saved, version = ThemeCompiler.BundledCatalog.Version, notice = UiText.Text(notice),
-            validation = UiText.Text(validation), previewId = surface.PreviewId, previewUri = validation.Length == 0 ? surface.PreviewUri : "",
+            validation = UiText.Text(validation), previewId = surface.PreviewId, previewUri = renderedRevision == revision ? surface.PreviewUri : "",
             canApply = readiness.CanApply, applyReason = UiText.Text(readiness.Reason), applyAction = readiness.Action, applyActionLabel = readiness.ActionLabel.Length == 0 ? "" : UiText.Text(readiness.ActionLabel),
             canDisable = canDisable && !busy, canRestore = canRestore && !busy,
             confirmation = confirmation is { } pending ? new { pending.Id, pending.Operation, themeName = pending.Configuration?.Name,
@@ -128,7 +134,7 @@ internal sealed class BuilderForm : Form
                     if (!ThemeConfiguration.Presets.Contains(id)) return;
                     configuration = configuration with { Preset = id, Palette = id, Font = id, Banner = id, Background = id }; Changed(); return;
                 case "previewReady":
-                    if (renderedRevision == revision) validation = surface.Ready ? "" : "The design or display font did not load. Choose another font or reload the preview.";
+                    if (renderedRevision == revision) validation = !surface.Ready ? "The design or display font did not load. Choose another font or reload the preview." : configuration.Guild.Length == 0 ? "Choose a target server before applying or saving." : "";
                     Publish(); return;
                 case "refresh": RenderPreview(); return;
                 case "cancelConfirmation":

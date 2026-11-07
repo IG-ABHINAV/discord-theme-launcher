@@ -87,6 +87,7 @@ if (!OperatingSystem.IsWindows())
     Reject(() => ThemeStore.CheckPath(Path.Combine(linked,"settings","settings.json")), "linked profile refused");
 }
 var config = new ThemeConfiguration { Name = "Synthetic community", Guild = "987654321012345678", Palette = "blurple" };
+Check(new ThemeConfiguration().Guild == "" && new ThemeConfiguration().Preset == "fluent", "new themes are neutral and have no implicit target server");
 Check(ThemeConfiguration.ParseGuild(" https://discord.com/channels/987654321012345678/123456789012345678 ") == config.Guild && ThemeConfiguration.ParseGuild(config.Guild) == config.Guild, "server ID and channel-link selection");
 foreach (var invalid in new[] { "", "@me", "123", "https://discord.gg/invite", "https://evil.invalid/channels/987654321012345678/123456789012345678", "99999999999999999999", "12345678901234567\"]){body{color:red}}" })
     Reject(() => ThemeConfiguration.ParseGuild(invalid), "invalid server target refused: " + invalid);
