@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0-beta.7 - 2026-11-07 (unreleased)
+
+- Restore the three server themes after Discord changed its CSS class names. Keep exact aliases for the previous and current layouts, including personal theme typography and custom backgrounds.
+- Preserve the selected-server guard: other servers, DMs and unknown layouts remain outside the theme.
+- Add regression coverage for all three presets and personal themes using the November Discord classes.
+
 ## 0.3.0-beta.6 - 2026-11-06
 
 - Repair a Discord install that still loads Vencord when `patcher.js` is missing, instead of opening the JavaScript error window.

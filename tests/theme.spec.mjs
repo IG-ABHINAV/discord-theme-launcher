@@ -6,9 +6,35 @@ const catalog = JSON.parse(await readFile(new URL('../catalog.json', import.meta
 const fixture = new URL('./fixture.html', import.meta.url).href;
 const target = '[data-list-item-id="guildsnav___1206415718728601600"]';
 const theme = fileURLToPath(new URL('../PrimeBuild.theme.css', import.meta.url));
+const discordClasses = JSON.parse(await readFile(new URL('../src/discord-classes.json', import.meta.url), 'utf8'));
 const token = page => page.locator('.base__5e434').evaluate(el => getComputedStyle(el).getPropertyValue('--pb-accent').trim());
 
 test.beforeEach(async ({ page }) => { await page.goto(fixture); });
+
+for (const profile of catalog.themes) test(`${profile.server}: November Discord classes apply and remain isolated`, async ({ page }) => {
+  await page.locator('#theme').evaluate((el, file) => el.href = '../' + file, profile.file);
+  await page.locator(`[data-list-item-id="guildsnav___${profile.guild}"]`).click();
+  await page.evaluate(classes => {
+    for (const el of document.querySelectorAll('[class]')) for (const name of [...el.classList]) {
+      if (classes[name]) el.classList.replace(name, classes[name]);
+    }
+  }, discordClasses);
+  const base = page.locator('.base_pog62O');
+  const accent = () => base.evaluate(el => getComputedStyle(el).getPropertyValue('--pb-accent').trim());
+  await expect.poll(accent).toBe(profile.accent);
+  const rgb = hex => `rgb(${[1,3,5].map(i => parseInt(hex.slice(i,i+2),16)).join(', ')})`;
+  await expect(page.locator('.chatContent_z_gUBg')).toHaveCSS('background-color', rgb(profile.chat));
+  expect(await page.locator('.sidebarList_pog62O').evaluate(el => getComputedStyle(el).backgroundImage)).toContain('data:image/svg+xml');
+  await expect(page.locator('.scrollableContainer_2x8-Qn')).toHaveCSS('background-color', rgb(profile.panel));
+  await page.locator('[data-list-item-id="guildsnav___other"]').click();
+  await expect.poll(accent).toBe('');
+  await page.locator('[data-list-item-id="guildsnav___home"]').click();
+  await expect.poll(accent).toBe('');
+  await page.locator(`[data-list-item-id="guildsnav___${profile.guild}"]`).click();
+  await expect.poll(accent).toBe(profile.accent);
+  await page.locator('nav.guilds_pog62O').evaluate(el => el.hidden = true);
+  await expect.poll(accent).toBe('');
+});
 
 test('activates in Prime Build, switches off in another server and DMs, and returns', async ({ page }) => {
   await expect.poll(() => token(page)).toBe('#ff6600');

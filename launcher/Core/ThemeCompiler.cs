@@ -63,7 +63,7 @@ public static class ThemeCompiler
             css = Set(css, "border-strong", "#969eaf");
             int last = css.LastIndexOf('}');
             string foreground = ThemeConfiguration.Luminance(accent) < .2 ? "#fafafb" : "#16100b";
-            css = css.Insert(last, "\n  .lookFilled__201d5.colorBrand__201d5, .unreadPill__908e2 { color: " + foreground + "; }\n  .lookFilled__201d5.colorBrand__201d5:hover { color: #16100b; }\n");
+            css = css.Insert(last, "\n  :is(.lookFilled__201d5, .lookFilled_9OQtot):is(.colorBrand__201d5, .colorBrand_9OQtot), :is(.unreadPill__908e2, .unreadPill_4TfzT5) { color: " + foreground + "; }\n  :is(.lookFilled__201d5, .lookFilled_9OQtot):is(.colorBrand__201d5, .colorBrand_9OQtot):hover { color: #16100b; }\n");
         }
         else
         {
@@ -81,7 +81,7 @@ public static class ThemeCompiler
         if (config.Background == "custom")
         {
             int last = css.LastIndexOf('}');
-            css = css.Insert(last, "\n  .chatContent_f75fb0, .container_f369db { background-image: linear-gradient(#101013ed, #101013ed), var(--pb-chat-art); background-size: cover; background-position: center; }\n");
+            css = css.Insert(last, "\n  :is(.chatContent_f75fb0, .chatContent_z_gUBg), :is(.container_f369db, .container_BkGrJJ) { background-image: linear-gradient(#101013ed, #101013ed), var(--pb-chat-art); background-size: cover; background-position: center; }\n");
         }
         css = Set(css, "profile", "\"personal\"");
         return "/* @name Personal Server Theme\n * @author PrimeBuild\n * @version " + BundledCatalog.Version + "\n * Local client styling for server " + config.Guild + ". Generated from a validated .dtheme configuration.\n */\n" + face + css;

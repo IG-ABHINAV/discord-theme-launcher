@@ -1,4 +1,12 @@
-# Validation - 0.3.0-beta.6
+# Validation - 0.3.0-beta.7 (local build)
+
+Date: **2026-11-07**. Reproduced missing themes on stable Discord 1.0.9267 (Electron 44.10.0 / Chromium 152): Vencord was loaded and all three CSS files were enabled, but Discord had replaced the hashed CSS classes. Added exact old/current aliases, retaining the structural and exact-server scope rather than broad substring selectors. Three current-layout preset regressions failed before the fix and passed afterward; custom personal-theme styling is covered too.
+
+Checks: **61 core, 45 browser and 37 Windows checks**. The x64 portable Release package builds successfully. All three themes were applied to the real local profile with a managed snapshot; colors, sidebar artwork, display fonts and DM isolation passed in the running client, including a fresh process restart. All 16 Vencord profile/runtime/theme files retained identical SHA-256 after that restart, and preferences/plugins/enablement matched the pre-fix settings. The launcher starts as beta.7 from a persistent local Programs folder. Its actual original-preset manager was then exercised with all three presets selected: Apply closed Discord, backed up/applied the selection, opened stable Discord through Update.exe and displayed "Done. Discord startup confirmed." All 16 Vencord file hashes still matched afterward. The temporary local debugging endpoint was removed by returning to a normal launch.
+
+No launcher scheduled tasks, startup items or shutdown/logoff scripts targeting these files were found. Runtime and theme paths are under AppData, outside temporary storage. A full profile copy and file manifests are kept locally under the launcher's diagnostics folder. A Windows reboot/power cycle, external cleanup tools, future Discord updates and universal absence of bugs are not covered by these checks. This build is local and unsigned; beta.6 remains the latest published GitHub release.
+
+## Inherited validation - 0.3.0-beta.6
 
 Date: **2026-11-06**. A patched stable Discord client was opening a JavaScript error because `app.asar` required `%APPDATA%\Vencord\dist\patcher.js` and that file was absent. The launcher now detects that stub, runs the pinned official Vencord CLI repair, and does not start Discord while the required module is missing. If the repair does not finish, it restores the local `_app.asar` backup.
 

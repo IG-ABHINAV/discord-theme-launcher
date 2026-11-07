@@ -4,6 +4,8 @@ import { artwork } from './artwork.mjs';
 
 const root = new URL('../', import.meta.url);
 const source = await readFile(new URL('src/server-theme.css', root), 'utf8');
+// Exact aliases observed in stable Discord on 2026-11-07. Unknown layouts still fail closed.
+const discordClasses = JSON.parse(await readFile(new URL('src/discord-classes.json', root), 'utf8'));
 const profiles = JSON.parse(await readFile(new URL('src/profiles.json', root), 'utf8'));
 const {version} = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 const logo = await readFile(new URL('assets/prime-build-logo.png', root));
@@ -49,6 +51,7 @@ for (const p of profiles) {
   }
   let css = source;
   for (const [key, value] of Object.entries(values)) css = css.replaceAll('__'+key+'__', value);
+  css = css.replace(/\.([A-Za-z][\w-]*)/g, (selector, name) => discordClasses[name] ? `:is(${selector}, .${discordClasses[name]})` : selector);
   if (/__[A-Z][A-Z_]+__/.test(css)) throw Error('Unresolved template placeholder');
   await writeFile(new URL(p.file, root), css);
   const sha256 = createHash('sha256').update(css).digest('hex');

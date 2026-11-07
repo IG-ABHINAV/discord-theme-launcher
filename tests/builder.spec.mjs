@@ -5,6 +5,21 @@ import postcss from 'postcss';
 const directory = new URL('../.local/builder-fixtures/', import.meta.url);
 const target = '[data-list-item-id="guildsnav___987654321012345678"]';
 const token = page => page.locator('.base__5e434').evaluate(el => getComputedStyle(el).getPropertyValue('--pb-accent').trim());
+const discordClasses = JSON.parse(await readFile(new URL('../src/discord-classes.json', import.meta.url), 'utf8'));
+
+test('personal custom background and typography support current Discord classes', async ({ page }) => {
+  await page.goto(new URL('custom.html', directory).href);
+  await page.evaluate(classes => {
+    for (const el of document.querySelectorAll('[class]')) for (const name of [...el.classList]) {
+      if (classes[name]) el.classList.replace(name, classes[name]);
+    }
+  }, discordClasses);
+  expect(await page.locator('.base_pog62O').evaluate(el => getComputedStyle(el).getPropertyValue('--pb-accent').trim())).toBe('#48cfae');
+  expect(await page.locator('.chatContent_z_gUBg').evaluate(el => getComputedStyle(el).backgroundImage)).toContain('linear-gradient');
+  expect(await page.locator('.header_XH4OpX h2').evaluate(el => getComputedStyle(el).fontFamily)).toContain('PrimeBuild Personal Display');
+  await page.getByRole('treeitem', { name:'DM', exact:true }).click();
+  expect(await page.locator('.base_pog62O').evaluate(el => getComputedStyle(el).getPropertyValue('--pb-accent').trim())).toBe('');
+});
 
 test('preview explains outside-server styling and keeps the composer in view', async ({ page }) => {
   await page.setViewportSize({width: 880, height: 540});
