@@ -1,6 +1,13 @@
 using System.Text.Json.Nodes;
 using CommunityThemes;
 
+if (args is ["--restore-profile", var isolatedProfile, var isolatedState])
+{
+    new ThemeStore(isolatedProfile, isolatedState, ThemeCompiler.BundledCatalog).RestoreLast();
+    Console.WriteLine("Isolated profile recovery completed in a fresh process.");
+    return;
+}
+
 var root = Path.GetFullPath(args.Length > 0 ? args[0] : ".");
 var catalog = Catalog.Parse(File.ReadAllText(Path.Combine(root, "catalog.json")));
 // Public catalog seam: an additional locally verified theme is data, not a launcher allowlist edit.
@@ -127,8 +134,12 @@ foreach (var design in new[] { zenit, new ThemeConfiguration { Name = "Dracula",
     var copy = ThemeConfiguration.Load(path);
     Check(copy.Imported!.Original.SequenceEqual(design.Imported!.Original) && ThemeCompiler.Compile(copy) == ThemeCompiler.Compile(design), "imported portable save/reopen retains original bytes, license and exact generated design: " + design.Name);
     store.ApplyPersonal(design); var exact = File.ReadAllBytes(Path.Combine(store.ThemesDirectory, ThemeCompiler.PersonalFile));
-    store.ApplyPersonal(design); store.RestoreLast();
-    Check(File.ReadAllBytes(Path.Combine(store.ThemesDirectory, ThemeCompiler.PersonalFile)).SequenceEqual(exact), "repeated imported apply and recovery preserves exact bytes: " + design.Name);
+    store.ApplyPersonal(design);
+    using var recoveryProcess = new System.Diagnostics.Process { StartInfo = new("dotnet") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true } };
+    foreach (var argument in new[] { System.Reflection.Assembly.GetExecutingAssembly().Location, "--restore-profile", vencord, state }) recoveryProcess.StartInfo.ArgumentList.Add(argument);
+    recoveryProcess.Start();
+    if (!recoveryProcess.WaitForExit(15000)) { recoveryProcess.Kill(); throw new Exception("Fresh-process profile recovery timed out"); }
+    Check(recoveryProcess.ExitCode == 0 && File.ReadAllBytes(Path.Combine(store.ThemesDirectory, ThemeCompiler.PersonalFile)).SequenceEqual(exact), "repeated imported apply and fresh-process recovery preserves exact bytes: " + design.Name);
 }
 Check(ThemeConfiguration.ParseGuild(" https://discord.com/channels/987654321012345678/123456789012345678 ") == config.Guild && ThemeConfiguration.ParseGuild(config.Guild) == config.Guild, "server ID and channel-link selection");
 foreach (var invalid in new[] { "", "@me", "123", "https://discord.gg/invite", "https://evil.invalid/channels/987654321012345678/123456789012345678", "99999999999999999999", "12345678901234567\"]){body{color:red}}" })
@@ -140,6 +151,17 @@ Reject(() => (config with { Palette = "custom", Surface = "#ffffff" }).Validate(
 Reject(() => (config with { Accent = "red; } body {color:red}" }).Validate(), "CSS injection through color refused");
 Reject(() => (config with { Font = "custom" }).Validate(), "missing selected custom asset refused");
 var png = ThemeAsset.Create("sample.png", "image/png", Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg=="));
+var pixelBudgetCss = new System.Text.StringBuilder(":root{");
+for (int image = 0; image < 3; image++)
+{
+    var manyPixels = png.Data.ToArray();
+    System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(manyPixels.AsSpan(16), 4000);
+    System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(manyPixels.AsSpan(20), 4000);
+    manyPixels[^1] = (byte)image;
+    pixelBudgetCss.Append("--image").Append(image).Append(":url(\"data:image/png;base64,").Append(Convert.ToBase64String(manyPixels)).Append("\");");
+}
+pixelBudgetCss.Append('}');
+Check(!CssThemeImporter.Review(System.Text.Encoding.UTF8.GetBytes(pixelBudgetCss.ToString()), "PixelBudget.theme.css").Supported, "aggregate declared image pixels are bounded before allocating preview bitmaps");
 var customFont = ThemeAsset.Create("Bangers-Regular.ttf", "font/ttf", File.ReadAllBytes(Path.Combine(root, "assets/fonts/bangers/Bangers-Regular.ttf")), File.ReadAllText(Path.Combine(root, "assets/fonts/bangers/OFL.txt")));
 var portable = config with { Font = "custom", CustomFont = customFont, Banner = "custom", CustomBanner = png, Background = "custom", CustomBackground = png, Palette = "custom", Accent = "#48cfae", Surface = "#11151b" };
 var package = Path.Combine(fixture, "portable.dtheme"); portable.Save(package); var reopened = ThemeConfiguration.Load(package);
@@ -150,6 +172,7 @@ Reject(() => (portable with { CustomFont = customFont with { License = "" } }).V
 Reject(() => (portable with { CustomBanner = ThemeAsset.Create("active.svg", "image/svg+xml", System.Text.Encoding.UTF8.GetBytes("<svg onload='alert(1)'></svg>")) }).Validate(), "active SVG import rejected");
 Reject(() => (portable with { CustomBanner = png with { Name = "../escape.png" } }).Validate(), "asset traversal metadata rejected");
 var oversized = png.Data.ToArray(); System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(oversized.AsSpan(16), 5000);
+Check(!CssThemeImporter.Review(System.Text.Encoding.UTF8.GetBytes(":root{--image:url(\"data:image/png;base64," + Convert.ToBase64String(oversized) + "\")}"), "LargeImage.theme.css").Supported, "embedded CSS image dimensions are bounded before preview decoding");
 Reject(() => (portable with { CustomBanner = ThemeAsset.Create("large.png", "image/png", oversized) }).Validate(), "oversized image dimensions rejected");
 var restricted = customFont.Data.ToArray();
 int tables = System.Buffers.Binary.BinaryPrimitives.ReadUInt16BigEndian(restricted.AsSpan(4));

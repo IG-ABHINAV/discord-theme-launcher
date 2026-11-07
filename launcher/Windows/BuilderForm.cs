@@ -266,8 +266,8 @@ internal sealed class BuilderForm : Form
     private bool ConfirmDiscard()
     {
         if (!dirty) return true;
-        using var dialog = new Form { Text = UiText.Text("Unsaved configuration"), BackColor = LauncherStyle.Surface, ForeColor = LauncherStyle.Text, Font = LauncherStyle.Font(), ClientSize = new Size(520, 180), StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false, FormBorderStyle = FormBorderStyle.FixedDialog };
-        var text = new Label { Text = UiText.Text("This configuration has unsaved edits. Save it before continuing if you want to keep them."), Dock = DockStyle.Top, Height = 90, Padding = new Padding(24) };
+        using var dialog = new Form { Text = UiText.Text("Unsaved configuration"), BackColor = LauncherStyle.Surface, ForeColor = LauncherStyle.Text, Font = LauncherStyle.Font(), ClientSize = new Size(560, 230), StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false, FormBorderStyle = FormBorderStyle.FixedDialog };
+        var text = new Label { Text = UiText.Text("This configuration has unsaved edits. Save it before continuing if you want to keep them."), Dock = DockStyle.Top, Height = 130, Padding = new Padding(24) };
         var row = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 60, Padding = new Padding(24, 0, 0, 0) };
         var keep = new DiscordButton { Text = UiText.Text("Keep editing"), Primary = true, AutoSize = true, Padding = new Padding(12, 7, 12, 7), DialogResult = DialogResult.Cancel };
         var discard = new DiscordButton { Text = UiText.Text("Discard edits"), AutoSize = true, Padding = new Padding(12, 7, 12, 7), DialogResult = DialogResult.OK };

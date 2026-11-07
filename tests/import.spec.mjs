@@ -24,6 +24,7 @@ for(const [design,variable,value] of [['zenit-gold','--zg-gold','#e6c15e'],['dra
     await page.evaluate(()=>window.setPreviewContext('target'));
     await page.getByRole('button',{name:'Global settings',exact:true}).click();
     expect(await page.locator('#global-settings').evaluate((el,key)=>getComputedStyle(el).getPropertyValue(key).trim(),variable)).toBe('');
+    expect(await page.locator('#global-settings').evaluate(el=>{const r=el.getBoundingClientRect();return Boolean(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('#global-settings'))})).toBe(true);
     await page.getByRole('button',{name:'Global settings',exact:true}).click();
     for(const failure of ['hidden','ambiguous','missing']){
       await page.reload();

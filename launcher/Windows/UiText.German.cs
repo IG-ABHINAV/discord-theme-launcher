@@ -213,5 +213,6 @@ internal static partial class UiText
         ,["Document-root layout changes cannot preserve the server pane bounds. Move layout rules to a descendant selector or use a reviewed adapter."] = "Layoutänderungen an der Dokumentwurzel können die Grenzen des Serverbereichs nicht bewahren. Verwende für Layoutregeln einen untergeordneten Selektor oder eine geprüfte Anpassung."
         ,["bytes · embedded"] = "Byte · eingebettet"
         ,["reviewed bundled font"] = "geprüfte enthaltene Schrift"
+        ,["Embedded images exceed the combined 32 million pixel preview budget. Use fewer or smaller images."] = "Eingebettete Bilder überschreiten zusammen das Vorschaulimit von 32 Millionen Pixeln. Verwende weniger oder kleinere Bilder."
     };
 }

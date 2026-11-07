@@ -2,6 +2,10 @@
 
 ## Theme pipeline
 
+Beta.8 adds `src/community.json` for author/source/license/version, adaptation and capabilities; the three original CSS profiles remain in `src/profiles.json`. Catalog parsing accepts a bounded manifest of unique safe filenames instead of a three-entry allowlist. Historical restoration touches only its recorded managed subset, leaving newer files alone.
+
+`CssSyntax` / `CssThemeImporter` parse the supported bounded CSS model in Core. Original source/digest/provenance and variable overrides are revalidated at persistence and apply boundaries. Conversion maps document roots to the exact server scope, confines ordinary selectors to descendants, enforces containment, namespaces animations and applies explicit offline resource policy. `CommunityGallery` supplies reviewed adapters, currently pinned Zenit and its offline font mapping. [Compatibility details](BETTERDISCORD-IMPORT.md) describe rejected constructs.
+
 `src/profiles.json` defines three identities and exact guild IDs. `src/server-theme.css` contains shared scoped component rules. `scripts/artwork.mjs` produces original header/chat/channel/member SVGs. `scripts/build.mjs` embeds artwork, substitutes each profile, and writes the three standalone theme files, inspectable vector assets, `catalog.json` and theme checksums.
 
 Each output has exactly one selected-server `@scope`. Each theme additionally registers a uniquely named, embedded data-only `@font-face`; this resource registration contains no selectors, and its font is applied only inside that theme's selected-server scope. The catalog records file sizes and digests. It is embedded in the launcher, so an existing binary cannot silently switch to a mutable main-branch catalog or a different release. The `--pb-` variable prefix is retained for compatibility with the original Officina source; each active scope gets its own values.

@@ -1,9 +1,12 @@
-DISCORD THEME LAUNCHER 0.3 - WINDOWS X64
+THEME STUDIO / DISCORD THEME LAUNCHER 0.3.0-beta.8 - WINDOWS X64
 
 1. Extract the ZIP. Run DiscordThemeLauncher.exe normally, not as Administrator.
-   The interface is English by default. Italian, Spanish and Russian are in the
+   The interface is English by default. Italian, Spanish, Russian and German are in the
    header language menu. These instructions stay in English.
-2. Choose your server ID / Discord channel link and a starting preset.
+2. Create starts in neutral Fluent Dark with no server selected. Choose your
+   server ID / Discord channel link. Community offers four credited designs,
+   including Zenit Gold -- by JACKPOT71, and downloaded .theme.css import.
+   Review compatibility/resources before accepting. Unsupported CSS is rejected.
 3. Use Style and Artwork to customize. Editing stays in preview by default.
 4. Save or Share theme to keep a .dtheme file with its selected assets/licenses.
 5. Click Apply to Discord. Review the theme and server in the overlay.
@@ -42,7 +45,11 @@ FONTS: static TTF/OTF <=2 MiB, license TXT <=64,000 bytes, editable embedding
 and redistribution rights required. Restricted fonts, variable fonts, font
 collections and imported WOFF/WOFF2 are rejected. Bundled fonts include notices.
 CONFIGURATIONS: .dtheme, <=24 MiB, selected assets embedded with SHA-256.
-Files contain data rather than arbitrary CSS/scripts. Review the target before
+Compatible CSS imports include original source/provenance and validated edits,
+rechecked on reopen/apply. Scripts and arbitrary resources are refused. See
+CSS-IMPORT-COMPATIBILITY.md. Original CSS export retains exact source bytes;
+it may be global when installed directly elsewhere. Share .dtheme for the
+server-targeted workflow. Review the target before
 applying a file from someone else. A checksum is not a publisher signature.
 
 Backups: %LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\backups

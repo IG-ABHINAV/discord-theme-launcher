@@ -42,6 +42,11 @@ internal static class Program
         Check(UiText.Current == "de" && UiText.Text("Restore previous setup") == "Vorherige Einrichtung wiederherstellen", "German native recovery translation and language persistence round trip");
         Check(UiText.Text("Unsupported stylesheet rule: @layer. @media, @supports, @container and named animations are supported; global registrations and nested CSS need a reviewed adapter.").StartsWith("Nicht unterstützte"), "German compatibility errors preserve the reported CSS rule");
         UiText.Use("en");
+        using (var longConsent = new DiscordCheckBox { Text = "Ich darf diese Schrift und ihre Lizenz einbetten und mit geteilten Themenkonfigurationen weitergeben.", Font = LauncherStyle.Font() })
+        {
+            var preferred = longConsent.GetPreferredSize(new Size(300, 100));
+            Check(preferred.Width <= 300 && preferred.Height > 35, "long German native consent wraps within the proposed width");
+        }
         form.Shown += async (_, _) =>
         {
             try
@@ -191,6 +196,10 @@ internal static class Program
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!importedSurface.Ready) await Task.Delay(100, timeout.Token);
                 var importedCore = importedSurface.Controls.OfType<WebView2>().Single().CoreWebView2;
+                await importedCore.ExecuteScriptAsync("document.querySelector('[data-action=new]').click()");
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (!importedSurface.Ready || await importedCore.ExecuteScriptAsync("state.values.guild==='' && document.getElementById('apply').disabled && document.getElementById('preview-error').hidden") != "true") await Task.Delay(100, timeout.Token);
+                Check(true, "a new native design previews a synthetic server while Apply requires an explicit target");
                 await importedCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"zenit-gold\"]').click()");
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!importedSurface.Ready || await importedCore.ExecuteScriptAsync("Boolean(state.imported?.sha256)") != "true") await Task.Delay(100, timeout.Token);
@@ -199,6 +208,9 @@ internal static class Program
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!importedSurface.Ready || await importedCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--zg-gold').trim()") != "\"#31c6b4\"") await Task.Delay(100, timeout.Token);
                 Check(importedBuilder.SimulatedOperations == 0, "native imported variable edits remain preview-only");
+                await importedCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'edit',values:{...state.values,guild:'987654321012345678'}})");
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (!importedSurface.Ready || await importedCore.ExecuteScriptAsync("!document.getElementById('apply').disabled") != "true") await Task.Delay(100, timeout.Token);
                 await importedCore.ExecuteScriptAsync("document.getElementById('apply').click()");
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (await importedCore.ExecuteScriptAsync("document.getElementById('operation-confirmation').open") != "true") await Task.Delay(50, timeout.Token);

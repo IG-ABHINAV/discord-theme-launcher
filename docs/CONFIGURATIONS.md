@@ -2,15 +2,17 @@
 
 ## Format and target
 
-`.dtheme` is versioned JSON data: schema 1, at most 24 MiB. It stores the exact target ID, preset/palette/font/artwork choices, custom colors and selected embedded assets. Assets contain a display filename, MIME type, bytes, SHA-256 and optional license. Filenames never become extraction paths: packages are not unpacked. Unknown choices and schemas are refused. Arbitrary CSS, HTML, JavaScript and remote asset references are not accepted.
+`.dtheme` is versioned JSON data: schema 1, at most 24 MiB. It stores the exact target ID, preset/palette/font/artwork choices, custom colors and selected embedded assets. Assets contain a display filename, MIME type, bytes, SHA-256 and optional license. Packages are never extracted and filenames do not become paths. Compatible CSS imports add a bounded `Imported` record with exact original bytes, SHA-256, author/source/license and validated variable edits. Source is reparsed on reopen/compile/apply. Unknown schemas, HTML, scripts, arbitrary resources and unsupported CSS are refused. See [CSS import](BETTERDISCORD-IMPORT.md).
 
 The generated `PersonalServer.theme.css` is disposable output; retain the configuration for editing/sharing. Newer launchers may regenerate CSS from the same schema with updated Discord selectors. There are no external references, cloud synchronization or automatic updates.
+
+New themes use neutral Fluent Dark, native typography, no artwork and no server target. The editor can preview a synthetic example before target selection; saving/application require a valid explicit server. Earlier schema-one files retain their explicit choices. One personal theme can be active; multiple portable files can be saved. Imported CSS preserves its supported author design instead of becoming a recolored built-in preset. Original export writes exact source bytes, which may be global when installed directly elsewhere; share `.dtheme` for the targeted editor workflow.
 
 Target selection accepts a 17–20 digit unsigned server ID or HTTPS Discord channel link. Invite links and arbitrary hosts are refused. The UI explains **User Settings > Advanced > Developer Mode**, then **right-click server > Copy Server ID**. The launcher never reads Discord account storage or requests credentials. Users must already belong to the server.
 
 ## Compilation and readability
 
-`ThemeCompiler` verifies embedded CSS against the embedded catalog, retains its selected-server guard and retargets the ID. It substitutes validated colors and embedded artwork and registers one personal display-font alias. Message, author and composer typography stay native. Native typography omits font registration.
+For built-ins, `ThemeCompiler` verifies embedded CSS, retains its selected-server guard and retargets the ID. It substitutes validated colors/artwork and registers a personal display-font alias; messages and input stay native. Imported CSS retains its own supported design and typography. The reviewed Zenit adapter supplies offline Montserrat under a unique alias, contains document layers in the server pane and namespaces animations.
 
 Imported backgrounds get a 93% dark scrim in recognized chat/forum containers. Custom surface luminance is capped at 0.055; composer boundaries use a stronger fixed border and accent button foregrounds adapt to accent luminance. Included SVG lettering remains part of its original design, even if the target name or display font changes.
 

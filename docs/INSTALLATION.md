@@ -1,5 +1,7 @@
 # Installation, updates and recovery
 
+In Theme Studio beta.8, **Create** starts neutral with no target. **Community** offers four credited designs and downloaded `.theme.css` import with compatibility/resource review. **My themes** opens/saves/shares portable configurations and exports original CSS bytes. Choose a target before applying. Unsupported imports never mutate the profile; [the supported CSS model](BETTERDISCORD-IMPORT.md) explains limitations. German joins the four existing languages and persists for the Windows user. Submission opens the real repository issue template unless an existing Discord destination is configured via `THEME_STUDIO_SUBMISSION_DISCORD`.
+
 ## Supported automatic setup
 
 The beta launcher targets Windows x64, standard per-user stable Discord in `%LOCALAPPDATA%\Discord`, and default Vencord data in `%APPDATA%\Vencord`. Windows 11 is the live-tested platform. PTB, Canary, Microsoft Store, custom profiles, linked profile paths, other client modifications and other operating systems require manual installation. The launcher refuses to run its setup elevated. No separate .NET installation is needed.

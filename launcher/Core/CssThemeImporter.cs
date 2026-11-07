@@ -40,7 +40,8 @@ public static class CssThemeImporter
                 fileName.IndexOfAny(['/', '\\', ':']) >= 0 || fileName.Any(char.IsControl) || !fileName.EndsWith(".theme.css", StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException("Choose a downloaded .theme.css file up to 2 MiB.");
             string css = new UTF8Encoding(false, true).GetString(bytes).TrimStart('\uFEFF');
-            string Metadata(string key) => Regex.Match(css, @"(?m)^\s*\*?\s*@" + key + @"\s+([^\r\n*]+)").Groups[1].Value.Trim();
+            string header = css[..Math.Min(css.Length, 8192)];
+            string Metadata(string key) => Regex.Match(header, @"(?m)^[\t ]*\*?[\t ]*@" + key + @"[\t ]+([^\r\n*]+)").Groups[1].Value.Trim();
             string hash = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
             if (hash == ZenitHash)
             {
@@ -91,6 +92,7 @@ public static class CssThemeImporter
         var rules = CssSyntax.Rules(css); var result = new Analysis();
         string alias = "ts-" + theme.Sha256[..12] + "-";
         var keyframes = new Dictionary<string, string>();
+        var imageHashes = new HashSet<string>(); long imagePixels = 0;
         void FindAnimations(List<CssRule> nodes)
         {
             foreach (var rule in nodes)
@@ -128,7 +130,11 @@ public static class CssThemeImporter
                     "font/ttf" => raw.AsSpan(0, 4).SequenceEqual(new byte[] {0,1,0,0}), _ => false
                 };
                 if (!valid) throw new InvalidDataException("Embedded resource signature does not match its declared format.");
-                if (mime.StartsWith("image/", StringComparison.Ordinal)) ValidateImageSize(mime, raw);
+                if (mime.StartsWith("image/", StringComparison.Ordinal) && imageHashes.Add(Convert.ToHexString(SHA256.HashData(raw))))
+                {
+                    imagePixels += ValidateImageSize(mime, raw);
+                    if (imagePixels > 32_000_000) throw new InvalidDataException("Embedded images exceed the combined 32 million pixel preview budget. Use fewer or smaller images.");
+                }
                 result.Resources.Add(mime + " · " + raw.Length + " bytes · embedded");
             }
         }
@@ -166,6 +172,8 @@ public static class CssThemeImporter
                     !(normalized == "z-index" && Regex.IsMatch(original, @"^[01](?:\s*!important)?$", RegexOptions.IgnoreCase)))
                     throw new InvalidDataException("Document-root layout changes cannot preserve the server pane bounds. Move layout rules to a descendant selector or use a reviewed adapter.");
                 CheckValue(original); string value = theme.Sha256 == ZenitHash ? original.Replace("\"Montserrat\"", "\"" + alias + "Montserrat\"") : original;
+                // Document stacking belongs to Discord; the imported pane must stay below detached portals.
+                if (root && normalized == "z-index") value = "auto!important";
                 string editable = Regex.Replace(value, @"\s*!important$", "", RegexOptions.IgnoreCase).Trim();
                 if (root && Identifier.IsMatch(property) && (Color.IsMatch(editable) || Number.IsMatch(editable)))
                     result.Variables[property] = new(property, editable, Color.IsMatch(editable) ? "color" : "number");
@@ -232,12 +240,12 @@ public static class CssThemeImporter
         string guard = ThemeCompiler.ServerScope(guild);
         string font = theme.Sha256 == ZenitHash ? CommunityGallery.ZenitFontCss : "";
         result.Css = font + guard + "{:scope{--pb-profile:\"personal\";position:relative;isolation:isolate;contain:paint;}" + converted +
-            ":scope{--pb-profile:\"personal\"!important;position:relative!important;isolation:isolate!important;contain:paint!important;" +
+            ":scope{--pb-profile:\"personal\"!important;position:relative!important;z-index:auto!important;isolation:isolate!important;contain:paint!important;" +
             string.Join("", theme.Edits.Select(e => e.Key + ":" + e.Value + "!important;")) + "}}";
         return result;
     }
 
-    private static void ValidateImageSize(string mime, byte[] bytes)
+    private static long ValidateImageSize(string mime, byte[] bytes)
     {
         int width = 0, height = 0;
         if (mime == "image/png" && bytes.Length >= 33 && Encoding.ASCII.GetString(bytes, 12, 4) == "IHDR")
@@ -267,5 +275,6 @@ public static class CssThemeImporter
         }
         if (width is < 1 or > 4096 || height is < 1 or > 4096 || (long)width * height > 16_000_000)
             throw new InvalidDataException("Embedded images must have valid dimensions up to 4096 × 4096 and 16 million pixels.");
+        return (long)width * height;
     }
 }
