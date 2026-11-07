@@ -38,11 +38,13 @@ Check(!VencordInstallation.IsReady(asar,vencord) && VencordInstallation.MissingR
 Check(VencordInstallation.InspectWindowTitle("Error") == StartupState.Failed && VencordInstallation.InspectWindowTitle("Discord") == StartupState.Waiting && VencordInstallation.InspectWindowTitle("Friends - Discord") == StartupState.Ready, "native error and splash windows cannot be reported as a successful startup");
 var resources = Path.Combine(fixture, "resources"); Directory.CreateDirectory(resources);
 var stub = Path.Combine(resources, "app.asar"); var original = Path.Combine(resources, "_app.asar");
-File.WriteAllText(stub, "require(\"C:\\\\missing\\\\Vencord\\\\dist\\\\patcher.js\")");
+var missingPatcher = Path.Combine(fixture, "missing", "Vencord", "dist", "patcher.js");
+var missingStub = "require(" + System.Text.Json.JsonSerializer.Serialize(missingPatcher) + ")";
+File.WriteAllText(stub, missingStub);
 File.WriteAllBytes(original, new byte[100_000]);
 Check(VencordInstallation.StubIsUnbootable(stub) && !VencordInstallation.IsReady(stub, vencord), "a stub whose patcher.js is missing must not boot");
 Check(VencordInstallation.TryRestoreOriginal(resources) && new FileInfo(stub).Length == 100_000 && !File.Exists(original), "missing patcher.js restores the official Discord package and does not start the stub");
-File.WriteAllText(stub, "require(\"C:\\\\missing\\\\Vencord\\\\dist\\\\patcher.js\")");
+File.WriteAllText(stub, missingStub);
 File.WriteAllBytes(original, new byte[50]);
 Check(!VencordInstallation.TryRestoreOriginal(resources) && File.ReadAllText(stub).Contains("patcher.js"), "a tiny backup is not treated as the official package");
 var present = Path.Combine(vencord, "dist", "patcher.js");
