@@ -42,6 +42,14 @@ CSS source is limited to 2 MiB; `.dtheme` to 24 MiB. Source and SHA-256 are reta
 
 Custom PNG/JPEG artwork is normalized to PNG, at most 8 MiB, 4096 px per side and 16 million pixels. Static TTF/OTF imports require redistribution and editable embedding rights and a license, at most 2 MiB. Do not redistribute assets without permission. Hashes detect corruption, not authorship or licensing.
 
+## Fonts on demand
+
+Editor → Style offers **64 additional Google Fonts families**, searchable by name and grouped as sans serif, serif, display, handwriting and monospace. Font files are downloaded only when selected, checked with pinned SHA-256 values and cached locally. No system font installation is required. Your own static TTF/OTF import remains available.
+
+The selected font and its OFL license are embedded in `.dtheme`, so reopening or sharing that theme needs no new font download. A failed download keeps the previous font. Fonts customize display headings/channels; messages keep their native readable typography. [Catalog provenance and storage](docs/FONT-CATALOG.md).
+
+![Searchable font selection in the editor](assets/theme-studio-fonts.png)
+
 ## Suggest a theme
 
 **Propose a theme** first explains the process in the app, then opens the [GitHub issue submission form](https://github.com/PrimeBuild-pc/discord-theme-launcher/issues/new?template=theme_submission.yml). Supply author/source, a synthetic-data preview, the file or pinned source, and license information. Human review precedes inclusion; submission never installs or publishes automatically.

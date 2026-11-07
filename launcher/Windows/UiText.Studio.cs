@@ -6,6 +6,10 @@ internal static partial class UiText
     {
         ["it"] = new()
         {
+            ["Downloading and verifying the selected font…"] = "Download e verifica del font selezionato…",
+            ["Font ready. It is saved with the theme and its license."] = "Font pronto. Viene salvato nel tema insieme alla licenza.",
+            ["The font could not be loaded. Your previous font is unchanged. Check your connection and retry."] = "Impossibile caricare il font. Il font precedente è rimasto invariato. Controlla la connessione e riprova.",
+
             ["Choose a target server before applying."] = "Scegli un server prima di applicare.",
             ["Theme files"] = "File dei temi",
             ["Import a theme"] = "Importa un tema",
@@ -17,6 +21,10 @@ internal static partial class UiText
         },
         ["es"] = new()
         {
+            ["Downloading and verifying the selected font…"] = "Descargando y verificando la fuente…",
+            ["Font ready. It is saved with the theme and its license."] = "Fuente lista. Se guarda con el tema y su licencia.",
+            ["The font could not be loaded. Your previous font is unchanged. Check your connection and retry."] = "No se pudo cargar la fuente. La anterior no ha cambiado. Comprueba la conexión y reintenta.",
+
             ["Choose a target server before applying."] = "Elige un servidor antes de aplicar.",
             ["Theme files"] = "Archivos de temas",
             ["Import a theme"] = "Importar un tema",
@@ -28,6 +36,10 @@ internal static partial class UiText
         },
         ["ru"] = new()
         {
+            ["Downloading and verifying the selected font…"] = "Загрузка и проверка шрифта…",
+            ["Font ready. It is saved with the theme and its license."] = "Шрифт готов. Он сохраняется в теме вместе с лицензией.",
+            ["The font could not be loaded. Your previous font is unchanged. Check your connection and retry."] = "Не удалось загрузить шрифт. Предыдущий шрифт не изменён. Проверь подключение и повтори.",
+
             ["Choose a target server before applying."] = "Выбери сервер перед применением.",
             ["Theme files"] = "Файлы тем",
             ["Import a theme"] = "Импортировать тему",
@@ -39,6 +51,10 @@ internal static partial class UiText
         },
         ["de"] = new()
         {
+            ["Downloading and verifying the selected font…"] = "Ausgewählte Schrift wird geladen und geprüft…",
+            ["Font ready. It is saved with the theme and its license."] = "Schrift bereit. Sie wird mit dem Design und ihrer Lizenz gespeichert.",
+            ["The font could not be loaded. Your previous font is unchanged. Check your connection and retry."] = "Die Schrift konnte nicht geladen werden. Die bisherige Schrift bleibt erhalten. Prüfe die Verbindung und versuche es erneut.",
+
             ["Choose a target server before applying."] = "Wähle vor dem Anwenden einen Server.",
             ["Theme files"] = "Designdateien",
             ["Import a theme"] = "Design importieren",

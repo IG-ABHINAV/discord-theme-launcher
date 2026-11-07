@@ -210,5 +210,12 @@
   "confirmResetManaged": "Deaktiviere alle vom Launcher verwalteten Designs. Externe Designs, QuickCSS und Plugins bleiben unverändert.",
   "confirmResetAll": "Deaktiviere lokale und Online-Designs sowie QuickCSS. Dateien und Plugins bleiben erhalten.",
   "tab.server": "Server",
-  "tab.files": "Dateien"
+  "tab.files": "Dateien",
+  "fontSearch": "Schriften suchen",
+  "fontOnDemand": "64 Schriften · werden bei Auswahl geladen und im Design gespeichert.",
+  "fontCategory.SANS_SERIF": "Serifenlos",
+  "fontCategory.SERIF": "Serifenschriften",
+  "fontCategory.DISPLAY": "Dekorativ",
+  "fontCategory.HANDWRITING": "Handschrift",
+  "fontCategory.MONOSPACE": "Dicktengleich"
 }

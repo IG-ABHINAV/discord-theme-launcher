@@ -104,6 +104,7 @@ internal static class Program
                     while (await studioCore.ExecuteScriptAsync(predicate) != "true") await Task.Delay(50, timeout.Token);
                 }
                 Check(builder.Icon is not null && builder.Icon.Width >= 16, "native window has the application icon");
+                Check(await studioCore.ExecuteScriptAsync("document.querySelectorAll('#font [data-catalog]').length>=50 && Boolean(document.querySelector('[data-action=importFont]'))") == "true", "native editor exposes fifty-plus on-demand fonts and keeps font import");
                 await studioCore.ExecuteScriptAsync("document.querySelector('[data-page=editor]').click()");
                 var capturePath = Path.GetFullPath(Path.Combine(".local", "studio-native-preview.png")); Directory.CreateDirectory(Path.GetDirectoryName(capturePath)!);
                 await using (var capture = File.Create(capturePath)) await studioCore.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, capture);

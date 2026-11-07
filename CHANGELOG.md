@@ -2,6 +2,7 @@
 
 ## 0.3.0-beta.9 - 2026-11-07 (unreleased)
 
+- Add 64 searchable, categorized Google Fonts families downloaded on selection, pinned SHA-256 verification, reusable local cache and embedded OFL licenses; retain custom font import.
 - Add the Theme Studio executable/window icon at Windows sizes 16–256 px.
 - Simplify Home and Templates; consolidate Server, Style, Artwork and Files under one Editor. Move source/license details into an expandable section.
 - Import individual .dtheme/.theme.css files or a folder with per-file compatibility reports. Save reusable designs before choosing a server.

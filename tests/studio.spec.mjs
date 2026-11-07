@@ -20,15 +20,16 @@ async function studio(page,brokenResources=false){
     if(url.pathname==='/preview'&&brokenResources)body=Buffer.from(body.toString().replace(/data:image\/webp;base64,[A-Za-z0-9+/=]+/g,'data:image/png;base64,AA=='));
     await route.fulfill({body,contentType});
   });
-  await page.addInitScript(({designs,review})=>{
+  await page.addInitScript(({designs,review,fonts})=>{
     let listener,revision=0;
-    const state={type:'state',designs,values:{name:'Your community',guild:'987654321012345678',preset:'fluent',palette:'custom',accent:'#8791ff',surface:'#202020',font:'native',banner:'none',background:'none'},assets:{},dirty:false,saved:false,busy:false,version:'0.3.0-beta.5',language:'en',notice:'Everything stays in preview until you confirm Apply.',validation:'',previewId:'1',previewUri:'https://theme-preview.invalid/preview?revision=1&preset=fluent',canApply:true,applyReason:'',applyAction:'',applyActionLabel:'',canDisable:false,canRestore:false,confirmation:null,installation:'Discord + Vencord ready.'};
+    const state={type:'state',designs,fonts,values:{name:'Your community',guild:'987654321012345678',preset:'fluent',palette:'custom',accent:'#8791ff',surface:'#202020',font:'native',banner:'none',background:'none'},assets:{},dirty:false,saved:false,busy:false,version:'0.3.0-beta.5',language:'en',notice:'Everything stays in preview until you confirm Apply.',validation:'',previewId:'1',previewUri:'https://theme-preview.invalid/preview?revision=1&preset=fluent',canApply:true,applyReason:'',applyAction:'',applyActionLabel:'',canDisable:false,canRestore:false,confirmation:null,installation:'Discord + Vencord ready.'};
     window.testSetupRequired=false;window.testConfirmationProblem='';
     window.patchTestState=patch=>{Object.assign(state,patch);listener?.({data:structuredClone(state)})};
     window.testMessages=[];
     window.chrome={webview:{addEventListener:(_,callback)=>listener=callback,postMessage:message=>{
       window.testMessages.push(message);
       if(message.action==='edit')state.values=message.values;
+      if(message.action==='downloadFont'){state.values.font='custom';state.assets.font=fonts.find(f=>f.id===message.value).fileName;}
       if(['preset','community'].includes(message.action)){if(message.value==='zenit-gold'){state.imported=review;state.values.preset='zenit-gold';state.values.font='native'}else{state.imported=null;for(const field of['preset','font','palette','banner','background'])state.values[field]=message.value;}}
       if(['importCss','open'].includes(message.action))state.importReview=review;
       if(message.action==='cancelImport')state.importReview=null;
@@ -43,7 +44,7 @@ async function studio(page,brokenResources=false){
       if(message.action==='previewReady'){state.canApply=message.ready;state.validation=message.ready?'':'An embedded preview resource did not load.';if(!message.ready)state.previewUri='';}
       queueMicrotask(()=>listener?.({data:structuredClone(state)}));
     }}};
-  },{designs:JSON.parse(await readFile(new URL('src/community.json',root),'utf8')),review:JSON.parse(await readFile(new URL('.local/builder-fixtures/zenit-review.json',root),'utf8'))});
+  },{fonts:JSON.parse(await readFile(new URL('src/font-catalog.json',root),'utf8')).fonts.map(f=>({...f,fileName:f.path.split('/').at(-1)})),designs:JSON.parse(await readFile(new URL('src/community.json',root),'utf8')),review:JSON.parse(await readFile(new URL('.local/builder-fixtures/zenit-review.json',root),'utf8'))});
   await page.goto(origin+'/');
   await expect(page.locator('#preview-loading')).toBeHidden();
   if(brokenResources)await expect(page.locator('#preview-error')).toBeVisible();else await expect(page.locator('#preview-error')).toBeHidden();
@@ -158,9 +159,9 @@ for(const viewport of[{width:1040,height:720},{width:1365,height:900},{width:192
   expect(composer.y+composer.height).toBeLessThanOrEqual(frameBox.y+frameBox.height);
   const apply=await page.locator('#apply').boundingBox();expect(apply.y+apply.height).toBeLessThanOrEqual(viewport.height);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  await page.getByRole('button',{name:'Style',exact:true}).click();
+  await page.getByRole('tab',{name:'Style',exact:true}).click();
   await expect(page.getByRole('combobox',{name:'Display font'})).toBeVisible();
-  await page.getByRole('button',{name:'Artwork',exact:true}).click();
+  await page.getByRole('tab',{name:'Artwork',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Server banner',exact:true})).toBeVisible();
   expect(await page.locator('#banner-cards img').evaluateAll(images=>images.every(image=>image.complete&&image.naturalWidth>0))).toBe(true);
 });
@@ -230,11 +231,11 @@ test('accepted CSS previews the author design, edits supported variables, and sh
   await page.getByRole('button',{name:'Use this design',exact:true}).click();
   await expect(page.locator('#preview-loading')).toBeHidden();
   expect(await page.frameLocator('#preview').locator('.base__5e434').evaluate(el=>getComputedStyle(el).getPropertyValue('--zg-gold').trim())).toBe('#e6c15e');
-  await page.getByRole('button',{name:'Style',exact:true}).click();
+  await page.getByRole('tab',{name:'Style',exact:true}).click();
   await expect(page.locator('#builtin-style')).toBeHidden();
   await page.locator('[data-variable="--zg-gold"]').fill('#31c6b4');await page.locator('[data-variable="--zg-gold"]').dispatchEvent('change');
   await expect(page.locator('#preview-loading')).toBeHidden();
-  await page.getByRole('button',{name:'Files',exact:true}).click();
+  await page.getByRole('tab',{name:'Files',exact:true}).click();
   await page.locator('#imported-details summary').click();
   await expect(page.locator('#imported-license')).toContainText('Copyright (c) 2026 ZENIT / Jackpot');
   await page.locator('[data-panel=library] [data-action=share]').click();
@@ -281,4 +282,16 @@ test('refinement: German preview translates illustrative content',async({page})=
   await studio(page);await page.locator('#language').selectOption('de');
   await expect(page.frameLocator('#preview').locator('.welcome-title')).toHaveText('Ein Ort, der sich nach dir anfühlt.');
   await expect(page.locator('[data-page="community"]')).toHaveText('Vorlagen');
+});
+
+test('font library offers fifty-plus searchable families without automatic downloads',async({page})=>{
+  await studio(page);await page.locator('[data-tab=style]').click();
+  expect(await page.locator('#font [data-catalog]').count()).toBeGreaterThanOrEqual(50);
+  expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='downloadFont'))).toBe(false);
+  await page.locator('#font-search').fill('Alata');
+  expect(await page.locator('#font [data-catalog]').evaluateAll(options=>options.filter(o=>!o.hidden).map(o=>o.textContent))).toEqual(['Alata']);
+  await page.locator('#font').selectOption('catalog:alata');
+  expect(await page.evaluate(()=>window.testMessages.filter(m=>m.action==='downloadFont').map(m=>m.value))).toEqual(['alata']);
+  await expect(page.locator('[data-action=importFont]')).toBeVisible();
+  expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='confirmOperation'))).toBe(false);
 });

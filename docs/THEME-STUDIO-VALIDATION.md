@@ -4,14 +4,16 @@ Local beta.9, 2026-11-07, Windows x64, .NET 10 and Chromium/WebView2. All automa
 
 ## Verified
 
-- **109 Core checks**: legacy snapshots, exact-byte recovery, CSS import/isolation, corruption rejection, named setup history, save/reopen before target selection, and both reset scopes. Full reset disables local/online themes and QuickCSS, preserves files/plugins, and restores all three styling settings on undo. Launcher-only reset preserves external styling.
-- **58 Chromium tests**: consolidated editor navigation, template selection, import review/editing, confirmation cancellation/replay, localization and responsive layouts. Five focused localization/dialog tests were rerun after moving new copy into the build generator's source JSON.
-- **54 native Windows checks**: real WebView2, icon availability, German preview/help, embedded unsaved-edit prompt, one-shot recovery confirmations, nested folder import with incompatibility reporting and preview-only selection. Native checks were repeated after the final host changes.
+- **115 Core checks**: legacy snapshots, exact-byte recovery, CSS import/isolation, corruption rejection, named setup history, save/reopen before target selection, and both reset scopes. Full reset disables local/online themes and QuickCSS, preserves files/plugins, and restores all three styling settings on undo. Launcher-only reset preserves external styling.
+- **59 Chromium tests**: consolidated editor navigation, template selection, import review/editing, confirmation cancellation/replay, localization and responsive layouts. Five focused localization/dialog tests were rerun after moving new copy into the build generator's source JSON.
+- **55 native Windows checks**: real WebView2, icon availability, German preview/help, embedded unsaved-edit prompt, one-shot recovery confirmations, nested folder import with incompatibility reporting and preview-only selection. Native checks were repeated after the final host changes.
 - CSS regeneration, checksum/scope/offline-resource audits and JavaScript syntax checks pass. Release packaging succeeds with no compiler warnings or errors and includes original license notices.
-- The packaged beta.9 executable was launched through agent-desktop in an interactive session with --safe-preview. Its Home view and window icon were visually inspected, and Help was opened via accessibility and verified as an embedded overlay in the same window. This is separate from the automated WebView captures.
+- The packaged beta.9 executable was launched through agent-desktop in an interactive session with --safe-preview. Its Home view and window icon were visually inspected, and Help was opened via accessibility and verified as an embedded overlay in the same window. This is separate from the automated WebView captures. A real Alata selection through accessibility downloaded and verified its font/license, returned the selected family, rendered the latest preview and re-enabled Apply; the safe-preview cache hashes match the catalog.
 - README screenshots were updated with synthetic content. The original beta.8 working tree and the running beta.8 window were preserved.
 
 The executable remains unsigned (NotSigned). Release SHA-256 values are generated under dist/release/SHA256SUMS.txt. Local delivery evidence records the final commit and artifact identities.
+
+The 64 actual upstream static fonts and licenses were individually verified for hashes, size, font tables and embedding rights. Font tests cover deferred requests, verified cache reuse without network, corrupt cache replacement, invalid download rejection and portable embedding.
 
 ## Limits
 

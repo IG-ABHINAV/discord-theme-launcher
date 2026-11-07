@@ -74,7 +74,14 @@
     "confirmResetManaged": "Disable every theme managed by this launcher. External themes, QuickCSS and plugins stay as they are.",
     "confirmResetAll": "Disable local themes, online themes and QuickCSS. Files and plugins are preserved.",
     "tab.server": "Server",
-    "tab.files": "Files"
+    "tab.files": "Files",
+    "fontSearch": "Search fonts",
+    "fontOnDemand": "64 fonts · downloaded on selection and included in your theme.",
+    "fontCategory.SANS_SERIF": "Sans serif",
+    "fontCategory.SERIF": "Serif",
+    "fontCategory.DISPLAY": "Display",
+    "fontCategory.HANDWRITING": "Handwriting",
+    "fontCategory.MONOSPACE": "Monospace"
   },
   "it": {
     "share": "Esporta una copia",
@@ -151,7 +158,14 @@
     "confirmResetManaged": "Disattiva tutti i temi gestiti dal launcher. Temi esterni, QuickCSS e plugin rimangono invariati.",
     "confirmResetAll": "Disattiva temi locali, temi online e QuickCSS. File e plugin vengono conservati.",
     "tab.server": "Server",
-    "tab.files": "File"
+    "tab.files": "File",
+    "fontSearch": "Cerca font",
+    "fontOnDemand": "64 font · si scaricano alla selezione e vengono inclusi nel tema.",
+    "fontCategory.SANS_SERIF": "Senza grazie",
+    "fontCategory.SERIF": "Con grazie",
+    "fontCategory.DISPLAY": "Titoli",
+    "fontCategory.HANDWRITING": "Scrittura a mano",
+    "fontCategory.MONOSPACE": "Monospazio"
   },
   "es": {
     "share": "Exportar una copia",
@@ -228,7 +242,14 @@
     "confirmResetManaged": "Desactiva los temas del launcher. Los temas externos, QuickCSS y plugins se conservan.",
     "confirmResetAll": "Desactiva temas locales, en línea y QuickCSS. Se conservan archivos y plugins.",
     "tab.server": "Servidor",
-    "tab.files": "Archivos"
+    "tab.files": "Archivos",
+    "fontSearch": "Buscar fuentes",
+    "fontOnDemand": "64 fuentes · se descargan al elegirlas y se incluyen en el tema.",
+    "fontCategory.SANS_SERIF": "Sin serifa",
+    "fontCategory.SERIF": "Con serifa",
+    "fontCategory.DISPLAY": "Títulos",
+    "fontCategory.HANDWRITING": "Manuscritas",
+    "fontCategory.MONOSPACE": "Monoespaciadas"
   },
   "ru": {
     "share": "Экспортировать копию",
@@ -305,6 +326,13 @@
     "confirmResetManaged": "Отключить темы лаунчера. Внешние темы, QuickCSS и плагины останутся.",
     "confirmResetAll": "Отключить локальные и сетевые темы и QuickCSS. Файлы и плагины сохранятся.",
     "tab.server": "Сервер",
-    "tab.files": "Файлы"
+    "tab.files": "Файлы",
+    "fontSearch": "Найти шрифт",
+    "fontOnDemand": "64 шрифта · загружаются при выборе и сохраняются с темой.",
+    "fontCategory.SANS_SERIF": "Без засечек",
+    "fontCategory.SERIF": "С засечками",
+    "fontCategory.DISPLAY": "Декоративные",
+    "fontCategory.HANDWRITING": "Рукописные",
+    "fontCategory.MONOSPACE": "Моноширинные"
   }
 }

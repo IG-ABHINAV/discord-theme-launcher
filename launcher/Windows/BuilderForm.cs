@@ -113,6 +113,7 @@ internal sealed class BuilderForm : Form
             canApply = readiness.CanApply, applyReason = UiText.Text(readiness.Reason), applyAction = readiness.Action, applyActionLabel = readiness.ActionLabel.Length == 0 ? "" : UiText.Text(readiness.ActionLabel),
             canDisable = canDisable && !busy, canRestore = canRestore && !busy,
             designs = CommunityGallery.Designs,
+            fonts = FontLibrary.Choices.Select(f => new { f.Id, f.Family, f.Category, fileName = Path.GetFileName(f.Path) }),
             recoveryHistory = history,
             discardPending = pendingDiscard.HasValue || pendingClose, importCandidates,
             imported = configuration.Imported is { } imported ? ReviewState(CssThemeImporter.Inspect(imported)) : null,
@@ -212,6 +213,7 @@ internal sealed class BuilderForm : Form
                 case "save": SaveDocument(false); return;
                 case "share": SaveDocument(true); return;
                 case "exportCss": ExportOriginalCss(); return;
+                case "downloadFont": await DownloadFontAsync(message.GetProperty("value").GetString() ?? ""); return;
                 case "importFont":
                     var asset = AssetImport.Font(this); if (asset is null) return;
                     configuration = configuration with { Font = "custom", CustomFont = asset }; notice = "Font imported with its redistribution license: " + asset.Name; Changed(); return;
@@ -227,7 +229,7 @@ internal sealed class BuilderForm : Form
                 case "apply": case "disable": RequestConfirmation(action); return;
             }
         }
-        catch (Exception error) when (error is IOException or InvalidDataException or JsonException or ArgumentException or UnauthorizedAccessException or System.Runtime.InteropServices.ExternalException or InvalidOperationException or KeyNotFoundException)
+        catch (Exception error) when (error is IOException or InvalidDataException or JsonException or ArgumentException or UnauthorizedAccessException or System.Runtime.InteropServices.ExternalException or InvalidOperationException or KeyNotFoundException or HttpRequestException or TaskCanceledException)
         {
             notice = error is InvalidDataException ? error.Message : "The action could not finish. Check the file's format, size and permissions. Your saved configurations are safe.";
             Publish();
@@ -308,6 +310,25 @@ internal sealed class BuilderForm : Form
         using var dialog = new SaveFileDialog { Filter = "BetterDiscord (*.theme.css)|*.theme.css", DefaultExt = "theme.css", AddExtension = true, FileName = imported.FileName, Title = UiText.Text("Export original CSS") };
         if (dialog.ShowDialog(this) != DialogResult.OK) return;
         ThemeStore.AtomicWrite(dialog.FileName, imported.Original);
+    }
+    private async Task DownloadFontAsync(string id)
+    {
+        if (busy || configuration.Imported is not null) return;
+        busy = true; notice = "Downloading and verifying the selected font…"; Publish();
+        try
+        {
+            using var handler = new HttpClientHandler { AllowAutoRedirect = false };
+            using var http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(40) };
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("ThemeStudio/" + ThemeCompiler.BundledCatalog.Version);
+            string root = dryRun ? Path.Combine(Path.GetTempPath(), "ThemeStudio-font-cache") : Path.Combine(client.StateRoot, "font-cache");
+            var asset = await FontLibrary.LoadAsync(http, id, root);
+            configuration = configuration with { Font = "custom", CustomFont = asset };
+            notice = "Font ready. It is saved with the theme and its license.";
+            Changed();
+        }
+        catch (Exception error) when (error is HttpRequestException or TaskCanceledException or IOException or InvalidDataException or UnauthorizedAccessException)
+        { notice = "The font could not be loaded. Your previous font is unchanged. Check your connection and retry."; }
+        finally { busy = false; Publish(); }
     }
     private void ImportImage(bool banner)
     {

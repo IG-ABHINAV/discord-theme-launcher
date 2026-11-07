@@ -259,5 +259,35 @@ namedHistory.DisableThemes(false);
 var namedEntry = namedHistory.RecoveryHistory().Single(e => e.Themes.Contains("My saved violet theme"));
 namedHistory.RestoreSnapshot(namedEntry.Id);
 Check(namedHistory.PersonalEnabled, "named history restores the chosen previous personal design");
+Check(FontLibrary.Choices.Count >= 50 && FontLibrary.Choices.Select(f => f.Id).Distinct().Count() == FontLibrary.Choices.Count, "font catalog offers at least fifty distinct downloadable families");
+var fontCache = Path.Combine(fixture, "FontCache");
+var fontHandler = new FontFixtureHandler(Path.Combine(root,"tests","fonts"));
+using var fontHttp = new HttpClient(fontHandler);
+var onlineFont = await FontLibrary.LoadAsync(fontHttp, "alata", fontCache);
+Check(fontHandler.Requests == 2 && onlineFont.License.Contains("SIL OPEN FONT LICENSE"), "on-demand font downloads verify font and license together");
+var cachedFont = await FontLibrary.LoadAsync(fontHttp, "alata", fontCache);
+Check(fontHandler.Requests == 2 && onlineFont.Data.SequenceEqual(cachedFont.Data), "verified font cache reopens without network access");
+var withOnlineFont = untargeted with { Font = "custom", CustomFont = onlineFont };
+withOnlineFont.Save(untargetedPath);
+Check(ThemeConfiguration.Load(untargetedPath).CustomFont!.Sha256 == onlineFont.Sha256, "downloaded font and license travel in the saved theme");
+File.WriteAllText(Path.Combine(fontCache,"alata.ttf"), "damaged");
+_ = await FontLibrary.LoadAsync(fontHttp, "alata", fontCache);
+Check(fontHandler.Requests == 4, "a damaged cached font is downloaded and verified again");
+fontHandler.Damaged = true;
+bool rejectedFont = false;
+try { await FontLibrary.LoadAsync(fontHttp, "alata", Path.Combine(fixture,"RejectedFontCache")); } catch (InvalidDataException) { rejectedFont = true; }
+Check(rejectedFont && !Directory.Exists(Path.Combine(fixture,"RejectedFontCache")), "damaged download cannot create a usable font cache");
 Console.WriteLine($"{checks} checks passed. Fixture: {fixture}");
 // Intentional: leave the temporary test fixture for inspection; never recurse over an unchecked root.
+
+sealed class FontFixtureHandler(string directory) : HttpMessageHandler
+{
+    public int Requests { get; private set; }
+    public bool Damaged { get; set; }
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        Requests++;
+        var name = request.RequestUri!.AbsolutePath.EndsWith("OFL.txt", StringComparison.Ordinal) ? "OFL.txt" : "Alata-Regular.ttf";
+        return Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = new ByteArrayContent(Damaged ? [1, 2, 3] : File.ReadAllBytes(Path.Combine(directory,name))) });
+    }
+}

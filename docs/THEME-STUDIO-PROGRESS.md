@@ -2,7 +2,7 @@
 
 ## Local beta.9 refinement — 2026-11-07
 
-Home / Editor / Templates, embedded Help/discard/recovery, two reset scopes and named history, individual/folder imports, target-optional saving, localized illustrative preview and executable/window icon implemented. Current validation: 109 Core + 58 browser + 54 native Windows checks. Interactive packaged Home/help/icon inspection completed with agent-desktop. GitHub issue submission is the primary user-operated path; the former environment-based Discord override is removed. See [current validation](THEME-STUDIO-VALIDATION.md).
+64 searchable on-demand font families with pinned content and portable licenses added. Home / Editor / Templates, embedded Help/discard/recovery, two reset scopes and named history, individual/folder imports, target-optional saving, localized illustrative preview and executable/window icon implemented. Current validation: 115 Core + 59 browser + 55 native Windows checks. Interactive packaged Home/help/icon inspection completed with agent-desktop. GitHub issue submission is the primary user-operated path; the former environment-based Discord override is removed. See [current validation](THEME-STUDIO-VALIDATION.md).
 
 ## Historical overnight beta.8 evidence
 
