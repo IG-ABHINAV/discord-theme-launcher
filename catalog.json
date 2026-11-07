@@ -26,6 +26,15 @@
         "format": "woff2",
         "weight": 500
       },
+      "author": "Prime Build",
+      "source": "https://github.com/PrimeBuild-pc/discord-theme-launcher",
+      "license": "MIT",
+      "capabilities": [
+        "palette",
+        "font",
+        "banner",
+        "background"
+      ],
       "sha256": "874b04200e014e549ea6f980f1cf998db388f27f7b54af6ea2e4d02f2d697b9e",
       "bytes": 339382
     },
@@ -53,6 +62,15 @@
         "format": "woff2",
         "weight": 500
       },
+      "author": "Prime Build",
+      "source": "https://github.com/PrimeBuild-pc/discord-theme-launcher",
+      "license": "MIT",
+      "capabilities": [
+        "palette",
+        "font",
+        "banner",
+        "background"
+      ],
       "sha256": "980fd60a80934c556f64bcc960b7229894762481382c4f7a44687bd7fb6a5c95",
       "bytes": 217135
     },
@@ -80,6 +98,15 @@
         "format": "truetype",
         "weight": 400
       },
+      "author": "Prime Build",
+      "source": "https://github.com/PrimeBuild-pc/discord-theme-launcher",
+      "license": "MIT",
+      "capabilities": [
+        "palette",
+        "font",
+        "banner",
+        "background"
+      ],
       "sha256": "21fe1b0ec7d327f9e0ef5a0784557c2011bdeae97830d0a9ab65ed2db6d515e1",
       "bytes": 207983
     }

@@ -15,6 +15,7 @@ public static class CommunityGallery
         {
             using var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("montserrat.ttf")!;
             using var buffer = new MemoryStream(); input.CopyTo(buffer);
+            ReleaseDownload.Verify(buffer.ToArray(), "0f7b311b2f3279e4eef9b2f968bcdbab6e28f4daeb1f049f4f278a902bcd82f7");
             return "/* Montserrat, SIL OFL 1.1:\n" + ThemeCompiler.Resource("montserrat-license.txt").Replace("*/", "* /") +
                 "\n*/\n@font-face{font-family:\"ts-" + CssThemeImporter.ZenitHash[..12] + "-Montserrat\";src:url(\"data:font/ttf;base64," + Convert.ToBase64String(buffer.ToArray()) +
                 "\");font-style:normal;font-weight:100 900;font-display:swap;}\n";

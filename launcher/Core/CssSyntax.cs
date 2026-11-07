@@ -14,9 +14,10 @@ internal static class CssSyntax
         {
             Skip(source, ref position);
             if (position == source.Length) break;
-            string header = Read(source, ref position, "{;");
+            string header = Read(source, ref position, "{;}");
             if (header.Length == 0 || position == source.Length) throw Invalid();
             char delimiter = source[position++];
+            if (delimiter == '}') throw Invalid();
             if (delimiter == ';') rules.Add(new(header, null));
             else
             {
@@ -76,6 +77,7 @@ internal static class CssSyntax
             if (c is '\'' or '"') { int start = position; String(source, ref position); value.Append(source[start..position]); continue; }
             if (Comment(source, ref position)) { value.Append(' '); continue; }
             if (nesting.Count == 0 && delimiters.Contains(c)) break;
+            if (c is '{' or '}') throw Invalid();
             if (c is '(' or '[') nesting.Push(c);
             else if (c is ')' or ']')
             {

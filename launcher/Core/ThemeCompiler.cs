@@ -31,6 +31,12 @@ public static class ThemeCompiler
     public static string ArtworkDataUri(string preset, string area)
     {
         if (area is not ("header" or "chat")) throw new InvalidDataException("Unknown artwork area.");
+        if (preset == "zenit-gold")
+        {
+            var root = CssSyntax.Rules(Resource("zenit.css")).First(r => r.Header == ":root");
+            var image = CssSyntax.Declarations(root.Body!).First(d => d.Property == "--zg-banner").Value;
+            return image[5..^2];
+        }
         var value = Value(PresetCss(preset), area == "header" ? "hardware-art" : "chat-art");
         return value[5..^2];
     }

@@ -13,7 +13,7 @@ internal static partial class UiText
     public const string WebViewMissing = "Theme Studio needs Microsoft Edge WebView2 Runtime. Install it from Microsoft's official WebView2 download page, then reopen the launcher. Your saved .dtheme files remain safe.\n\nhttps://developer.microsoft.com/microsoft-edge/webview2/";
     public const string PreviewWebViewMissing = "The local preview needs Microsoft Edge WebView2 Runtime.\nInstall it from Microsoft's official WebView2 download page, then reopen the launcher.\nYour configuration can still be saved and shared.";
 
-    public static bool Supported(string? code) => code is "en" or "it" or "es" or "ru";
+    public static bool Supported(string? code) => code is "en" or "it" or "es" or "ru" or "de";
     public static void Use(string? code) { if (Supported(code)) Current = code!; }
     public static void Load(string root)
     {
@@ -65,6 +65,7 @@ internal static partial class UiText
         ("Theme applied to server ", ". Discord startup confirmed. Changes are local to you.", "Theme applied to server {0}. Discord startup confirmed. Changes are local to you."),
         ("Downloading and verifying ", "…", "Downloading and verifying {0}…"),
         ("Vencord is incomplete. Missing or unreadable: ", ". Choose Repair official Vencord before reopening Discord.", "Vencord is incomplete. Missing or unreadable: {0}. Choose Repair official Vencord before reopening Discord.")
+        ,("Unsupported stylesheet rule: ", ". @media, @supports, @container and named animations are supported; global registrations and nested CSS need a reviewed adapter.", "Unsupported stylesheet rule: {0}. @media, @supports, @container and named animations are supported; global registrations and nested CSS need a reviewed adapter.")
     ];
 
     private static Dictionary<string, string> Map(string code) => code switch
@@ -72,6 +73,7 @@ internal static partial class UiText
         "it" => Italian,
         "es" => Spanish,
         "ru" => Russian,
+        "de" => German,
         _ => EnglishFallback
     };
 
@@ -259,8 +261,9 @@ internal static partial class UiText
 
     static UiText()
     {
+        LoadImportText();
         foreach (var key in Italian.Keys)
-            if (!Spanish.ContainsKey(key) || !Russian.ContainsKey(key) || Spanish[key].Length == 0 || Russian[key].Length == 0)
+            if (!Spanish.ContainsKey(key) || !Russian.ContainsKey(key) || !German.ContainsKey(key) || Spanish[key].Length == 0 || Russian[key].Length == 0 || German[key].Length == 0)
                 throw new InvalidOperationException("Missing interface translation: " + key);
     }
 }

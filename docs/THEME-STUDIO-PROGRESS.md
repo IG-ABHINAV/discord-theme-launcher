@@ -5,14 +5,14 @@ The supplied beta.7 source overlay, November Discord class map, research and six
 
 | Milestone | Status | Required evidence / remaining work |
 | --- | --- | --- |
-| baseline_beta7 | Verified | Supplied snapshot checkpoint `follows git history`; CSS audits and 61 core checks pass. Pinned Chromium installed; `npm test`: 45 passed. Startup/runtime/file regression coverage retained. |
-| catalog_recovery | In progress | Bounded extensible catalog/capabilities implemented; fourth-entry regression failed before fix and passes after. Historical-subset restore now leaves newer files alone; expanded migration test running. |
-| neutral_editor | Pending | Fluent Dark without implicit server/branding; Create/Community/My themes; accessible preview/edit/save/reopen/share/apply/restore; explicit server choice. |
-| community_zenit | Pending | Four credited entries; pinned Zenit source/license/assets; author design preserved in reviewed server adaptation; independent preview/isolation/persistence. |
-| betterdiscord_import | Pending | Downloaded CSS parser/conversion, resource/compatibility review, no arbitrary fetches; actual design and variables; portable provenance/integrity; two materially different fixtures including Zenit; apply/recovery and rejection tests. |
-| localization_submission | Pending | Five complete languages including German native/WebView errors and persistence; long labels; configuration sharing; verified submission route or issue-template fallback and configurable Discord destination. |
-| validation_packaging | Pending | Repository verification, isolated Windows integration, Release packaging; startup/cancellation/repeated apply/recovery; artifacts/checksums/screenshots and tested/not-tested report. |
-| final_review_delivery | Pending | Full acceptance review and fixes, draft PR with committed head, verified README/changelog/compatibility/description, credited preview for Lorenzo. |
+| baseline_beta7 | Verified | Supplied snapshot checkpoint `5090a9a` (see history for exact SHA); CSS audits and 61 core checks passed. Pinned Chromium installed; baseline `npm test`: 45 passed. Startup/runtime/file regression coverage retained. |
+| catalog_recovery | Verified | Bounded extensible catalog/capabilities; fourth-entry regression failed before fix. `evidence/catalog-recovery.txt`: 63 checks passed, including historical subset restore, newer files and unchanged runtime. |
+| neutral_editor | Implemented, final verification pending | Neutral defaults with no server; Create/Community/My themes; preview stays available on a synthetic example until an explicit target is supplied. Browser tests cover edit/share/confirmation/cancellation/layout. Save/reopen/recovery exercised at real Core seams. |
+| community_zenit | Implemented, final verification pending | Four credited entries, pinned original CSS and licenses, offline pinned Montserrat; author background/mascot retained. Browser review found and fixed backdrop occlusion. Core tests cover exact source roundtrip/recovery; native gallery/variable edits/cancellation passed. |
+| betterdiscord_import | Implemented, final verification pending | Actual downloaded CSS picker, strict bounded parser and conversion, resource/compatibility dialog, variable edits, source export, portable source/provenance/integrity. Zenit and Dracula fixtures tested. Rejections include resources, corruption, size/path abuse, syntax escapes and containment resets. Preview now verifies image decoding before application. |
+| localization_submission | Implemented, final verification pending | German native/WebView coverage, persistent language, long labels at 1040/1365; existing four languages retained. Source keys and new import errors translated. Real GitHub issue template fallback; optional validated Discord destination through `THEME_STUDIO_SUBMISSION_DISCORD`. No existing Discord invite found in project sources. |
+| validation_packaging | In progress | `npm run verify`: 93 Core + 54 browser tests passed before final hardening. Native integration: 43 real Windows/WebView checks passed; these are not interactive desktop tests. Release packaging and final run remain. |
+| final_review_delivery | In progress | Review fixed backdrop layering, scope breakout, containment resets and resource readiness. Documentation, draft PR, artifacts and final acceptance review remain. |
 
 ## Constraints and assumptions
 

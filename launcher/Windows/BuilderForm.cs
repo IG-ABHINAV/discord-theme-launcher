@@ -17,6 +17,7 @@ internal sealed class BuilderForm : Form
     private int revision, renderedRevision = -1;
     private bool busy, dirty, saved;
     private OperationConfirmation? confirmation;
+    private CssImportReview? importReview;
     internal int SimulatedOperations { get; private set; }
     private string? documentPath;
     private string notice = "Design here. Preview here. Apply when you're ready.", validation = "";
@@ -97,9 +98,12 @@ internal sealed class BuilderForm : Form
         var readiness = ApplyReadiness.Evaluate(busy, validation, renderedRevision == revision && surface.Ready);
         surface.Publish(new { type = "state", values = StudioValues.From(configuration), assets = new { font = configuration.CustomFont?.Name, banner = configuration.CustomBanner?.Name, background = configuration.CustomBackground?.Name },
             busy, dirty, saved, version = ThemeCompiler.BundledCatalog.Version, notice = UiText.Text(notice),
-            validation = UiText.Text(validation), previewId = surface.PreviewId, previewUri = renderedRevision == revision ? surface.PreviewUri : "",
+            validation = UiText.Text(validation), previewId = surface.PreviewId, previewUri = renderedRevision == revision && (validation.Length == 0 || validation == "Choose a target server before applying or saving.") ? surface.PreviewUri : "",
             canApply = readiness.CanApply, applyReason = UiText.Text(readiness.Reason), applyAction = readiness.Action, applyActionLabel = readiness.ActionLabel.Length == 0 ? "" : UiText.Text(readiness.ActionLabel),
             canDisable = canDisable && !busy, canRestore = canRestore && !busy,
+            designs = CommunityGallery.Designs,
+            imported = configuration.Imported is { } imported ? ReviewState(CssThemeImporter.Inspect(imported)) : null,
+            importReview = importReview is null ? null : ReviewState(importReview),
             confirmation = confirmation is { } pending ? new { pending.Id, pending.Operation, themeName = pending.Configuration?.Name,
                 guild = pending.Configuration?.Guild, serverName = ThemeCompiler.BundledCatalog.Themes.FirstOrDefault(t => t.Guild == pending.Configuration?.Guild)?.Server ?? UiText.Text("Selected server"),
                 pending.RequiresSetup, pending.Repair, problem = UiText.Text(pending.Problem) } : null,
@@ -132,7 +136,29 @@ internal sealed class BuilderForm : Form
                 case "preset":
                     string id = message.GetProperty("value").GetString() ?? "";
                     if (!ThemeConfiguration.Presets.Contains(id)) return;
-                    configuration = configuration with { Preset = id, Palette = id, Font = id, Banner = id, Background = id }; Changed(); return;
+                    configuration = CommunityGallery.Create(id, configuration.Guild); Changed(); return;
+                case "community":
+                    if (!ConfirmDiscard()) return;
+                    configuration = CommunityGallery.Create(message.GetProperty("value").GetString() ?? "", configuration.Guild);
+                    documentPath = null; saved = false; Changed(); return;
+                case "importCss": ReviewCss(); return;
+                case "cancelImport": importReview = null; Publish(); return;
+                case "acceptImport":
+                    if (importReview is not { Supported: true, Theme: { } theme }) return;
+                    configuration = new ThemeConfiguration { Name = theme.Name.Length > 80 ? theme.Name[..80] : theme.Name, Guild = configuration.Guild, Imported = theme };
+                    importReview = null; documentPath = null; saved = false; Changed(); return;
+                case "importVariable":
+                    if (configuration.Imported is null) return;
+                    string key = message.GetProperty("name").GetString() ?? "", edit = message.GetProperty("value").GetString() ?? "";
+                    var importedTheme = configuration.Imported with { Edits = new(configuration.Imported.Edits) { [key] = edit } };
+                    _ = CssThemeImporter.Inspect(importedTheme);
+                    configuration = configuration with { Imported = importedTheme }; Changed(); return;
+                case "browseThemes": OpenExternal("https://betterdiscord.app/themes"); return;
+                case "submitTheme": OpenExternal(SubmissionDestination()); return;
+                case "communitySource":
+                    OpenExternal(CommunityGallery.Designs.Single(d => d.Id == message.GetProperty("value").GetString()).Source); return;
+                case "communityAuthor":
+                    OpenExternal(CommunityGallery.Designs.Single(d => d.Id == message.GetProperty("value").GetString()).AuthorUrl); return;
                 case "previewReady":
                     if (renderedRevision == revision) validation = !surface.Ready ? "The design or display font did not load. Choose another font or reload the preview." : configuration.Guild.Length == 0 ? "Choose a target server before applying or saving." : "";
                     Publish(); return;
@@ -153,6 +179,7 @@ internal sealed class BuilderForm : Form
                 case "open": OpenDocument(); return;
                 case "save": SaveDocument(false); return;
                 case "share": SaveDocument(true); return;
+                case "exportCss": ExportOriginalCss(); return;
                 case "importFont":
                     var asset = AssetImport.Font(this); if (asset is null) return;
                     configuration = configuration with { Font = "custom", CustomFont = asset }; notice = "Font imported with its redistribution license: " + asset.Name; Changed(); return;
@@ -179,6 +206,34 @@ internal sealed class BuilderForm : Form
         confirmation = null; configuration = value; documentPath = dialog.FileName; dirty = false; saved = true; revision++;
         notice = "Configuration opened. Review the target server before applying."; RenderPreview();
     }
+    private void ReviewCss()
+    {
+        if (!ConfirmDiscard()) return;
+        using var dialog = new OpenFileDialog { Filter = "BetterDiscord (*.theme.css)|*.theme.css", Title = UiText.Text("Import a downloaded BetterDiscord theme") };
+        if (dialog.ShowDialog(this) != DialogResult.OK) return;
+        importReview = CssThemeImporter.ReviewFile(dialog.FileName);
+        Publish();
+    }
+    private static object ReviewState(CssImportReview review) => new
+    {
+        review.Supported, name = review.Theme?.Name, author = review.Theme?.Author, source = review.Theme?.Source,
+        sha256 = review.Theme?.Sha256, license = review.Theme?.License,
+        notes = review.Notes.Select(UiText.Text), resources = review.Resources.Select(r => r.Replace("bytes · embedded", UiText.Text("bytes · embedded")).Replace("reviewed bundled font", UiText.Text("reviewed bundled font"))),
+        variables = review.Variables.Select(v => new { v.Name, value = review.Theme?.Edits.GetValueOrDefault(v.Name) ?? v.Value, v.Kind })
+    };
+    private static void OpenExternal(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme != "https" || !string.IsNullOrEmpty(uri.UserInfo))
+            throw new InvalidDataException("Use an HTTPS destination without credentials.");
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true });
+    }
+    private static string SubmissionDestination()
+    {
+        var configured = Environment.GetEnvironmentVariable("THEME_STUDIO_SUBMISSION_DISCORD");
+        if (Uri.TryCreate(configured, UriKind.Absolute, out var uri) && uri.Scheme == "https" && uri.UserInfo.Length == 0 &&
+            (uri.Host == "discord.gg" || uri.Host == "discord.com" && uri.AbsolutePath.StartsWith("/channels/", StringComparison.Ordinal))) return uri.AbsoluteUri;
+        return "https://github.com/PrimeBuild-pc/discord-theme-launcher/issues/new?template=theme_submission.yml";
+    }
     private void SaveDocument(bool share)
     {
         var value = ReadConfiguration(); string? path = share ? null : documentPath;
@@ -191,6 +246,14 @@ internal sealed class BuilderForm : Form
         if (!dryRun) value.Save(DraftPath);
         notice = share ? "Portable copy saved with selected assets and font license. Send it to members yourself; each member applies it locally." : "Your configuration and selected assets are saved together.";
         Publish();
+    }
+    private void ExportOriginalCss()
+    {
+        if (configuration.Imported is not { } imported) return;
+        _ = CssThemeImporter.Inspect(imported);
+        using var dialog = new SaveFileDialog { Filter = "BetterDiscord (*.theme.css)|*.theme.css", DefaultExt = "theme.css", AddExtension = true, FileName = imported.FileName, Title = UiText.Text("Export original CSS") };
+        if (dialog.ShowDialog(this) != DialogResult.OK) return;
+        ThemeStore.AtomicWrite(dialog.FileName, imported.Original);
     }
     private void ImportImage(bool banner)
     {

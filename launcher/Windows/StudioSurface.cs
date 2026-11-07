@@ -62,8 +62,8 @@ internal sealed class StudioSurface : Panel
                     else if (path.StartsWith("/art/", StringComparison.Ordinal))
                     {
                         var parts = path.Split('/');
-                        if (parts.Length == 4 && ThemeConfiguration.Presets.Contains(parts[2]) && parts[3] is "header" or "chat")
-                        { var data = ThemeCompiler.ArtworkDataUri(parts[2], parts[3]); bytes = Convert.FromBase64String(data[(data.IndexOf(',') + 1)..]); mime = "image/svg+xml"; allowed = true; }
+                        if (parts.Length == 4 && CommunityGallery.Designs.Any(d => d.Id == parts[2]) && parts[3] is "header" or "chat")
+                        { var data = ThemeCompiler.ArtworkDataUri(parts[2], parts[3]); bytes = Convert.FromBase64String(data[(data.IndexOf(',') + 1)..]); mime = data[5..data.IndexOf(';')]; allowed = true; }
                     }
                 }
                 var response = new MemoryStream(bytes);

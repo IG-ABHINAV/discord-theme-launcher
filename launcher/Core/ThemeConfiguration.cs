@@ -30,7 +30,7 @@ public sealed record ThemeConfiguration
     public ThemeAsset? CustomBackground { get; init; }
     public ImportedTheme? Imported { get; init; }
     public const int MaxFileBytes = 24 * 1024 * 1024;
-    public static readonly string[] Presets = ["primebuild", "primebuild-dev", "fantafort"];
+    public static string[] Presets => ThemeCompiler.BundledCatalog.Themes.Select(t => t.Id).ToArray();
     public static readonly string[] Palettes = ["primebuild", "primebuild-dev", "fantafort", "blurple", "custom"];
 
     public static string ParseGuild(string input)

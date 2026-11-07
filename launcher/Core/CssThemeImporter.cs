@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Buffers.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -20,11 +21,15 @@ public static class CssThemeImporter
 
     public static ImportedTheme Load(string path)
     {
+        var review = ReviewFile(path);
+        return review.Theme ?? throw new InvalidDataException(string.Join("\n", review.Notes));
+    }
+    public static CssImportReview ReviewFile(string path)
+    {
         ThemeStore.CheckPath(path);
         if (!path.EndsWith(".theme.css", StringComparison.OrdinalIgnoreCase) || new FileInfo(path).Length > MaxBytes)
             throw new InvalidDataException("Choose a downloaded .theme.css file up to 2 MiB.");
-        var review = Review(File.ReadAllBytes(path), Path.GetFileName(path));
-        return review.Theme ?? throw new InvalidDataException(string.Join("\n", review.Notes));
+        return Review(File.ReadAllBytes(path), Path.GetFileName(path));
     }
 
     public static CssImportReview Review(byte[] bytes, string fileName, string source = "", string license = "")
@@ -37,6 +42,11 @@ public static class CssThemeImporter
             string css = new UTF8Encoding(false, true).GetString(bytes).TrimStart('\uFEFF');
             string Metadata(string key) => Regex.Match(css, @"(?m)^\s*\*?\s*@" + key + @"\s+([^\r\n*]+)").Groups[1].Value.Trim();
             string hash = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+            if (hash == ZenitHash)
+            {
+                if (license.Length == 0) license = ThemeCompiler.Resource("zenit-license.txt");
+                if (source.Length == 0) source = "https://github.com/JACKPOT71/zenit-gold/tree/64cc7a1eaf77dc3b081d5fd0637d8dc165b273c6";
+            }
             var theme = new ImportedTheme(fileName, bytes.ToArray(), hash, Metadata("name") is { Length: > 0 } name ? name : fileName,
                 Metadata("author"), source.Length > 0 ? source : Metadata("source"), license, []);
             var analysis = Analyze(theme, "987654321012345678");
@@ -118,14 +128,23 @@ public static class CssThemeImporter
                     "font/ttf" => raw.AsSpan(0, 4).SequenceEqual(new byte[] {0,1,0,0}), _ => false
                 };
                 if (!valid) throw new InvalidDataException("Embedded resource signature does not match its declared format.");
+                if (mime.StartsWith("image/", StringComparison.Ordinal)) ValidateImageSize(mime, raw);
                 result.Resources.Add(mime + " · " + raw.Length + " bytes · embedded");
             }
         }
+        bool documentBackdrop = false;
         string MapSelector(string selector)
         {
             // Document anchors are grammar tokens, not blind string prefixes.
             var root = Regex.Match(selector, @"^(?::root|html|body|#app-mount)(?=$|[\s:.#>+~\[])", RegexOptions.IgnoreCase);
+            if (root.Value.Equals("body", StringComparison.OrdinalIgnoreCase) && selector[root.Length..] == "::before") documentBackdrop = true;
             if (root.Success) selector = ":scope" + selector[root.Length..];
+            else
+            {
+                if (selector.Contains(":scope", StringComparison.OrdinalIgnoreCase)) throw CssSyntax.Invalid();
+                // Ordinary selectors can style descendants, never the containing server pane itself.
+                selector = ":scope " + selector;
+            }
             if (Regex.IsMatch(selector.Replace(":scope", ""), @"(?i)(?<![\w-])(?:body|html)(?![\w-])|:root|#app-mount") ||
                 selector.Contains('&') || selector.Contains('\\') || selector.Contains('@')) throw new InvalidDataException("Unsupported document-root selector. Keep html/body/:root/#app-mount at the beginning of a selector, without CSS nesting.");
             return selector;
@@ -136,9 +155,20 @@ public static class CssThemeImporter
             foreach (var (property, original) in CssSyntax.Declarations(body))
             {
                 if (!Regex.IsMatch(property, "^(?:--)?[a-zA-Z-][a-zA-Z0-9-]{0,99}$") || property.Equals("behavior", StringComparison.OrdinalIgnoreCase)) throw CssSyntax.Invalid();
+                string normalized = property.ToLowerInvariant();
+                if (normalized == "all" || normalized == "contain" && !Regex.IsMatch(original, @"^(?:paint|strict|content)(?:\s*!important)?$", RegexOptions.IgnoreCase) ||
+                    normalized == "isolation" && !Regex.IsMatch(original, @"^isolate(?:\s*!important)?$", RegexOptions.IgnoreCase) ||
+                    normalized == "display" && !Regex.IsMatch(original, @"^(?:none|block|flex|grid|inline-block|inline-flex|inline-grid|flow-root)(?:\s*!important)?$", RegexOptions.IgnoreCase))
+                    throw new InvalidDataException("This CSS can remove server containment. all resets, unbounded containment and indirect display values require a reviewed adapter.");
+                if (root && !property.StartsWith("--", StringComparison.Ordinal) &&
+                    !Regex.IsMatch(normalized, @"^(?:background(?:-[a-z-]+)?|color|font(?:-[a-z-]+)?|line-height|text-[a-z-]+|border(?:-[a-z-]+)?|outline(?:-[a-z-]+)?|box-shadow|opacity)$") &&
+                    !(normalized == "position" && Regex.IsMatch(original, @"^relative(?:\s*!important)?$", RegexOptions.IgnoreCase)) &&
+                    !(normalized == "z-index" && Regex.IsMatch(original, @"^[01](?:\s*!important)?$", RegexOptions.IgnoreCase)))
+                    throw new InvalidDataException("Document-root layout changes cannot preserve the server pane bounds. Move layout rules to a descendant selector or use a reviewed adapter.");
                 CheckValue(original); string value = theme.Sha256 == ZenitHash ? original.Replace("\"Montserrat\"", "\"" + alias + "Montserrat\"") : original;
-                if (root && Identifier.IsMatch(property) && (Color.IsMatch(value) || Number.IsMatch(value)))
-                    result.Variables[property] = new(property, value, Color.IsMatch(value) ? "color" : "number");
+                string editable = Regex.Replace(value, @"\s*!important$", "", RegexOptions.IgnoreCase).Trim();
+                if (root && Identifier.IsMatch(property) && (Color.IsMatch(editable) || Number.IsMatch(editable)))
+                    result.Variables[property] = new(property, editable, Color.IsMatch(editable) ? "color" : "number");
                 if (property is "animation" or "animation-name")
                     foreach (var animation in keyframes) value = Regex.Replace(value, @"(?<![\w-])" + Regex.Escape(animation.Key) + @"(?![\w-])", animation.Value);
                 if (property == "position" && value.StartsWith("fixed", StringComparison.OrdinalIgnoreCase))
@@ -183,12 +213,15 @@ public static class CssThemeImporter
                 else
                 {
                     var selectors = CssSyntax.Selectors(rule.Header).Select(MapSelector).ToArray();
-                    output.AppendJoin(',', selectors).Append('{').Append(Declarations(rule.Body ?? throw CssSyntax.Invalid(), selectors.Contains(":scope"))).Append('}');
+                    bool stylesRoot = selectors.Any(s => s.StartsWith(":scope", StringComparison.Ordinal) && !s.StartsWith(":scope ", StringComparison.Ordinal) && !s.StartsWith(":scope::", StringComparison.Ordinal));
+                    output.AppendJoin(',', selectors).Append('{').Append(Declarations(rule.Body ?? throw CssSyntax.Invalid(), stylesRoot)).Append('}');
                 }
             }
             return output.ToString();
         }
         string converted = Emit(rules);
+        // body and app-mount become one pane: keep the former body's backdrop behind its content.
+        if (documentBackdrop) converted += ":scope::before{z-index:-1!important;}";
         if (result.Variables.Count > 128) throw new InvalidDataException("The stylesheet exposes too many editable variables (maximum 128).");
         foreach (var edit in theme.Edits)
         {
@@ -199,7 +232,40 @@ public static class CssThemeImporter
         string guard = ThemeCompiler.ServerScope(guild);
         string font = theme.Sha256 == ZenitHash ? CommunityGallery.ZenitFontCss : "";
         result.Css = font + guard + "{:scope{--pb-profile:\"personal\";position:relative;isolation:isolate;contain:paint;}" + converted +
-            ":scope{" + string.Join("", theme.Edits.Select(e => e.Key + ":" + e.Value + ";")) + "}}";
+            ":scope{--pb-profile:\"personal\"!important;position:relative!important;isolation:isolate!important;contain:paint!important;" +
+            string.Join("", theme.Edits.Select(e => e.Key + ":" + e.Value + "!important;")) + "}}";
         return result;
+    }
+
+    private static void ValidateImageSize(string mime, byte[] bytes)
+    {
+        int width = 0, height = 0;
+        if (mime == "image/png" && bytes.Length >= 33 && Encoding.ASCII.GetString(bytes, 12, 4) == "IHDR")
+        {
+            uint w = BinaryPrimitives.ReadUInt32BigEndian(bytes.AsSpan(16)), h = BinaryPrimitives.ReadUInt32BigEndian(bytes.AsSpan(20));
+            if (w <= int.MaxValue && h <= int.MaxValue) { width = (int)w; height = (int)h; }
+        }
+        else if (mime == "image/webp" && bytes.Length >= 30 && BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(4)) == bytes.Length - 8)
+        {
+            string chunk = Encoding.ASCII.GetString(bytes, 12, 4);
+            if (chunk == "VP8X") { width = 1 + bytes[24] + (bytes[25] << 8) + (bytes[26] << 16); height = 1 + bytes[27] + (bytes[28] << 8) + (bytes[29] << 16); }
+            else if (chunk == "VP8 " && bytes[23] == 0x9d && bytes[24] == 1 && bytes[25] == 0x2a)
+            { width = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(26)) & 0x3fff; height = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(28)) & 0x3fff; }
+            else if (chunk == "VP8L" && bytes[20] == 0x2f)
+            { uint size = BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(21)); width = (int)(size & 0x3fff) + 1; height = (int)((size >> 14) & 0x3fff) + 1; }
+        }
+        else if (mime == "image/jpeg")
+        {
+            int p = 2;
+            while (p + 9 < bytes.Length && bytes[p] == 255)
+            {
+                int marker = bytes[p + 1], length = BinaryPrimitives.ReadUInt16BigEndian(bytes.AsSpan(p + 2));
+                if (length < 2 || p + 2 + length > bytes.Length) break;
+                if (marker is 0xc0 or 0xc1 or 0xc2) { height = BinaryPrimitives.ReadUInt16BigEndian(bytes.AsSpan(p + 5)); width = BinaryPrimitives.ReadUInt16BigEndian(bytes.AsSpan(p + 7)); break; }
+                p += 2 + length;
+            }
+        }
+        if (width is < 1 or > 4096 || height is < 1 or > 4096 || (long)width * height > 16_000_000)
+            throw new InvalidDataException("Embedded images must have valid dimensions up to 4096 × 4096 and 16 million pixels.");
     }
 }

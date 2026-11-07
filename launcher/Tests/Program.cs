@@ -93,7 +93,43 @@ Check(cssReview.Supported && cssReview.Theme is not null, "self-contained import
 var importedCss = CssThemeImporter.Compile(cssReview.Theme!, "987654321012345678");
 Check(importedCss.Contains("--accent:#18bfae") && importedCss.Contains("border:2px solid var(--accent)"), "import compilation retains original design rather than substituting a preset");
 var zenit = CommunityGallery.Create("zenit-gold", config.Guild);
+Check(CssThemeImporter.Load(Path.Combine(root, "assets/community/zenit-gold/ZenitGold.theme.css")).Sha256 == CssThemeImporter.ZenitHash, "a downloaded .theme.css file follows the same pinned import seam used by the native picker");
 Check(zenit.Imported!.Sha256 == CssThemeImporter.ZenitHash && ThemeCompiler.Compile(zenit).Contains("--zg-gold:#e6c15e"), "pinned Zenit original imports with its author design and offline font");
+var draculaReview = CssThemeImporter.Review(File.ReadAllBytes(Path.Combine(root, "tests/imports/dracula/DraculaBase.theme.css")), "Dracula.theme.css", "https://github.com/dracula/betterdiscord/tree/77e73629086e5b77381f87b255b9f96401c61ced", File.ReadAllText(Path.Combine(root, "tests/imports/dracula/LICENSE")));
+Check(draculaReview.Supported && draculaReview.Variables.Any(v => v.Name == "--dracula-purple"), "materially different pinned Dracula design imports and exposes author variables");
+Check(!CssThemeImporter.Review(System.Text.Encoding.UTF8.GetBytes(".safe} .outside{color:red}"), "Breakout.theme.css").Supported, "unbalanced selector cannot escape the server scope");
+Check(!CssThemeImporter.Review(System.Text.Encoding.UTF8.GetBytes(":root:where(.theme-dark){all:unset!important;display:contents!important} .chat{position:fixed}"), "Containment.theme.css").Supported, "import cannot remove server containment through root resets");
+foreach (string badCss in new[] {
+    "@import url(\"https://example.invalid/all.css\"); .chat{color:red}",
+    ":root{--image:url(\"https://example.invalid/image.png\")}",
+    ".chat{background:url(\"file:///C:/private.png\")}",
+    ".chat{background:url(\"../private.png\")}",
+    ".chat{background:image-set(\"//example.invalid/image.png\" 1x)}",
+    ".chat{background:u\\72l(\"https://example.invalid/image.png\")}",
+    ".chat{background:url(\"data:image/svg+xml;base64,PHN2Zz4=\")}",
+    "@property --evil{syntax:'*';inherits:true;initial-value:red}",
+    ".chat{color:red;.nested{color:blue}}", "body .chat{color:red", ".chat:is(.safe} .outside){color:red}",
+    ".chat{background:url(\"data:image/png;base64,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\")}",
+    "html body .chat{color:red}", "@font-face{font-family:X;src:url(\"https://example.invalid/font.ttf\")}" })
+    Check(!CssThemeImporter.Review(System.Text.Encoding.UTF8.GetBytes(badCss), "Unsupported.theme.css").Supported, "unsupported CSS rejected before mutation: " + badCss[..Math.Min(50, badCss.Length)]);
+Check(!CssThemeImporter.Review(new byte[CssThemeImporter.MaxBytes + 1], "TooLarge.theme.css").Supported, "oversized CSS is rejected");
+Check(!CssThemeImporter.Review([255,254,0], "BadEncoding.theme.css").Supported, "invalid UTF-8 CSS is rejected");
+Check(!CssThemeImporter.Review(zenit.Imported!.Original, "../escape.theme.css").Supported, "CSS import traversal name is rejected");
+Reject(() => CssThemeImporter.Compile(zenit.Imported! with { Sha256 = new string('0',64) }, config.Guild), "corrupt imported source rejected on reopen/compile");
+Reject(() => CssThemeImporter.Compile(zenit.Imported! with { Edits = new() { ["--zg-gold"] = "red;}body{color:red" } }, config.Guild), "CSS injection through imported variable edit rejected");
+Reject(() => CssThemeImporter.Compile(zenit.Imported!, ""), "import application requires an explicit target");
+var legacyConfiguration = Path.Combine(fixture, "legacy-beta7.dtheme");
+File.WriteAllText(legacyConfiguration, """{"schema":1,"name":"Legacy saved theme","guild":"987654321012345678","preset":"primebuild-dev","palette":"primebuild-dev","accent":"#ff782e","surface":"#10131b","font":"primebuild-dev","banner":"primebuild-dev","background":"primebuild-dev"}""");
+Check(ThemeConfiguration.Load(legacyConfiguration).Preset == "primebuild-dev" && ThemeCompiler.Compile(ThemeConfiguration.Load(legacyConfiguration)).Contains("#ff782e"), "existing beta.7 schema-one configurations retain their explicit design choices");
+foreach (var design in new[] { zenit, new ThemeConfiguration { Name = "Dracula", Guild = config.Guild, Imported = draculaReview.Theme } })
+{
+    var path = Path.Combine(fixture, design.Name.Replace(' ', '-') + ".dtheme"); design.Save(path);
+    var copy = ThemeConfiguration.Load(path);
+    Check(copy.Imported!.Original.SequenceEqual(design.Imported!.Original) && ThemeCompiler.Compile(copy) == ThemeCompiler.Compile(design), "imported portable save/reopen retains original bytes, license and exact generated design: " + design.Name);
+    store.ApplyPersonal(design); var exact = File.ReadAllBytes(Path.Combine(store.ThemesDirectory, ThemeCompiler.PersonalFile));
+    store.ApplyPersonal(design); store.RestoreLast();
+    Check(File.ReadAllBytes(Path.Combine(store.ThemesDirectory, ThemeCompiler.PersonalFile)).SequenceEqual(exact), "repeated imported apply and recovery preserves exact bytes: " + design.Name);
+}
 Check(ThemeConfiguration.ParseGuild(" https://discord.com/channels/987654321012345678/123456789012345678 ") == config.Guild && ThemeConfiguration.ParseGuild(config.Guild) == config.Guild, "server ID and channel-link selection");
 foreach (var invalid in new[] { "", "@me", "123", "https://discord.gg/invite", "https://evil.invalid/channels/987654321012345678/123456789012345678", "99999999999999999999", "12345678901234567\"]){body{color:red}}" })
     Reject(() => ThemeConfiguration.ParseGuild(invalid), "invalid server target refused: " + invalid);
@@ -156,6 +192,12 @@ grownStore.RestoreLast();
 Check(File.ReadAllBytes(fourthPath).SequenceEqual(new byte[] { 0, 255, 13, 10 }) && grownStore.PersonalEnabled, "catalog growth preserves newer files and personal slot when restoring historical snapshots");
 Check(File.ReadAllText(Path.Combine(vencord, "dist", "patcher.js")) == "// fixture patcher", "apply and recovery preserve Vencord runtime files");
 var previewDirectory = Path.Combine(root, ".local", "builder-fixtures"); Directory.CreateDirectory(previewDirectory);
+File.WriteAllText(Path.Combine(previewDirectory, "fluent.html"), ThemePreview.Html(new ThemeConfiguration { Guild = config.Guild }));
+File.WriteAllText(Path.Combine(previewDirectory, "zenit-gold.html"), ThemePreview.Html(zenit));
+var editedZenit = zenit with { Imported = zenit.Imported! with { Edits = new() { ["--zg-gold"] = "#31c6b4" } } };
+File.WriteAllText(Path.Combine(previewDirectory, "zenit-edited.html"), ThemePreview.Html(editedZenit));
+File.WriteAllText(Path.Combine(previewDirectory, "dracula.html"), ThemePreview.Html(new ThemeConfiguration { Guild = config.Guild, Name = "Dracula", Imported = draculaReview.Theme }));
+File.WriteAllText(Path.Combine(previewDirectory, "zenit-review.json"), System.Text.Json.JsonSerializer.Serialize(new { supported = true, name = zenit.Name, author = zenit.Imported!.Author, source = zenit.Imported.Source, sha256 = zenit.Imported.Sha256, license = zenit.Imported.License, notes = CssThemeImporter.Inspect(zenit.Imported).Notes, resources = CssThemeImporter.Inspect(zenit.Imported).Resources, variables = CssThemeImporter.Inspect(zenit.Imported).Variables.Select(v => new { name = v.Name, value = v.Value, kind = v.Kind }) }));
 foreach (var id in ThemeConfiguration.Presets)
 {
     var example = config with { Preset = id, Palette = id, Font = id, Banner = id, Background = id };

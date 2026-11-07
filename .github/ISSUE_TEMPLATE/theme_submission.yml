@@ -1,0 +1,31 @@
+name: Propose a community theme
+description: Submit a theme for human review. Submission does not install or publish it.
+title: "[Theme]: "
+body:
+  - type: input
+    id: author
+    attributes:
+      label: Theme name and author
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Configuration or CSS source
+      description: Link a public source repository and pinned version, or attach a .dtheme in a ZIP. Never include tokens, private messages or account data.
+    validations:
+      required: true
+  - type: textarea
+    id: preview
+    attributes:
+      label: Preview and intended server adaptation
+      description: Include a screenshot with synthetic conversations and describe editable properties and compatibility limits.
+    validations:
+      required: true
+  - type: textarea
+    id: license
+    attributes:
+      label: License and attribution
+      description: Supply author credits and licenses/permissions for CSS, images and fonts. Human review is required before inclusion.
+    validations:
+      required: true

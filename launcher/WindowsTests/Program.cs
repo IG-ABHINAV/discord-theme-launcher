@@ -38,6 +38,10 @@ internal static class Program
         pending = OperationConfirmation.Create("apply", 3, reviewed, false, false, "Unsupported client"); token = pending.Id;
         Check(!OperationConfirmation.TryTake(ref pending, token, 3, out _), "unsupported installation cannot pass confirmation");
         var fixture = Path.Combine(Path.GetTempPath(), "ThemeLauncher-WindowsTests-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(fixture);
+        UiText.Use("de"); UiText.Save(fixture); UiText.Use("en"); UiText.Load(fixture);
+        Check(UiText.Current == "de" && UiText.Text("Restore previous setup") == "Vorherige Einrichtung wiederherstellen", "German native recovery translation and language persistence round trip");
+        Check(UiText.Text("Unsupported stylesheet rule: @layer. @media, @supports, @container and named animations are supported; global registrations and nested CSS need a reviewed adapter.").StartsWith("Nicht unterstützte"), "German compatibility errors preserve the reported CSS rule");
+        UiText.Use("en");
         form.Shown += async (_, _) =>
         {
             try
@@ -73,7 +77,7 @@ internal static class Program
                 await Loaded(); Check(preview.Ready, "actual WebView2 loads embedded font and large offline image");
                 var core = preview.Controls.OfType<WebView2>().Single().CoreWebView2;
                 var accent = await core.ExecuteScriptAsync("getComputedStyle(document.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()");
-                Check(accent == "\"#ff6600\"", "native preview renders generated CSS");
+                Check(accent == System.Text.Json.JsonSerializer.Serialize(config.Accent), "native preview renders generated CSS");
                 await core.ExecuteScriptAsync("document.querySelector('[data-list-item-id=\"guildsnav___other\"]').click()");
                 Check(await core.ExecuteScriptAsync("getComputedStyle(document.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") == "\"\"", "native preview releases styling on a different server");
                 string source = core.Source;
@@ -130,9 +134,9 @@ internal static class Program
                 Check(builder.SimulatedOperations == 1, "late edits invalidate the native confirmation snapshot");
                 await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'edit',values:{...state.values,name:'Your community'}})");
                 await StudioState("state.values.name==='Your community' && !document.getElementById('apply').disabled");
-                Check(await studioCore.ExecuteScriptAsync("document.querySelector('label[for=guild]').textContent.includes('Server ID') && document.querySelectorAll('[data-preset]').length===3") == "true", "studio exposes labeled server selection and three coordinated presets");
+                Check(await studioCore.ExecuteScriptAsync("document.querySelector('label[for=guild]').textContent.includes('Server ID') && document.querySelectorAll('[data-preset]').length===4") == "true", "studio exposes labeled server selection and four credited community designs");
                 Check(await studioCore.ExecuteScriptAsync("[...document.querySelectorAll('.preset-card img')].every(image=>image.complete&&image.naturalWidth>0)") == "true", "actual native studio loads all bundled preset artwork");
-                await studioCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"fantafort\"]').click()");
+                await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'preset',value:'fantafort'})");
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!studio.Ready || await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") != "\"#f5db36\"") await Task.Delay(100, timeout.Token);
                 Check(true, "native preset selection updates the real preview through the validated bridge");
@@ -157,7 +161,7 @@ internal static class Program
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!studio.Ready) await Task.Delay(100, timeout.Token);
                 Check(await studioCore.ExecuteScriptAsync("document.getElementById('preview-error').hidden") == "true", "valid target recovers the preview without reopening the application");
-                await studioCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"primebuild\"]').click();document.querySelector('[data-preset=\"primebuild-dev\"]').click();document.querySelector('[data-preset=\"fantafort\"]').click()");
+                await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'preset',value:'primebuild'});window.chrome.webview.postMessage({action:'preset',value:'primebuild-dev'});window.chrome.webview.postMessage({action:'preset',value:'fantafort'})");
                 await Task.Delay(150);
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!studio.Ready || await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") != "\"#f5db36\"") await Task.Delay(100, timeout.Token);
@@ -171,11 +175,36 @@ internal static class Program
                 await studioCore.ExecuteScriptAsync("document.getElementById('language').value='en';document.getElementById('language').dispatchEvent(new Event('change'))");
                 await StudioState("document.documentElement.lang==='en' && document.getElementById('apply').textContent.includes('Apply to Discord') && document.querySelector('label[for=guild]').textContent.includes('Server ID')");
                 Check(true, "studio switches among English, Italian, Spanish and Russian, then returns to English");
-                await studioCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"primebuild\"]').click()");
+                await studioCore.ExecuteScriptAsync("document.getElementById('language').value='de';document.getElementById('language').dispatchEvent(new Event('change'))");
+                await StudioState("document.documentElement.lang==='de' && document.getElementById('apply').textContent.includes('Auf Discord anwenden')");
+                Check(UiText.Current == "de", "German WebView selection reaches native localization");
+                await studioCore.ExecuteScriptAsync("document.getElementById('language').value='en';document.getElementById('language').dispatchEvent(new Event('change'))");
+                await StudioState("document.documentElement.lang==='en'");
+                await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'preset',value:'primebuild'})");
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!studio.Ready || await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") != "\"#ff6600\"") await Task.Delay(100, timeout.Token);
                 // Edits made by this test are synthetic; do not open the user's unsaved-edits dialog on disposal.
                 builder.Hide();
+                using var importedBuilder = new BuilderForm(true);
+                importedBuilder.Show();
+                var importedSurface = importedBuilder.Controls.OfType<StudioSurface>().Single();
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (!importedSurface.Ready) await Task.Delay(100, timeout.Token);
+                var importedCore = importedSurface.Controls.OfType<WebView2>().Single().CoreWebView2;
+                await importedCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"zenit-gold\"]').click()");
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (!importedSurface.Ready || await importedCore.ExecuteScriptAsync("Boolean(state.imported?.sha256)") != "true") await Task.Delay(100, timeout.Token);
+                Check(await importedCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--zg-gold').trim()") == "\"#e6c15e\"", "real native gallery selects the original Zenit design and reviewed offline resources");
+                await importedCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'importVariable',name:'--zg-gold',value:'#31c6b4'})");
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (!importedSurface.Ready || await importedCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--zg-gold').trim()") != "\"#31c6b4\"") await Task.Delay(100, timeout.Token);
+                Check(importedBuilder.SimulatedOperations == 0, "native imported variable edits remain preview-only");
+                await importedCore.ExecuteScriptAsync("document.getElementById('apply').click()");
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (await importedCore.ExecuteScriptAsync("document.getElementById('operation-confirmation').open") != "true") await Task.Delay(50, timeout.Token);
+                await importedCore.ExecuteScriptAsync("document.getElementById('confirmation-cancel').click()");
+                Check(importedBuilder.SimulatedOperations == 0, "native imported application cancellation leaves the profile untouched");
+                importedBuilder.Hide();
                 Console.WriteLine($"{checks} Windows checks passed. Fixture: {fixture}");
                 Environment.ExitCode = 0;
             }
