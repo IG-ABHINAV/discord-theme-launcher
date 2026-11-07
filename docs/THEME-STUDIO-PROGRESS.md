@@ -5,8 +5,8 @@ The supplied beta.7 source overlay, November Discord class map, research and six
 
 | Milestone | Status | Required evidence / remaining work |
 | --- | --- | --- |
-| baseline_beta7 | In progress | CSS audits and 61 core checks passed. Install pinned Chromium and run browser baseline; preserve startup/runtime/file regression coverage. |
-| catalog_recovery | Pending | Bounded extensible catalog/capabilities; legacy configurations and historical snapshots; exact-byte recovery preserving unrelated runtime/settings. |
+| baseline_beta7 | Verified | Supplied snapshot checkpoint `follows git history`; CSS audits and 61 core checks pass. Pinned Chromium installed; `npm test`: 45 passed. Startup/runtime/file regression coverage retained. |
+| catalog_recovery | In progress | Bounded extensible catalog/capabilities implemented; fourth-entry regression failed before fix and passes after. Historical-subset restore now leaves newer files alone; expanded migration test running. |
 | neutral_editor | Pending | Fluent Dark without implicit server/branding; Create/Community/My themes; accessible preview/edit/save/reopen/share/apply/restore; explicit server choice. |
 | community_zenit | Pending | Four credited entries; pinned Zenit source/license/assets; author design preserved in reviewed server adaptation; independent preview/isolation/persistence. |
 | betterdiscord_import | Pending | Downloaded CSS parser/conversion, resource/compatibility review, no arbitrary fetches; actual design and variables; portable provenance/integrity; two materially different fixtures including Zenit; apply/recovery and rejection tests. |

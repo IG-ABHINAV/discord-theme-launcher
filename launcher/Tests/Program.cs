@@ -3,6 +3,13 @@ using CommunityThemes;
 
 var root = Path.GetFullPath(args.Length > 0 ? args[0] : ".");
 var catalog = Catalog.Parse(File.ReadAllText(Path.Combine(root, "catalog.json")));
+// Public catalog seam: an additional locally verified theme is data, not a launcher allowlist edit.
+var extendedJson = JsonNode.Parse(File.ReadAllText(Path.Combine(root, "catalog.json")))!;
+var additional = extendedJson["themes"]![0]!.DeepClone();
+additional["id"] = "fourth"; additional["file"] = "Fourth.theme.css"; additional["guild"] = "987654321012345678";
+extendedJson["themes"]!.AsArray().Add(additional);
+var extendedCatalog = Catalog.Parse(extendedJson.ToJsonString());
+if (extendedCatalog.Themes.Length != 4) throw new Exception("Extensible catalog lost fourth entry");
 var fixture = Path.Combine(Path.GetTempPath(), "CommunityThemes-tests-" + Guid.NewGuid().ToString("N"));
 Directory.CreateDirectory(fixture);
 int checks = 0;
@@ -133,6 +140,14 @@ var legacyName = Guid.NewGuid().ToString("N"); var legacyFolder = Path.Combine(s
 File.WriteAllText(Path.Combine(legacyFolder, "snapshot.json"), System.Text.Json.JsonSerializer.Serialize(new Snapshot(catalog.Themes.Select(t => new SavedTheme(t.File, false, false)).ToArray())));
 File.WriteAllText(Path.Combine(state, "last-backup.txt"), legacyName); store.RestoreLast();
 Check(store.PersonalEnabled && store.InstalledSelection().Length == 0, "legacy three-file backups restore without changing the personal slot");
+// Reopening an old snapshot after catalog growth must neither reject it nor delete new files.
+var fourthPath = Path.Combine(store.ThemesDirectory, "Fourth.theme.css");
+File.WriteAllBytes(fourthPath, [0, 255, 13, 10]);
+var grownStore = new ThemeStore(vencord, state, extendedCatalog);
+File.WriteAllText(Path.Combine(state, "last-backup.txt"), legacyName);
+grownStore.RestoreLast();
+Check(File.ReadAllBytes(fourthPath).SequenceEqual(new byte[] { 0, 255, 13, 10 }) && grownStore.PersonalEnabled, "catalog growth preserves newer files and personal slot when restoring historical snapshots");
+Check(File.ReadAllText(Path.Combine(vencord, "dist", "patcher.js")) == "// fixture patcher", "apply and recovery preserve Vencord runtime files");
 var previewDirectory = Path.Combine(root, ".local", "builder-fixtures"); Directory.CreateDirectory(previewDirectory);
 foreach (var id in ThemeConfiguration.Presets)
 {

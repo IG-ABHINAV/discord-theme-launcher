@@ -4,16 +4,22 @@ using System.Text.Json.Nodes;
 
 namespace CommunityThemes;
 
-public sealed record Theme(string Id, string Guild, string Name, string Server, string File, string Accent, string Tagline, string Sha256, int Bytes);
+public sealed record Theme(string Id, string Guild, string Name, string Server, string File, string Accent, string Tagline, string Sha256, int Bytes,
+    string Author = "Prime Build", string Source = "https://github.com/PrimeBuild-pc/discord-theme-launcher", string License = "MIT",
+    string[]? Capabilities = null);
 public sealed record Catalog(string Version, string Repository, Theme[] Themes)
 {
     public static Catalog Parse(string json)
     {
         var catalog = JsonSerializer.Deserialize<Catalog>(json, JsonOptions) ?? throw new InvalidDataException("Invalid theme catalog.");
-        string[] names = ["PrimeBuild.theme.css", "PrimeBuildDev.theme.css", "FantaFort.theme.css"];
-        if (catalog.Repository != "PrimeBuild-pc/discord-theme-launcher" || catalog.Themes.Length != 3 ||
-            catalog.Themes.Select(t => t.File).Distinct().Count() != 3 ||
-            catalog.Themes.Any(t => !names.Contains(t.File) || t.Bytes is <= 0 or > 358400 || !System.Text.RegularExpressions.Regex.IsMatch(t.Sha256, "^[a-f0-9]{64}$")) ||
+        if (catalog.Repository != "PrimeBuild-pc/discord-theme-launcher" || catalog.Themes is null || catalog.Themes.Length is < 1 or > 16 ||
+            catalog.Themes.Select(t => t.File).Distinct(StringComparer.OrdinalIgnoreCase).Count() != catalog.Themes.Length ||
+            catalog.Themes.Select(t => t.Id).Distinct().Count() != catalog.Themes.Length ||
+            catalog.Themes.Any(t => t.File is null || !System.Text.RegularExpressions.Regex.IsMatch(t.File, "^[A-Za-z][A-Za-z0-9-]{0,63}\\.theme\\.css$") ||
+                t.File.Equals(ThemeCompiler.PersonalFile, StringComparison.OrdinalIgnoreCase) ||
+                t.Id is null || !System.Text.RegularExpressions.Regex.IsMatch(t.Id, "^[a-z][a-z0-9-]{0,63}$") ||
+                t.Bytes is <= 0 or > 2 * 1024 * 1024 || t.Sha256 is null || !System.Text.RegularExpressions.Regex.IsMatch(t.Sha256, "^[a-f0-9]{64}$") ||
+                t.Guild != ThemeConfiguration.ParseGuild(t.Guild)) ||
             !System.Text.RegularExpressions.Regex.IsMatch(catalog.Version, @"^\d+\.\d+\.\d+(?:-beta\.\d+)?$"))
             throw new InvalidDataException("Unsupported theme catalog.");
         return catalog;
@@ -199,9 +205,10 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         CheckPath(folder);
         var snapshotPath = Path.Combine(folder, "snapshot.json"); CheckPath(snapshotPath);
         var snapshot = JsonSerializer.Deserialize<Snapshot>(File.ReadAllText(snapshotPath), Catalog.JsonOptions) ?? throw new InvalidDataException("Invalid backup.");
-        // Existing three-file snapshots remain restorable without changing the new personal slot.
-        if (snapshot.Themes.Length is not (3 or 4) || snapshot.Themes.Select(t => t.File).Distinct().Count() != snapshot.Themes.Length ||
-            snapshot.Themes.Any(t => !ManagedFiles.Contains(t.File)) || catalog.Themes.Any(t => !snapshot.Themes.Any(s => s.File == t.File)))
+        // Historical snapshots touch only their recorded managed subset; newer catalog entries are left alone.
+        if (snapshot.Themes is null || snapshot.Themes.Length < 1 || snapshot.Themes.Length > ManagedFiles.Length ||
+            snapshot.Themes.Select(t => t.File).Distinct().Count() != snapshot.Themes.Length ||
+            snapshot.Themes.Any(t => !ManagedFiles.Contains(t.File)))
             throw new InvalidDataException("The backup does not match this launcher.");
         var settings = ReadSettings();
         // Validate every source/destination first; never partially restore an incomplete backup.
