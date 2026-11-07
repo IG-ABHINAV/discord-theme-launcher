@@ -1,4 +1,4 @@
-THEME STUDIO / DISCORD THEME LAUNCHER 0.3.0-beta.10 - WINDOWS X64
+THEME STUDIO / DISCORD THEME LAUNCHER 0.3.0-beta.11 - WINDOWS X64
 
 1. Extract the ZIP and run DiscordThemeLauncher.exe without Administrator rights.
 2. Home offers Create a theme, Import a theme, and Choose a template.
@@ -31,7 +31,7 @@ themselves. No token, login, bot, Nitro, server permissions or credentials.
 The launcher never joins servers, reads messages or changes server settings.
 
 One personal theme is active at a time. Apply replaces that slot and disables
-a bundled theme targeting the same server. Other server presets remain enabled.
+all other launcher themes. Their files and external themes remain intact.
 Recovery disables styling without deleting theme files. Full reset also disables
 online links and QuickCSS; a snapshot allows undoing that choice. Plugins
 and unrelated preferences are preserved in both reset modes.
@@ -77,3 +77,7 @@ Discord terms/account implications. FantaFort is independent of Epic Games.
 Source, compatibility, recovery, licenses and validation:
 https://github.com/PrimeBuild-pc/discord-theme-launcher
 Official Vencord: https://vencord.dev/download/
+
+The studio resumes the document and section used on your last clean exit.
+Unsaved edits prompt Save and close, Discard or Keep editing. Saved theme,
+palette and image buttons show a check and disable redundant saves.

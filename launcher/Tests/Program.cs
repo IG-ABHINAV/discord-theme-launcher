@@ -211,13 +211,14 @@ File.WriteAllText(Path.Combine(state, "last-backup.txt"), "invalid");
 store.Apply(catalog.Themes.Select(t => t.Id).ToArray(), all);
 store.ApplyPersonal(portable with { Guild = catalog.Themes[0].Guild });
 settings = JsonNode.Parse(File.ReadAllText(store.SettingsPath))!;
-Check(store.PersonalEnabled && !store.InstalledSelection().Contains("primebuild") && store.InstalledSelection().Length == 2 && File.Exists(Path.Combine(store.ThemesDirectory, "PrimeBuild.theme.css")), "personal apply disables only the preset for the same server and preserves its bytes");
+Check(store.PersonalEnabled && store.InstalledSelection().Length == 0 && File.Exists(Path.Combine(store.ThemesDirectory, "PrimeBuild.theme.css")), "personal apply enables only the current theme and preserves other preset files");
+Check(settings["enabledThemes"]!.AsArray().Select(n => n!.GetValue<string>()).Order().SequenceEqual(new[] { "SomeoneElse.theme.css", ThemeCompiler.PersonalFile }.Order()), "personal apply disables every old launcher preset while keeping the external theme enabled");
 Check(settings["plugins"]!["Other"]!["enabled"]!.GetValue<bool>() && settings["newPreference"]!.GetValue<string>() == "keep-me" && File.ReadAllText(quickCss) == "/* existing customization */", "personal apply preserves plugins, preferences and QuickCSS");
 store.ApplyPersonal(config);
 Check(store.PersonalEnabled && File.ReadAllText(Path.Combine(store.ThemesDirectory, ThemeCompiler.PersonalFile)).Contains(config.Guild), "personal slot can be retargeted without accumulating managed files");
 store.RestoreLast();
 Check(File.ReadAllText(Path.Combine(store.ThemesDirectory, ThemeCompiler.PersonalFile)) == ThemeCompiler.Compile(portable with { Guild = catalog.Themes[0].Guild }), "restore recovers exact prior personal CSS");
-store.ApplyPersonal(null); Check(!store.PersonalEnabled && store.InstalledSelection().Length == 2, "disable removes only the personal slot");
+store.ApplyPersonal(null); Check(!store.PersonalEnabled && store.InstalledSelection().Length == 0, "disable removes the personal slot without reactivating previous presets");
 store.RestoreLast(); Check(store.PersonalEnabled, "personal disable is reversible");
 var lastBackup = Path.Combine(state, "backups", File.ReadAllText(Path.Combine(state, "last-backup.txt")).Trim());
 // This snapshot predates restore and has no personal file; corrupt a preset that did exist.

@@ -6,6 +6,7 @@ internal static partial class UiText
     {
         ["it"] = new()
         {
+            ["The session could not be saved. Check disk space and permissions, then try closing again."] = "Impossibile salvare la sessione. Controlla lo spazio sul disco e i permessi, poi riprova a chiudere.",
             ["Selected targets"] = "Destinazioni selezionate",
             ["Theme applied. Discord startup confirmed. Changes are local to you."] = "Tema applicato. Avvio di Discord confermato. Le modifiche sono locali.",
             ["Choose at least one server or DM chat."] = "Scegli almeno un server o una chat DM.",
@@ -32,6 +33,7 @@ internal static partial class UiText
         },
         ["es"] = new()
         {
+            ["The session could not be saved. Check disk space and permissions, then try closing again."] = "No se pudo guardar la sesión. Comprueba el espacio en disco y los permisos y vuelve a intentar cerrar.",
             ["Selected targets"] = "Destinos seleccionados",
             ["Theme applied. Discord startup confirmed. Changes are local to you."] = "Tema aplicado. Inicio de Discord confirmado. Los cambios son locales.",
             ["Choose at least one server or DM chat."] = "Elige al menos un servidor o chat DM.",
@@ -58,6 +60,7 @@ internal static partial class UiText
         },
         ["ru"] = new()
         {
+            ["The session could not be saved. Check disk space and permissions, then try closing again."] = "Не удалось сохранить сеанс. Проверьте свободное место на диске и права доступа, затем повторите закрытие.",
             ["Selected targets"] = "Выбранные цели",
             ["Theme applied. Discord startup confirmed. Changes are local to you."] = "Тема применена. Запуск Discord подтверждён. Изменения локальные.",
             ["Choose at least one server or DM chat."] = "Выбери хотя бы один сервер или личный чат.",
@@ -84,6 +87,7 @@ internal static partial class UiText
         },
         ["de"] = new()
         {
+            ["The session could not be saved. Check disk space and permissions, then try closing again."] = "Die Sitzung konnte nicht gespeichert werden. Prüfe den freien Speicherplatz und die Berechtigungen und versuche erneut, das Programm zu schließen.",
             ["Selected targets"] = "Ausgewählte Ziele",
             ["Theme applied. Discord startup confirmed. Changes are local to you."] = "Design angewendet. Discord-Start bestätigt. Änderungen gelten nur lokal.",
             ["Choose at least one server or DM chat."] = "Wähle mindestens einen Server oder DM-Chat.",

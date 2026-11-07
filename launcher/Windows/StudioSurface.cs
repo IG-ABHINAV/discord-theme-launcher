@@ -128,6 +128,10 @@ internal sealed class StudioSurface : Panel
     {
         if (loaded && web.CoreWebView2.Source == Origin) web.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(state, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
     }
+    public async Task PrepareCloseAsync()
+    {
+        if (Available) await web.CoreWebView2.ExecuteScriptAsync("flushEdits();send('closeReady',{paletteName:document.getElementById('palette-name').value})");
+    }
 
     protected override void Dispose(bool disposing)
     {

@@ -30,7 +30,7 @@ If Apply is disabled, review configuration errors, wait for the latest design/fo
 
 ## Apply semantics
 
-Personal Apply replaces the single `PersonalServer.theme.css` slot and disables a bundled preset targeting the same server, retaining its bytes. Other server presets and unrelated themes remain enabled. Shared configurations affect only the installing user's client.
+Personal Apply replaces the single `PersonalServer.theme.css` slot and disables other launcher presets, retaining their bytes. External themes remain enabled. Shared configurations affect only the installing user's client.
 
 Recovery offers **Restore Discord**, with a choice between launcher themes only or all local/online themes and QuickCSS. Files and plugins are preserved. A safety snapshot is written before updating settings. Alternatively choose a previous setup from the history and confirm its restoration.
 

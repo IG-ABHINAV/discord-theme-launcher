@@ -159,8 +159,9 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         // Compile only validated data; shared packages never supply executable CSS.
         byte[]? css = configuration is null ? null : System.Text.Encoding.UTF8.GetBytes(ThemeCompiler.Compile(configuration));
         var settings = ReadSettings();
+        // Applying the open document replaces launcher styling; old presets must not remain active elsewhere.
         var enabled = Enabled(settings).Where(name => name != ThemeCompiler.PersonalFile &&
-            !catalog.Themes.Any(t => t.File == name && configuration?.TargetGuilds.Contains(t.Guild) == true)).ToList();
+            (configuration is null || !ManagedFiles.Contains(name))).ToList();
         if (css is not null) enabled.Add(ThemeCompiler.PersonalFile);
         var folder = SaveSnapshot(settings);
         AtomicWrite(LastPath, System.Text.Encoding.UTF8.GetBytes(Path.GetFileName(folder)));

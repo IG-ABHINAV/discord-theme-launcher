@@ -113,7 +113,11 @@
     "targetLabel": "TARGETS",
     "saveAsNew": "Save as new theme",
     "copyName": "{name} copy",
-    "privacyNote": "No login, token or server permissions. IDs only choose where the theme appears."
+    "privacyNote": "No login, token or server permissions. IDs only choose where the theme appears.",
+    "saved": "Saved",
+    "saveClose": "Save & close",
+    "saveContinue": "Save & continue",
+    "confirmApplyBody": "Apply this theme only to the selected servers and DM chats. Other launcher themes will be disabled; external themes are kept."
   },
   "it": {
     "share": "Esporta una copia",
@@ -229,7 +233,11 @@
     "targetLabel": "DESTINAZIONI",
     "saveAsNew": "Salva come nuovo tema",
     "copyName": "{name} copia",
-    "privacyNote": "Nessun login, token o permesso server. Gli ID scelgono solo dove appare il tema."
+    "privacyNote": "Nessun login, token o permesso server. Gli ID scelgono solo dove appare il tema.",
+    "saved": "Salvato",
+    "saveClose": "Salva e chiudi",
+    "saveContinue": "Salva e continua",
+    "confirmApplyBody": "Applica questo tema solo ai server e alle chat DM selezionati. Gli altri temi del launcher verranno disattivati; i temi esterni vengono mantenuti."
   },
   "es": {
     "share": "Exportar una copia",
@@ -345,7 +353,11 @@
     "targetLabel": "DESTINOS",
     "saveAsNew": "Guardar como nuevo tema",
     "copyName": "Copia de {name}",
-    "privacyNote": "Sin inicio de sesión, token ni permisos del servidor. Los ID solo eligen dónde aparece el tema."
+    "privacyNote": "Sin inicio de sesión, token ni permisos del servidor. Los ID solo eligen dónde aparece el tema.",
+    "saved": "Guardado",
+    "saveClose": "Guardar y cerrar",
+    "saveContinue": "Guardar y continuar",
+    "confirmApplyBody": "Aplica este tema solo a los servidores y chats privados seleccionados. Los otros temas del launcher se desactivarán; se conservan los temas externos."
   },
   "ru": {
     "share": "Экспортировать копию",
@@ -461,6 +473,10 @@
     "targetLabel": "ЦЕЛИ",
     "saveAsNew": "Сохранить как новую тему",
     "copyName": "Копия {name}",
-    "privacyNote": "Без входа, токенов и прав сервера. ID определяют только место применения темы."
+    "privacyNote": "Без входа, токенов и прав сервера. ID определяют только место применения темы.",
+    "saved": "Сохранено",
+    "saveClose": "Сохранить и закрыть",
+    "saveContinue": "Сохранить и продолжить",
+    "confirmApplyBody": "Применить эту тему только к выбранным серверам и личным чатам. Другие темы лаунчера будут отключены; внешние темы сохранятся."
   }
 }

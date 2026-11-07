@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0-beta.11 - 2026-11-07 (unreleased)
+
+- Remove the duplicate Save as new theme action in Files.
+- Show a persistent saved check on theme, palette and image buttons; disable redundant saves until values change. Keep draft palette names while editing colors.
+- Apply only the open theme to its explicit targets, disabling older launcher presets while preserving their files, external themes, plugins and recovery snapshots.
+- Resume the last document, local profile identity, editor section, Templates tab and preview context.
+- Flush pending edits before closing and offer embedded Save and close, Discard or Keep editing; include pending palette names and keep validation failures visible. Discarded edits stay discarded on reopening.
+
 ## 0.3.0-beta.10 - 2026-11-07 (unreleased)
 
 - Order navigation as Home, Templates, Editor, Recovery, Help; add an empty template and Standard / My themes tabs.

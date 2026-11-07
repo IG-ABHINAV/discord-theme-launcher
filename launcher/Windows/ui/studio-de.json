@@ -132,7 +132,7 @@
   "confirmApplyTitle": "Dein Thema anwenden?",
   "confirmDisableTitle": "Persönliches Thema deaktivieren?",
   "confirmRestoreTitle": "Vorherige Einrichtung wiederherstellen?",
-  "confirmApplyBody": "Du siehst eine Vorschau. Fahre fort, um das Thema auf den ausgewählten Server in deinem lokalen Discord-Client anzuwenden.",
+  "confirmApplyBody": "Dieses Design nur auf die ausgewählten Server und Direktnachrichten anwenden. Andere Launcher-Designs werden deaktiviert; externe Designs bleiben erhalten.",
   "confirmDisableBody": "Fahre fort, um das persönliche Thema aus deinem lokalen Client zu entfernen. Andere Themen bleiben erhalten.",
   "confirmRestoreBody": "Fahre fort, um die vorherigen verwalteten Themendateien und Aktivierungen wiederherzustellen. Andere Einstellungen bleiben erhalten.",
   "themeLabel": "THEMA",
@@ -245,5 +245,8 @@
   "statusDmInactive": " Ursprüngliches Discord · dieser DM-Chat ist nicht ausgewählt",
   "art.original": "Originaldesign",
   "saveAsNew": "Als neues Design speichern",
-  "copyName": "{name} Kopie"
+  "copyName": "{name} Kopie",
+  "saved": "Gespeichert",
+  "saveClose": "Speichern und schließen",
+  "saveContinue": "Speichern und fortfahren"
 }

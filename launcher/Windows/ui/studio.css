@@ -24,3 +24,5 @@ textarea{font:inherit;display:block;width:100%;resize:vertical;min-height:64px;m
 .template-tabs{display:flex;gap:6px;margin-bottom:18px}.template-tabs button{flex:1;padding:10px 5px;font-size:12px;color:var(--muted);border:1px solid var(--border)}.template-tabs [aria-selected=true]{background:#5865f230;color:#e0e3ff;border-color:#8189c6}
 
 .template-tabs{position:sticky;top:0;background:var(--sidebar);z-index:2;padding-block:8px}
+
+button.save-complete { color: #8edbb3; opacity: 1; }

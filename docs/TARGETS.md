@@ -10,4 +10,4 @@ The DM preview uses synthetic private-chat navigation, a named contact and a mes
 
 Automated tests cover both server IDs, the selected DM, a different DM, absent messages, a matching decoy outside the message list, DM-only save/reopen and initial preview, current/legacy layout anchors and native WebView bridge behavior. Live Discord DM application and empty-conversation styling are not claimed as tested.
 
-Applying a personal theme still replaces the one personal slot. A bundled preset is disabled only when its server is among the new server targets. Other preset files and unrelated preferences are preserved, with the existing recovery snapshots.
+Applying a personal theme replaces the one personal slot and disables every older launcher preset, including presets for other servers. Only the current document’s explicit targets remain themed by the launcher. Preset files, external themes and unrelated preferences are preserved, with the existing recovery snapshots.

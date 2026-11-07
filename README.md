@@ -4,7 +4,7 @@ Create, edit, preview, save and share a Discord theme for your chosen servers an
 
 **Changes affect your local Discord client.** Other members choose whether to install a shared theme themselves. This app does not alter a server for everyone, discover membership, read messages, or request Discord credentials.
 
-This branch prepares **0.3.0-beta.10** as a draft, not a public release. Build a portable candidate using the commands below. [Published releases](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases) may predate this workflow.
+This branch prepares **0.3.0-beta.11** as a draft, not a public release. Build a portable candidate using the commands below. [Published releases](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases) may predate this workflow.
 
 ![Fluent Dark editor with synthetic conversations](assets/theme-studio-create.png)
 

@@ -30,7 +30,7 @@ async function studio(page,brokenResources=false){
     window.chrome={webview:{addEventListener:(_,callback)=>listener=callback,postMessage:message=>{
       window.testMessages.push(message);
       if(message.action==='edit')state.values=message.values;
-      if(message.action==='save'){state.localThemes.push({id:'local'+state.localThemes.length,name:state.values.name});state.saved=true;state.dirty=false;}
+      if(message.action==='save'){state.localThemes.push({id:'local'+state.localThemes.length,name:state.values.name});state.localThemeId='local'+(state.localThemes.length-1);state.saved=true;state.dirty=false;}
       if(message.action==='savePalette'){state.paletteId=state.paletteId||'palette'+state.localPalettes.length;const value={id:state.paletteId,name:message.name,accent:state.values.accent,surface:state.values.surface,panel:state.values.panel};state.localPalettes=state.localPalettes.filter(p=>p.id!==value.id).concat(value)}
       if(message.action==='loadPalette'){const palette=state.localPalettes.find(p=>p.id===message.value);Object.assign(state.values,{palette:'custom',accent:palette.accent,surface:palette.surface,panel:palette.panel});state.paletteId=palette.id}
       if(message.action==='newPalette'){state.paletteId='';state.values.palette='custom'}
@@ -315,6 +315,27 @@ test('local profiles and three-color palettes are named and available in Templat
 test('custom artwork gets a real thumbnail and can be saved and reused',async({page})=>{
  await studio(page);await page.evaluate(()=>window.patchTestState({assets:{banner:'banner.png',bannerHash:'first'},values:{...state.values,banner:'custom'}}));await page.locator('[data-tab=art]').click();
  const thumbnail=page.locator('[data-banner=custom] img');await expect(thumbnail).toBeVisible();expect(await thumbnail.evaluate(i=>i.complete&&i.naturalWidth>0)).toBe(true);
- await page.locator('#save-banner').click();await page.locator('#name-dialog-input').fill('Reusable art');await page.locator('#name-dialog-save').click();await page.locator('[data-images-kind=background]').click();await expect(page.locator('#saved-images')).toContainText('Reusable art');await page.locator('[data-saved-image]').click();
+ await page.locator('#save-banner').click();await page.locator('#name-dialog-input').fill('Reusable art');await page.locator('#name-dialog-save').click();await expect(page.locator('#save-banner')).toBeDisabled();await expect(page.locator('#save-banner')).toContainText('✓');await page.locator('[data-images-kind=background]').click();await expect(page.locator('#saved-images')).toContainText('Reusable art');await page.locator('[data-saved-image]').click();
  expect(await page.evaluate(()=>window.testMessages.find(m=>m.action==='loadImage').kind)).toBe('background');await expect(page.locator('[data-background=custom] img')).toBeVisible();
+});
+
+test('Files has one save-as-new action and theme saves show a persistent check',async({page})=>{
+ await studio(page);await page.locator('[data-tab=library]').click();
+ await expect(page.locator('#panel-library [data-action=saveAsNew]')).toHaveCount(1);
+ await page.locator('#panel-library [data-action=save]').click();
+ await expect(page.locator('#panel-library [data-action=save]')).toBeDisabled();
+ await expect(page.locator('#panel-library [data-action=save]')).toContainText('✓');
+ await page.locator('#theme-name').fill('Changed name');
+ await expect(page.locator('#panel-library [data-action=save]')).toBeEnabled();
+});
+
+test('palette saves acknowledge success and only enable when colors or name differ',async({page})=>{
+ await studio(page);await page.locator('[data-tab=style]').click();
+ await page.locator('#palette-name').fill('Saved violet');await page.locator('#save-palette').click();
+ await expect(page.locator('#save-palette')).toBeDisabled();await expect(page.locator('#save-palette')).toContainText('✓');
+ await page.locator('#accent').fill('#aa88ff');await expect(page.locator('#save-palette')).toBeEnabled();
+ await page.locator('#accent').fill('#8791ff');await expect(page.locator('#save-palette')).toBeDisabled();
+ await page.locator('#palette-name').fill('Renamed violet');await expect(page.locator('#save-palette')).toBeEnabled();
+ await page.locator('#panel').fill('#15151b');await expect(page.locator('#palette-name')).toHaveValue('Renamed violet');
+ await page.locator('#save-palette').click();await expect(page.locator('#save-palette')).toBeDisabled();
 });

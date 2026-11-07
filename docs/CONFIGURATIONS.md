@@ -43,3 +43,5 @@ One personal slot, `PersonalServer.theme.css`, is active at a time. Apply replac
 Original standalone CSS retains community IDs. Existing 0.2.x installations require no destructive migration. Save personal configurations before replacing the portable application with a newer version.
 
 Local Save stores an editable profile under the launcher library. Save as new theme duplicates the configuration under a new local identity. Named three-color palettes and reusable normalized images are independent library items. DM targets accept channel IDs or message links; see [target compatibility](TARGETS.md).
+
+The studio keeps its last clean session in `studio-session.json` next to the local library. It restores the document, profile identity and selected sections; unsaved changes require an explicit save or discard before closing. Session writes are atomic. Exporting a portable copy does not mark the local theme saved.

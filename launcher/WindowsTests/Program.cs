@@ -281,6 +281,84 @@ internal static class Program
                 await importedCore.ExecuteScriptAsync("document.getElementById('confirmation-cancel').click()");
                 Check(importedBuilder.SimulatedOperations == 0, "native imported application cancellation leaves the profile untouched");
                 importedBuilder.Hide();
+                var sessionRoot = Path.Combine(fixture, "StudioSession");
+                async Task<(BuilderForm Form, CoreWebView2 Core)> OpenSession()
+                {
+                    var window = new BuilderForm(true, sessionRoot); window.Show();
+                    var view = window.Controls.OfType<StudioSurface>().Single();
+                    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                    while (!view.Ready) await Task.Delay(50, timeout.Token);
+                    return (window, view.Controls.OfType<WebView2>().Single().CoreWebView2);
+                }
+                async Task SessionState(CoreWebView2 core, string expression)
+                {
+                    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                    while (await core.ExecuteScriptAsync(expression) != "true") await Task.Delay(50, timeout.Token);
+                }
+                async Task SessionClosed(BuilderForm window)
+                {
+                    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                    while (window.Visible) await Task.Delay(50, timeout.Token);
+                }
+                var firstSession = await OpenSession();
+                await firstSession.Core.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'edit',values:{...state.values,dms:'876543210123456789'}})");
+                await SessionState(firstSession.Core, "state.values.dms==='876543210123456789' && document.getElementById('preview-loading').hidden");
+                await firstSession.Core.ExecuteScriptAsync("document.querySelector('[data-context=dm]').click()");
+                await SessionState(firstSession.Core, "currentContext==='dm'");
+                await firstSession.Core.ExecuteScriptAsync("document.querySelector('[data-page=editor]').click();document.querySelector('[data-tab=style]').click();document.getElementById('theme-name').value='Last keystroke';document.getElementById('theme-name').dispatchEvent(new Event('input'))");
+                firstSession.Form.Close();
+                await SessionState(firstSession.Core, "document.getElementById('discard-dialog').open && state.values.name==='Last keystroke' && document.getElementById('discard-save').textContent==='Save & close'");
+                Check(firstSession.Form.Visible, "closing flushes the final debounced keystroke and offers embedded Save and close");
+                await firstSession.Core.ExecuteScriptAsync("document.getElementById('discard-cancel').click()");
+                await SessionState(firstSession.Core, "!document.getElementById('discard-dialog').open");
+                Check(!File.Exists(Path.Combine(sessionRoot,"studio-session.json")), "canceling close preserves the unsaved editor without saving implicitly");
+                firstSession.Form.Close();
+                await SessionState(firstSession.Core, "document.getElementById('discard-dialog').open");
+                await firstSession.Core.ExecuteScriptAsync("document.getElementById('discard-save').click()");
+                await SessionClosed(firstSession.Form);
+                using var resumedSessionForm = (await OpenSession()).Form;
+                var resumedCore = resumedSessionForm.Controls.OfType<StudioSurface>().Single().Controls.OfType<WebView2>().Single().CoreWebView2;
+                await SessionState(resumedCore, "state.values.name==='Last keystroke' && currentPage==='editor' && editorTab==='style' && currentContext==='dm' && document.getElementById('preview').contentWindow.getPreviewContext()==='dm' && !state.dirty && Boolean(state.localThemeId) && document.querySelector('[data-action=save]').disabled");
+                Check(true, "fresh studio resumes the saved document, local identity and exact editor section");
+                await resumedCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'edit',values:{...state.values,name:'Temporary name'}})");
+                await SessionState(resumedCore, "state.dirty");
+                await resumedCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'edit',values:{...state.values,name:'Last keystroke'}})");
+                await SessionState(resumedCore, "!state.dirty && document.querySelector('[data-action=save]').disabled");
+                Check(true, "reverting document edits clears dirty state rather than requiring a redundant save");
+                await resumedCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'edit',values:{...state.values,surface:'#ffffff'}})");
+                await SessionState(resumedCore, "state.dirty");
+                resumedSessionForm.Close();
+                await SessionState(resumedCore, "document.getElementById('discard-dialog').open");
+                await resumedCore.ExecuteScriptAsync("document.getElementById('discard-save').click()");
+                await SessionState(resumedCore, "document.getElementById('discard-problem').textContent.length>0");
+                Check(resumedSessionForm.Visible, "failed validation keeps the close dialog open and explains why Save failed");
+                await resumedCore.ExecuteScriptAsync("document.getElementById('discard-continue').click()");
+                await SessionClosed(resumedSessionForm);
+                using var discardedSessionForm = (await OpenSession()).Form;
+                var discardedCore = discardedSessionForm.Controls.OfType<StudioSurface>().Single().Controls.OfType<WebView2>().Single().CoreWebView2;
+                await SessionState(discardedCore, "state.values.name==='Last keystroke' && state.values.surface==='#202020' && !state.dirty");
+                Check(true, "discarded changes do not return on the next launch or overwrite the saved profile");
+                await discardedCore.ExecuteScriptAsync("document.querySelector('[data-page=community]').click();document.getElementById('template-tab-local').click()");
+                discardedSessionForm.Close(); await SessionClosed(discardedSessionForm);
+                using var finalSessionForm = (await OpenSession()).Form;
+                var finalCore = finalSessionForm.Controls.OfType<StudioSurface>().Single().Controls.OfType<WebView2>().Single().CoreWebView2;
+                await SessionState(finalCore, "currentPage==='community' && document.getElementById('template-tab-local').getAttribute('aria-selected')==='true'");
+                Check(true, "clean exit resumes Templates and its local library tab without asking to save");
+                await finalCore.ExecuteScriptAsync("document.querySelector('[data-page=editor]').click();document.querySelector('[data-tab=style]').click();document.getElementById('palette-name').value='Palette name only'");
+                finalSessionForm.Close();
+                await SessionState(finalCore, "document.getElementById('discard-dialog').open && !state.dirty");
+                Check(true, "an unsaved palette name also prompts on close even when the theme itself is clean");
+                await finalCore.ExecuteScriptAsync("document.getElementById('discard-save').click()");
+                await SessionClosed(finalSessionForm);
+                using var paletteSessionForm = (await OpenSession()).Form;
+                var paletteCore = paletteSessionForm.Controls.OfType<StudioSurface>().Single().Controls.OfType<WebView2>().Single().CoreWebView2;
+                await SessionState(paletteCore, "state.localPalettes.some(p=>p.name==='Palette name only') && document.getElementById('save-palette').disabled");
+                Check(true, "Save and close preserves pending palette changes as well as the current theme");
+                paletteSessionForm.Close(); await SessionClosed(paletteSessionForm);
+                var brokenSessionRoot = Path.Combine(fixture, "BrokenStudioSession"); Directory.CreateDirectory(brokenSessionRoot);
+                File.WriteAllText(Path.Combine(brokenSessionRoot, "studio-session.json"), "{\"configuration\":null}");
+                using var brokenSession = new BuilderForm(true, brokenSessionRoot);
+                Check(true, "a corrupt session falls back safely instead of preventing application startup");
                 Console.WriteLine($"{checks} Windows checks passed. Fixture: {fixture}");
                 Environment.ExitCode = 0;
             }
