@@ -15,6 +15,7 @@ internal sealed class StudioSurface : Panel
     private string previewHtml = "";
     private bool loaded;
     private ulong rootNavigation;
+    public bool Available => loaded;
     public bool Ready { get; private set; }
     public string PreviewId { get; private set; } = "";
     public string PreviewUri => Origin + "preview?revision=" + PreviewId;
@@ -57,6 +58,8 @@ internal sealed class StudioSurface : Panel
                     if (path == "/preview" && e.Request.Uri == PreviewUri) { bytes = Encoding.UTF8.GetBytes(previewHtml); mime = "text/html"; allowed = true; }
                     else if (path is "/" or "/studio.css" or "/studio.js" or "/i18n.js")
                     { bytes = Resource(path == "/" ? "ui/studio.html" : "ui/" + path[1..]); mime = path == "/" ? "text/html" : path.EndsWith("css") ? "text/css" : "text/javascript"; allowed = true; }
+                    else if (path == "/app-icon.svg")
+                    { bytes = Resource("ui/app-icon.svg"); mime = "image/svg+xml"; allowed = true; }
                     else if (path is "/font/regular.ttf" or "/font/bold.ttf")
                     { bytes = Resource(path.Contains("regular") ? "NotoSans-Regular.ttf" : "NotoSans-Bold.ttf"); mime = "font/ttf"; allowed = true; }
                     else if (path.StartsWith("/art/", StringComparison.Ordinal))

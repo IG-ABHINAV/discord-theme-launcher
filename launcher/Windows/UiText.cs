@@ -43,6 +43,7 @@ internal static partial class UiText
     {
         if (string.IsNullOrEmpty(english) || Current == "en") return english;
         if (Map(Current).TryGetValue(english, out var translated)) return translated;
+        if (StudioCopy.TryGetValue(Current, out var copy) && copy.TryGetValue(english, out translated)) return translated;
         const string retry = " No automatic retry was made.";
         if (english.Length > retry.Length && english.EndsWith(retry, StringComparison.Ordinal))
             return Text(english[..^retry.Length]) + Text(retry);

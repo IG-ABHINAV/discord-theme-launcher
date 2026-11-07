@@ -4,20 +4,20 @@ Create, edit, preview and share a Discord theme for the server you choose. Start
 
 **Changes affect your local Discord client.** Other members choose whether to install a shared theme themselves. This app does not alter a server for everyone, discover membership, read messages, or request Discord credentials.
 
-This branch prepares **0.3.0-beta.8** as a draft, not a public release. Build a portable candidate using the commands below. [Published releases](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases) may predate this workflow.
+This branch prepares **0.3.0-beta.9** as a draft, not a public release. Build a portable candidate using the commands below. [Published releases](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases) may predate this workflow.
 
 ![Fluent Dark editor with synthetic conversations](assets/theme-studio-create.png)
 
-## Create, Community, My themes
+## Home, Editor, Templates
 
-1. **Create** starts with charcoal surfaces, a configurable accent, native typography and no artwork or implicit server. Choose your server ID or Discord channel link. An example preview is available before you choose.
-2. **Community** offers credited designs and a button to [browse BetterDiscord themes](https://betterdiscord.app/themes). Download a `.theme.css` yourself, then choose **Import downloaded .theme.css**. Review compatibility and resources before accepting it.
-3. Preview the actual design. **Style** and **Artwork** expose its capabilities. Imported CSS exposes supported author color/numeric variables; source artwork and typography remain intact. Other-server and DM previews demonstrate isolation.
-4. **My themes** opens, saves and shares `.dtheme` configurations with assets, licenses, source bytes and edits. **Export original CSS** preserves imported bytes exactly. One personal theme is active at a time; you can keep multiple saved files.
-5. **Apply to Discord** reviews the design and target. Finish calls/streams and save drafts. Only **Continue & apply** authorizes changes and a Discord restart. **Back to preview** or Esc cancels. Required official Vencord setup is offered with explicit consent.
-6. **Recovery** disables the personal theme or restores exact previous managed files and enablement. Other themes, plugins, QuickCSS, online links, runtime files and unrelated preferences remain intact. Earlier configurations and backups remain supported.
+1. **Home** offers three actions: create a theme, import a theme, or choose a template.
+2. **Editor** keeps **Server**, **Style**, **Artwork** and **Files** together beside the live preview. Start with Fluent Dark, customize a template, or import `.dtheme` / compatible downloaded BetterDiscord `.theme.css` files. Folder import includes subfolders (up to eight levels and 100 theme files), reports incompatible files, and lets you choose a design to edit.
+3. **Templates** contains Prime Build, Prime Build Dev, FantaFort and credited Zenit Gold. Choose one to customize in the editor, or [browse BetterDiscord themes](https://betterdiscord.app/themes) and import your downloaded file. Compatibility is reviewed before accepting CSS; not every BetterDiscord theme is supported.
+4. **Save** keeps your editable `.dtheme`; **Export a copy** creates a portable copy with assets, licenses and original imported bytes. A target server is optional while saving. **Source and license** details remain available under Files.
+5. **Apply to Discord** requires an explicit server and a valid preview. Review the theme and target, finish calls and save drafts, then confirm. Vencord setup is offered with consent only when applying requires it.
+6. **Recovery → Restore Discord** opens one embedded dialog: disable launcher themes only, or all local/online themes and QuickCSS. Both preserve files and plugins and save a recovery snapshot. Alternatively select a previously applied setup from the history. Full resets also save the three styling settings needed to undo that reset; other preferences are never copied or reverted.
 
-English, Italian, Spanish, Russian and **German** are available from the header. The language persists for the Windows user; documentation remains English. Controls support keyboard navigation and visible focus.
+English, Italian, Spanish, Russian and **German** are available from the header. The synthetic preview conversation follows the selected language; theme names, source code, author credits and user-created content stay as authored. Help, discard prompts and recovery are embedded overlays in the application. Language persists for the Windows user; documentation remains English.
 
 ## Community designs
 
@@ -44,13 +44,13 @@ Custom PNG/JPEG artwork is normalized to PNG, at most 8 MiB, 4096 px per side an
 
 ## Suggest a theme
 
-**Propose a theme** opens the [submission form](https://github.com/PrimeBuild-pc/discord-theme-launcher/issues/new?template=theme_submission.yml). Supply author/source, a synthetic-data preview, the file or pinned source, and license information. Human review precedes inclusion; submission never installs or publishes automatically.
+**Propose a theme** first explains the process in the app, then opens the [GitHub issue submission form](https://github.com/PrimeBuild-pc/discord-theme-launcher/issues/new?template=theme_submission.yml). Supply author/source, a synthetic-data preview, the file or pinned source, and license information. Human review precedes inclusion; submission never installs or publishes automatically.
 
-A maintainer may set `THEME_STUDIO_SUBMISSION_DISCORD` to an existing HTTPS `discord.com/channels/...` or `discord.gg/...` destination before launching. The app validates the host and otherwise uses GitHub. No invite is invented and no upload/email service is deployed.
+Save a `.dtheme` copy and attach it as a ZIP with a preview, author/source and redistribution license. The user submits the issue personally with a GitHub account. The launcher does not upload files, create a pull request, send email or publish a theme automatically.
 
 ## Windows setup
 
-The portable build is self-contained .NET 10 for Windows x64. Extract its ZIP and run `DiscordThemeLauncher.exe` normally, without Administrator privileges. The UI requires **Microsoft Edge WebView2 Runtime**, never installed silently. Optional Vencord setup uses its pinned official installer.
+The executable and taskbar window use the bundled Theme Studio icon. The portable build is self-contained .NET 10 for Windows x64. Extract its ZIP and run `DiscordThemeLauncher.exe` normally, without Administrator privileges. The UI requires **Microsoft Edge WebView2 Runtime**, never installed silently. Optional Vencord setup uses its pinned official installer.
 
 Automatic application supports per-user stable Discord and the default Vencord profile. Store/PTB/Canary, custom profiles, unknown loaders, linked folders and other platforms are outside automatic support. The EXE is **unsigned**. No security settings are changed. This independent project is not affiliated with Discord or Vencord; Vencord is unofficial and has terms/account implications.
 
@@ -58,7 +58,7 @@ Read [Installation and recovery](docs/INSTALLATION.md), [Compatibility](docs/COM
 
 ## Development
 
-Node 22+, .NET 10 SDK and pinned npm dependencies are required. Windows is required for native integration and packaging.
+Node 22+, .NET 10 SDK and pinned npm dependencies are required. Windows is required for native integration and packaging. After editing `assets/app-icon.svg`, regenerate its multi-size ICO with `node scripts/build-icon.mjs`.
 
 ```sh
 npm ci
@@ -71,7 +71,7 @@ dotnet run --project launcher/WindowsTests/WindowsTests.csproj -c Release
 ./scripts/package-windows.ps1
 ```
 
-Tests use isolated profiles and synthetic conversations. Native WebView integration is not evidence of human GUI interaction or Windows reboot coverage. No real Discord profile is modified by tests. See [architecture](docs/ARCHITECTURE.md), [acceptance progress](docs/THEME-STUDIO-PROGRESS.md), and the [credited preview for Lorenzo](docs/ZENIT-PREVIEW.md).
+Tests use isolated profiles and synthetic conversations. Native integration and the separate agent-desktop smoke check do not cover Windows reboot behavior. No real Discord profile is modified by tests. See [architecture](docs/ARCHITECTURE.md), [acceptance progress](docs/THEME-STUDIO-PROGRESS.md), and the [credited preview for Lorenzo](docs/ZENIT-PREVIEW.md).
 
 ## Credits and licenses
 

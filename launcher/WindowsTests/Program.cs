@@ -103,16 +103,18 @@ internal static class Program
                     using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
                     while (await studioCore.ExecuteScriptAsync(predicate) != "true") await Task.Delay(50, timeout.Token);
                 }
+                Check(builder.Icon is not null && builder.Icon.Width >= 16, "native window has the application icon");
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-page=editor]').click()");
                 var capturePath = Path.GetFullPath(Path.Combine(".local", "studio-native-preview.png")); Directory.CreateDirectory(Path.GetDirectoryName(capturePath)!);
                 await using (var capture = File.Create(capturePath)) await studioCore.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, capture);
                 foreach (var page in new[] { "style", "art" })
                 {
-                    await studioCore.ExecuteScriptAsync("document.querySelector('[data-page=\"" + page + "\"]').click()");
+                    await studioCore.ExecuteScriptAsync("document.querySelector('[data-tab=\"" + page + "\"]').click()");
                     await Task.Delay(75);
                     await using var capture = File.Create(Path.GetFullPath(Path.Combine(".local", "studio-native-" + page + ".png")));
                     await studioCore.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, capture);
                 }
-                await studioCore.ExecuteScriptAsync("document.querySelector('[data-page=\"server\"]').click()");
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-tab=\"server\"]').click()");
                 Check(await studioCore.ExecuteScriptAsync("!document.getElementById('apply').disabled && !document.getElementById('restart-ready') && document.getElementById('mode-badge').textContent==='Preview'") == "true", "normal preview exposes Apply without a separate restart checkbox");
                 await studioCore.ExecuteScriptAsync("document.getElementById('apply').click()");
                 await StudioState("document.getElementById('operation-confirmation').open");
@@ -183,6 +185,26 @@ internal static class Program
                 await studioCore.ExecuteScriptAsync("document.getElementById('language').value='de';document.getElementById('language').dispatchEvent(new Event('change'))");
                 await StudioState("document.documentElement.lang==='de' && document.getElementById('apply').textContent.includes('Auf Discord anwenden')");
                 Check(UiText.Current == "de", "German WebView selection reaches native localization");
+                Check(await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentDocument.querySelector('.welcome-title').textContent==='Ein Ort, der sich nach dir anfühlt.'") == "true", "German translates the native illustrative preview");
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-action=help]').click()");
+                Check(await studioCore.ExecuteScriptAsync("document.getElementById('info-dialog').open && document.getElementById('info-body').textContent.includes('Erstelle ein Design')") == "true", "help is translated and embedded in the same WebView");
+                await studioCore.ExecuteScriptAsync("document.getElementById('info-close').click();document.querySelector('[data-page=recovery]').click();document.getElementById('restore').click()");
+                await StudioState("document.getElementById('reset-dialog').open");
+                Check(builder.SimulatedOperations == 1, "opening recovery does not perform an operation");
+                await studioCore.ExecuteScriptAsync("document.getElementById('reset-scope').value='disableAll';document.getElementById('reset-scope').dispatchEvent(new Event('change'))");
+                await StudioState("state.confirmation?.operation==='disableAll' && !document.getElementById('reset-apply').disabled");
+                var resetId = await studioCore.ExecuteScriptAsync("state.confirmation.id");
+                await studioCore.ExecuteScriptAsync("document.getElementById('reset-apply').click()");
+                await StudioState("!document.getElementById('reset-dialog').open");
+                Check(builder.SimulatedOperations == 2, "all-themes recovery executes only the bound confirmed operation");
+                await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'confirmOperation',id:" + resetId + ",allowSetup:false})");
+                Check(builder.SimulatedOperations == 2, "recovery confirmation cannot be replayed");
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-action=new]').click()");
+                await StudioState("document.getElementById('discard-dialog').open");
+                await studioCore.ExecuteScriptAsync("document.getElementById('discard-cancel').click()");
+                await StudioState("!document.getElementById('discard-dialog').open");
+                Check(await studioCore.ExecuteScriptAsync("state.values.guild==='987654321012345678'") == "true", "canceling embedded discard preserves the current theme");
+
                 await studioCore.ExecuteScriptAsync("document.getElementById('language').value='en';document.getElementById('language').dispatchEvent(new Event('change'))");
                 await StudioState("document.documentElement.lang==='en'");
                 await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'preset',value:'primebuild'})");
@@ -200,6 +222,19 @@ internal static class Program
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!importedSurface.Ready || await importedCore.ExecuteScriptAsync("state.values.guild==='' && document.getElementById('apply').disabled && document.getElementById('preview-error').hidden") != "true") await Task.Delay(100, timeout.Token);
                 Check(true, "a new native design previews a synthetic server while Apply requires an explicit target");
+                var importFolder = Path.Combine(fixture, "ImportFolder"); Directory.CreateDirectory(Path.Combine(importFolder,"nested"));
+                File.Copy("assets/community/zenit-gold/ZenitGold.theme.css", Path.Combine(importFolder,"Zenit.theme.css"));
+                File.WriteAllText(Path.Combine(importFolder,"Unsupported.theme.css"), "@import url('https://example.invalid/remote.css');");
+                new ThemeConfiguration { Name = "Reusable folder theme", Guild = "" }.Save(Path.Combine(importFolder,"nested","Reusable.dtheme"));
+                importedBuilder.ReviewFolder(importFolder);
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (await importedCore.ExecuteScriptAsync("document.getElementById('folder-dialog').open && document.querySelectorAll('#folder-files button').length===3") != "true") await Task.Delay(50, timeout.Token);
+                Check(await importedCore.ExecuteScriptAsync("[...document.querySelectorAll('#folder-files button')].find(b=>b.textContent==='Unsupported.theme.css').disabled && document.getElementById('folder-files').textContent.includes('@import')") == "true", "folder import reports incompatible CSS and includes nested portable themes");
+                await importedCore.ExecuteScriptAsync("[...document.querySelectorAll('#folder-files button')].find(b=>b.textContent.includes('Reusable.dtheme')).click()");
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (!importedSurface.Ready || await importedCore.ExecuteScriptAsync("state.values.name==='Reusable folder theme' && !document.getElementById('folder-dialog').open") != "true") await Task.Delay(50, timeout.Token);
+                Check(importedBuilder.SimulatedOperations == 0, "selecting an imported folder design opens it in preview without applying");
+
                 await importedCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"zenit-gold\"]').click()");
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!importedSurface.Ready || await importedCore.ExecuteScriptAsync("Boolean(state.imported?.sha256)") != "true") await Task.Delay(100, timeout.Token);

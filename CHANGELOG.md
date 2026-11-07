@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0-beta.9 - 2026-11-07 (unreleased)
+
+- Add the Theme Studio executable/window icon at Windows sizes 16–256 px.
+- Simplify Home and Templates; consolidate Server, Style, Artwork and Files under one Editor. Move source/license details into an expandable section.
+- Import individual .dtheme/.theme.css files or a folder with per-file compatibility reports. Save reusable designs before choosing a server.
+- Localize illustrative preview content and complete German labels; keep authored names and source data intact.
+- Embed Help, submission guidance and unsaved-edit prompts in the application. GitHub issue submission is user-operated, with no automatic upload or PR.
+- Replace the legacy recovery window with an embedded reset choice (launcher themes or all styling) and selectable setup history. Reset preserves files/plugins and can itself be undone.
+
 ## 0.3.0-beta.8 - 2026-11-07 (unreleased)
 
 - Start in neutral Fluent Dark with an explicit server target; organize Create, Community and My themes.

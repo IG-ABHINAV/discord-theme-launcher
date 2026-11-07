@@ -9,6 +9,7 @@ async function studio(page,brokenResources=false){
     if(url.origin!==origin){await route.abort();return;}
     let path,contentType;
     if(url.pathname==='/'){path='launcher/Windows/ui/studio.html';contentType='text/html';}
+    else if(url.pathname==='/app-icon.svg'){path='assets/app-icon.svg';contentType='image/svg+xml';}
     else if(['/studio.js','/studio.css','/i18n.js'].includes(url.pathname)){path='launcher/Windows/ui'+url.pathname;contentType=url.pathname.endsWith('js')?'text/javascript':'text/css';}
     else if(url.pathname.startsWith('/font/')){path='assets/fonts/NotoSans-'+(url.pathname.includes('bold')?'Bold':'Regular')+'.ttf';contentType='font/ttf';}
     else if(url.pathname.startsWith('/art/')){const parts=url.pathname.split('/');if(parts[2]==='zenit-gold'){const css=await readFile(new URL('assets/community/zenit-gold/ZenitGold.theme.css',root),'utf8');const uri=css.match(/--zg-banner:\s*url\("([^"]+)"\)/)[1];await route.fulfill({body:Buffer.from(uri.split(',')[1],'base64'),contentType:'image/webp'});return;}path='assets/generated/'+parts[2]+'-'+parts[3]+'.svg';contentType='image/svg+xml';}
@@ -29,12 +30,12 @@ async function studio(page,brokenResources=false){
       window.testMessages.push(message);
       if(message.action==='edit')state.values=message.values;
       if(['preset','community'].includes(message.action)){if(message.value==='zenit-gold'){state.imported=review;state.values.preset='zenit-gold';state.values.font='native'}else{state.imported=null;for(const field of['preset','font','palette','banner','background'])state.values[field]=message.value;}}
-      if(message.action==='importCss')state.importReview=review;
+      if(['importCss','open'].includes(message.action))state.importReview=review;
       if(message.action==='cancelImport')state.importReview=null;
       if(message.action==='acceptImport'){state.imported=state.importReview;state.importReview=null;state.values.preset='zenit-gold';state.values.font='native'}
       if(message.action==='importVariable'){state.imported.variables.find(v=>v.name===message.name).value=message.value;state.values.preset='zenit-edited'}
       if(['edit','preset','community','acceptImport','importVariable','refresh'].includes(message.action)){state.previewId=String(++revision+1);state.previewUri='https://theme-preview.invalid/preview?revision='+state.previewId+'&preset='+state.values.preset;state.dirty=true;}
-      if(['apply','disable','restore'].includes(message.action))state.confirmation={id:'confirmation-'+(++revision),operation:message.action,themeName:state.values.name,guild:state.values.guild,serverName:'Selected server',requiresSetup:window.testSetupRequired,repair:false,problem:window.testConfirmationProblem};
+      if(['apply','disable','restore','disableManaged','disableAll'].includes(message.action))state.confirmation={id:'confirmation-'+(++revision),operation:message.action,themeName:state.values.name,guild:state.values.guild,serverName:'Selected server',requiresSetup:window.testSetupRequired,repair:false,problem:window.testConfirmationProblem};
       if(message.action==='cancelConfirmation'&&message.id===state.confirmation?.id)state.confirmation=null;
       if(message.action==='confirmOperation'&&message.id===state.confirmation?.id&&!state.confirmation.problem&&(!state.confirmation.requiresSetup||message.allowSetup)){state.confirmation=null;state.notice='Theme applied in the test fixture.'}
       if(message.action==='language'&&['en','it','es','ru','de'].includes(message.value))state.language=message.value;
@@ -46,6 +47,7 @@ async function studio(page,brokenResources=false){
   await page.goto(origin+'/');
   await expect(page.locator('#preview-loading')).toBeHidden();
   if(brokenResources)await expect(page.locator('#preview-error')).toBeVisible();else await expect(page.locator('#preview-error')).toBeHidden();
+  await page.locator('[data-page=editor]').click();
   return requests;
 }
 
@@ -108,16 +110,15 @@ test('unsupported installation is explained inside confirmation and cannot conti
   expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='confirmOperation'))).toBe(false);
 });
 
-test('Recovery disable and restore also require a reviewed confirmation',async({page})=>{
-  await studio(page);await page.evaluate(()=>window.patchTestState({canDisable:true,canRestore:true}));
-  await page.getByRole('button',{name:'Recovery',exact:true}).click();
-  await page.getByRole('button',{name:'Disable personal theme',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Disable your personal theme?',exact:true})).toBeVisible();
-  await page.getByRole('button',{name:'Back to preview',exact:true}).click();
-  await page.getByRole('button',{name:'Restore previous setup',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Restore the previous setup?',exact:true})).toBeVisible();
+test('Recovery scopes and historical selection require reviewed confirmation',async({page})=>{
+  await studio(page);await page.evaluate(()=>window.patchTestState({canDisable:true,canRestore:true,recoveryHistory:[{id:'abc',created:'2026-11-07T10:00:00Z',themes:['Personal theme']}]}));
+  await page.getByRole('button',{name:'Recovery',exact:true}).click();await page.locator('#restore').click();
+  await expect(page.locator('#reset-dialog')).toBeVisible();await page.locator('#reset-scope').selectOption('disableAll');
+  await expect(page.locator('#reset-apply')).toBeEnabled();await page.locator('#reset-apply').click();
+  await expect(page.locator('#reset-dialog')).toBeHidden();
+  await page.locator('#restore-history').click();await expect(page.locator('#operation-confirmation')).toBeVisible();
   await page.getByRole('button',{name:'Continue & restore',exact:true}).click();
-  expect(await page.evaluate(()=>window.testMessages.filter(m=>m.action==='confirmOperation').length)).toBe(1);
+  const actions=await page.evaluate(()=>window.testMessages);expect(actions.filter(m=>m.action==='confirmOperation').length).toBe(2);expect(actions.find(m=>m.action==='restore').value).toBe('abc');
 });
 
 test('studio loads real artwork and readable controls without external dependencies',async({page})=>{
@@ -134,7 +135,7 @@ test('studio loads real artwork and readable controls without external dependenc
 
 test('starting preset and isolation context have separate clear controls',async({page})=>{
   await studio(page);
-  await page.getByRole('button',{name:'Community',exact:true}).click();
+  await page.getByRole('button',{name:'Templates',exact:true}).click();
   await page.getByRole('button',{name:'Prime Build Dev',exact:true}).click();
   await expect(page.locator('#preview-loading')).toBeHidden();
   await expect(page.locator('[data-preset="primebuild-dev"]')).toHaveAttribute('aria-pressed','true');
@@ -144,7 +145,7 @@ test('starting preset and isolation context have separate clear controls',async(
   await expect(page.frameLocator('#preview').locator('.base__5e434')).toHaveCSS('background-color','rgb(49, 51, 56)');
   await page.getByRole('button',{name:'Your server',exact:true}).click();
   await expect(page.getByRole('status')).toContainText('Theme active');
-  await page.getByRole('button',{name:'Community',exact:true}).click();
+  await page.getByRole('button',{name:'Templates',exact:true}).click();
   await page.getByRole('button',{name:'FantaFort',exact:true}).click();
   await expect(page.locator('#preview-loading')).toBeHidden();
   await expect(page.frameLocator('#preview').locator('.chatContent_f75fb0')).toHaveCSS('background-color','rgb(16, 23, 43)');
@@ -201,19 +202,20 @@ test('interface defaults to English and can switch to Italian, Spanish and Russi
 });
 
 test('community exposes four credited designs, catalog browsing and a working submission action',async({page})=>{
-  await studio(page);await page.getByRole('button',{name:'Community',exact:true}).click();
+  await studio(page);await page.getByRole('button',{name:'Templates',exact:true}).click();
   await expect(page.locator('.community-card')).toHaveCount(4);
   await expect(page.getByRole('button',{name:'Zenit Gold — by JACKPOT71',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Browse BetterDiscord themes',exact:true}).click();
-  await page.getByRole('button',{name:'Propose a theme',exact:true}).click();
+  await page.locator('[data-panel=community] [data-action=submitTheme]').click();
+  await expect(page.locator('#info-dialog')).toBeVisible();await page.locator('#info-continue').click();
   const actions=await page.evaluate(()=>window.testMessages.map(m=>m.action));
   expect(actions).toContain('browseThemes');expect(actions).toContain('submitTheme');expect(actions).not.toContain('confirmOperation');
   await page.screenshot({path:'.local/studio-community-preview.png'});
 });
 
 test('downloaded CSS is reviewed before accepting, cancellation leaves the existing design untouched',async({page})=>{
-  await studio(page);await page.getByRole('button',{name:'Community',exact:true}).click();
-  await page.getByRole('button',{name:'Import downloaded .theme.css',exact:true}).click();
+  await studio(page);await page.getByRole('button',{name:'Templates',exact:true}).click();
+  await page.locator('[data-page=editor]').click();await page.locator('[data-tab=library]').click();await page.locator('[data-panel=library] [data-action=open]').click();
   await expect(page.locator('#import-review')).toBeVisible();
   await expect(page.locator('#import-review-resources')).toContainText('Montserrat');
   await expect(page.locator('#import-review-status')).toContainText('Compatible');
@@ -223,8 +225,8 @@ test('downloaded CSS is reviewed before accepting, cancellation leaves the exist
 });
 
 test('accepted CSS previews the author design, edits supported variables, and shares without applying',async({page})=>{
-  await studio(page);await page.getByRole('button',{name:'Community',exact:true}).click();
-  await page.getByRole('button',{name:'Import downloaded .theme.css',exact:true}).click();
+  await studio(page);await page.getByRole('button',{name:'Templates',exact:true}).click();
+  await page.locator('[data-page=editor]').click();await page.locator('[data-tab=library]').click();await page.locator('[data-panel=library] [data-action=open]').click();
   await page.getByRole('button',{name:'Use this design',exact:true}).click();
   await expect(page.locator('#preview-loading')).toBeHidden();
   expect(await page.frameLocator('#preview').locator('.base__5e434').evaluate(el=>getComputedStyle(el).getPropertyValue('--zg-gold').trim())).toBe('#e6c15e');
@@ -232,7 +234,8 @@ test('accepted CSS previews the author design, edits supported variables, and sh
   await expect(page.locator('#builtin-style')).toBeHidden();
   await page.locator('[data-variable="--zg-gold"]').fill('#31c6b4');await page.locator('[data-variable="--zg-gold"]').dispatchEvent('change');
   await expect(page.locator('#preview-loading')).toBeHidden();
-  await page.getByRole('button',{name:'My themes',exact:true}).click();
+  await page.getByRole('button',{name:'Files',exact:true}).click();
+  await page.locator('#imported-details summary').click();
   await expect(page.locator('#imported-license')).toContainText('Copyright (c) 2026 ZENIT / Jackpot');
   await page.locator('[data-panel=library] [data-action=share]').click();
   expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='confirmOperation'))).toBe(false);
@@ -252,9 +255,30 @@ for(const viewport of [{width:1040,height:720},{width:1365,height:900}])test(`Ge
   await page.setViewportSize(viewport);await studio(page);await page.locator('#language').selectOption('de');
   expect(await page.evaluate(()=>Object.keys(I18N.en).every(key=>typeof I18N.de[key]==='string'&&I18N.de[key].length>0)&&Object.keys(I18N.en).length===Object.keys(I18N.de).length)).toBe(true);
   await expect(page.getByRole('button',{name:'Auf Discord anwenden',exact:true})).toBeVisible();
-  await page.getByRole('button',{name:'Wiederherstellung',exact:true}).click();
-  await expect(page.getByRole('button',{name:'Vorherige Einrichtung wiederherstellen',exact:true})).toBeVisible();
+  await page.locator('[data-page=recovery]').click();
+  await expect(page.locator('#restore')).toHaveText('Discord zurücksetzen');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   const apply=await page.locator('#apply').boundingBox();expect(apply.y+apply.height).toBeLessThanOrEqual(viewport.height);
   await page.screenshot({path:'.local/studio-german-'+viewport.width+'.png'});
+});
+
+
+test('refinement: one editor contains all editing tools and help stays embedded',async({page})=>{
+  await studio(page);
+  await expect(page.locator('.rail [data-page="editor"]')).toHaveCount(1);
+  await expect(page.locator('.rail [data-page="style"],.rail [data-page="art"],.rail [data-page="library"]')).toHaveCount(0);
+  await page.locator('[data-action="help"]').click();
+  await expect(page.locator('#info-dialog')).toBeVisible();
+});
+test('refinement: restore offers both scopes before any mutation',async({page})=>{
+  await studio(page);await page.locator('[data-page="recovery"]').click();
+  await page.locator('#restore').click();
+  await expect(page.locator('#reset-dialog')).toBeVisible();
+  await expect(page.locator('#reset-scope option')).toHaveCount(2);
+  expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='confirmOperation'))).toBe(false);
+});
+test('refinement: German preview translates illustrative content',async({page})=>{
+  await studio(page);await page.locator('#language').selectOption('de');
+  await expect(page.frameLocator('#preview').locator('.welcome-title')).toHaveText('Ein Ort, der sich nach dir anfühlt.');
+  await expect(page.locator('[data-page="community"]')).toHaveText('Vorlagen');
 });

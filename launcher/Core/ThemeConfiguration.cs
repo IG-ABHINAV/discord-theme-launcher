@@ -47,12 +47,12 @@ public sealed record ThemeConfiguration
         return input;
     }
 
-    public void Validate()
+    public void Validate(bool requireTarget = true)
     {
         if (Schema != 1) throw new InvalidDataException("This configuration version is not supported.");
         if (string.IsNullOrWhiteSpace(Name) || Name.Length > 80 || Name.Any(char.IsControl)) throw new InvalidDataException("Use a theme name of 1–80 characters.");
-        if (Guild != ParseGuild(Guild)) throw new InvalidDataException("Save the target as a server ID.");
-        if (Imported is not null) _ = CssThemeImporter.Compile(Imported, Guild);
+        if ((requireTarget || Guild != "") && Guild != ParseGuild(Guild)) throw new InvalidDataException("Save the target as a server ID.");
+        if (Imported is not null) _ = CssThemeImporter.Compile(Imported, Guild == "" && !requireTarget ? "987654321012345678" : Guild);
         if (!Presets.Append("fluent").Contains(Preset) || !Palettes.Contains(Palette) || !Presets.Append("native").Append("custom").Contains(Font) ||
             !Presets.Append("none").Append("custom").Contains(Banner) || !Presets.Append("none").Append("custom").Contains(Background))
             throw new InvalidDataException("Unknown preset, palette, font or artwork choice.");
@@ -122,12 +122,12 @@ public sealed record ThemeConfiguration
         ThemeStore.CheckPath(path);
         if (new FileInfo(path).Length > MaxFileBytes) throw new InvalidDataException("Configuration exceeds 24 MiB.");
         var value = JsonSerializer.Deserialize<ThemeConfiguration>(File.ReadAllBytes(path), Catalog.JsonOptions) ?? throw new InvalidDataException("Invalid configuration.");
-        value.Validate(); return value;
+        value.Validate(false); return value;
     }
 
     public void Save(string path)
     {
-        Validate(); var bytes = JsonSerializer.SerializeToUtf8Bytes(this, Catalog.JsonOptions);
+        Validate(false); var bytes = JsonSerializer.SerializeToUtf8Bytes(this, Catalog.JsonOptions);
         if (bytes.Length > MaxFileBytes) throw new InvalidDataException("Configuration exceeds 24 MiB. Use smaller images.");
         ThemeStore.AtomicWrite(path, bytes);
     }

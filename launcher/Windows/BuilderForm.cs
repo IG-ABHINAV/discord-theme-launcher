@@ -18,6 +18,10 @@ internal sealed class BuilderForm : Form
     private bool busy, dirty, saved;
     private OperationConfirmation? confirmation;
     private CssImportReview? importReview;
+    private JsonElement? pendingDiscard;
+    private bool pendingClose, discardApproved;
+    private string[]? importPaths;
+    private object[]? importCandidates;
     internal int SimulatedOperations { get; private set; }
     private string? documentPath;
     private string notice = "Design here. Preview here. Apply when you're ready.", validation = "";
@@ -30,6 +34,8 @@ internal sealed class BuilderForm : Form
         BackColor = LauncherStyle.Surface; ForeColor = LauncherStyle.Text; Font = LauncherStyle.Font(); AutoScaleMode = AutoScaleMode.Dpi;
         Text = UiText.Format("Theme Studio · Discord Theme Launcher — {0}", ThemeCompiler.BundledCatalog.Version);
         ClientSize = new Size(1420, 900); MinimumSize = new Size(1020, 700); StartPosition = FormStartPosition.CenterScreen;
+        using (var iconStream = new MemoryStream(StudioSurface.Resource("app-icon.ico")))
+        using (var icon = new Icon(iconStream)) Icon = (Icon)icon.Clone();
         Controls.Add(surface);
         surface.Loaded += Publish;
         surface.MessageReceived += async message => await HandleMessageAsync(message);
@@ -40,7 +46,11 @@ internal sealed class BuilderForm : Form
             try { var draft = ThemeConfiguration.Load(DraftPath); AssetImport.ValidateImages(draft); configuration = draft; saved = true; }
             catch { notice = "The last configuration could not be reopened. Open another .dtheme file or start a new one."; }
         }
-        FormClosing += (_, e) => { if (busy || !ConfirmDiscard()) e.Cancel = true; };
+        FormClosing += (_, e) => {
+            if (busy) { e.Cancel = true; return; }
+            if (dirty && surface.Available) { e.Cancel = true; pendingClose = true; Publish(); }
+            else if (dirty && !ConfirmDiscard()) e.Cancel = true;
+        };
         Load += (_, _) =>
         {
             var area = Screen.FromControl(this).WorkingArea;
@@ -57,13 +67,13 @@ internal sealed class BuilderForm : Form
         RenderPreview();
     }
 
-    private ThemeConfiguration ReadConfiguration()
+    private ThemeConfiguration ReadConfiguration(bool requireTarget = true)
     {
-        var value = configuration with { Name = configuration.Name.Trim(), Guild = ThemeConfiguration.ParseGuild(configuration.Guild),
+        var value = configuration with { Name = configuration.Name.Trim(), Guild = !requireTarget && configuration.Guild.Trim().Length == 0 ? "" : ThemeConfiguration.ParseGuild(configuration.Guild),
             CustomFont = configuration.Font == "custom" ? configuration.CustomFont : null,
             CustomBanner = configuration.Banner == "custom" ? configuration.CustomBanner : null,
             CustomBackground = configuration.Background == "custom" ? configuration.CustomBackground : null };
-        value.Validate(); return value;
+        value.Validate(requireTarget); return value;
     }
     private void ShowRuntimeFallback()
     {
@@ -83,7 +93,7 @@ internal sealed class BuilderForm : Form
         {
             // A synthetic target lets a new design render without choosing a real server implicitly.
             var value = configuration.Guild.Length == 0 ? configuration with { Guild = "987654321012345678" } : ReadConfiguration();
-            validation = configuration.Guild.Length == 0 ? "Choose a target server before applying or saving." : "";
+            validation = configuration.Guild.Length == 0 ? "Choose a target server before applying." : "";
             renderedRevision = revision; surface.Render(value);
         }
         catch (InvalidDataException error) { validation = error.Message; renderedRevision = -1; }
@@ -92,21 +102,24 @@ internal sealed class BuilderForm : Form
     private void Publish()
     {
         bool canDisable = false, canRestore = false;
-        try { if (!dryRun) { canDisable = store.PersonalEnabled; canRestore = store.CanRestore; } }
+        RecoveryEntry[] history = [];
+        try { if (!dryRun) { canDisable = store.PersonalEnabled; canRestore = store.CanRestore; history = store.RecoveryHistory(); } }
         catch { notice = "The Vencord profile could not be read. Check the manual recovery guide."; }
         var patched = client.Patched;
         var readiness = ApplyReadiness.Evaluate(busy, validation, renderedRevision == revision && surface.Ready);
         surface.Publish(new { type = "state", values = StudioValues.From(configuration), assets = new { font = configuration.CustomFont?.Name, banner = configuration.CustomBanner?.Name, background = configuration.CustomBackground?.Name },
             busy, dirty, saved, version = ThemeCompiler.BundledCatalog.Version, notice = UiText.Text(notice),
-            validation = UiText.Text(validation), previewId = surface.PreviewId, previewUri = renderedRevision == revision && (validation.Length == 0 || validation == "Choose a target server before applying or saving.") ? surface.PreviewUri : "",
+            validation = UiText.Text(validation), previewId = surface.PreviewId, previewUri = renderedRevision == revision && (validation.Length == 0 || validation == "Choose a target server before applying.") ? surface.PreviewUri : "",
             canApply = readiness.CanApply, applyReason = UiText.Text(readiness.Reason), applyAction = readiness.Action, applyActionLabel = readiness.ActionLabel.Length == 0 ? "" : UiText.Text(readiness.ActionLabel),
             canDisable = canDisable && !busy, canRestore = canRestore && !busy,
             designs = CommunityGallery.Designs,
+            recoveryHistory = history,
+            discardPending = pendingDiscard.HasValue || pendingClose, importCandidates,
             imported = configuration.Imported is { } imported ? ReviewState(CssThemeImporter.Inspect(imported)) : null,
             importReview = importReview is null ? null : ReviewState(importReview),
             confirmation = confirmation is { } pending ? new { pending.Id, pending.Operation, themeName = pending.Configuration?.Name,
                 guild = pending.Configuration?.Guild, serverName = ThemeCompiler.BundledCatalog.Themes.FirstOrDefault(t => t.Guild == pending.Configuration?.Guild)?.Server ?? UiText.Text("Selected server"),
-                pending.RequiresSetup, pending.Repair, problem = UiText.Text(pending.Problem) } : null,
+                pending.RequiresSetup, pending.Repair, pending.RecoveryId, problem = UiText.Text(pending.Problem) } : null,
             installation = UiText.Text(patched ? "Discord + Vencord ready. No installation needed." : client.Unbootable ? "Discord cannot start because Vencord's patcher.js is missing. The launcher repairs it with the official installer." : client.Found ? "Discord found. Apply will offer official Vencord setup if needed." : "Standard Discord desktop was not found for this Windows user."),
             language = UiText.Current });
     }
@@ -117,9 +130,30 @@ internal sealed class BuilderForm : Form
         if (busy && action != "previewReady") return;
         try
         {
+            if (dirty && !discardApproved && action is ("community" or "new" or "open" or "importCss" or "importFolder"))
+            { pendingDiscard = message.Clone(); Publish(); return; }
             switch (action)
             {
                 case "loaded": Publish(); return;
+                case "cancelDiscard": pendingDiscard = null; pendingClose = false; Publish(); return;
+                case "discardEdits":
+                    if (!pendingClose && pendingDiscard is null) return;
+                    var nextAction = pendingDiscard; bool close = pendingClose;
+                    pendingDiscard = null; pendingClose = false; Publish();
+                    if (close) { dirty = false; Close(); }
+                    else if (nextAction is { } next)
+                    {
+                        discardApproved = true;
+                        try { await HandleMessageAsync(next); }
+                        finally { discardApproved = false; }
+                    }
+                    return;
+                case "importFolder": ImportFolder(); return;
+                case "cancelFolder": importPaths = null; importCandidates = null; Publish(); return;
+                case "chooseImport":
+                    if (importPaths is null || !int.TryParse(message.GetProperty("value").GetString(), out int index) || index < 0 || index >= importPaths.Length) return;
+                    var chosen = importPaths[index]; importPaths = null; importCandidates = null;
+                    ImportPath(chosen); return;
                 case "language":
                     var code = message.GetProperty("value").GetString();
                     if (!UiText.Supported(code)) return;
@@ -138,7 +172,6 @@ internal sealed class BuilderForm : Form
                     if (!ThemeConfiguration.Presets.Contains(id)) return;
                     configuration = CommunityGallery.Create(id, configuration.Guild); Changed(); return;
                 case "community":
-                    if (!ConfirmDiscard()) return;
                     configuration = CommunityGallery.Create(message.GetProperty("value").GetString() ?? "", configuration.Guild);
                     documentPath = null; saved = false; Changed(); return;
                 case "importCss": ReviewCss(); return;
@@ -160,7 +193,7 @@ internal sealed class BuilderForm : Form
                 case "communityAuthor":
                     OpenExternal(CommunityGallery.Designs.Single(d => d.Id == message.GetProperty("value").GetString()).AuthorUrl); return;
                 case "previewReady":
-                    if (renderedRevision == revision) validation = !surface.Ready ? "The design or display font did not load. Choose another font or reload the preview." : configuration.Guild.Length == 0 ? "Choose a target server before applying or saving." : "";
+                    if (renderedRevision == revision) validation = !surface.Ready ? "The design or display font did not load. Choose another font or reload the preview." : configuration.Guild.Length == 0 ? "Choose a target server before applying." : "";
                     Publish(); return;
                 case "refresh": RenderPreview(); return;
                 case "cancelConfirmation":
@@ -174,8 +207,7 @@ internal sealed class BuilderForm : Form
                     if (!OperationConfirmation.TryTake(ref confirmation, confirmationId, revision, out var confirmed)) { Publish(); return; }
                     await OperateAsync(confirmed!, allowSetup); return;
                 case "new":
-                    if (!ConfirmDiscard()) return;
-                    confirmation = null; configuration = new ThemeConfiguration { Name = "My server theme", Guild = "" }; documentPath = null; dirty = saved = false; revision++; RenderPreview(); return;
+                    confirmation = null; configuration = new ThemeConfiguration { Name = UiText.Text("My server theme"), Guild = "" }; documentPath = null; dirty = saved = false; revision++; RenderPreview(); return;
                 case "open": OpenDocument(); return;
                 case "save": SaveDocument(false); return;
                 case "share": SaveDocument(true); return;
@@ -187,31 +219,59 @@ internal sealed class BuilderForm : Form
                 case "importBackground": ImportImage(false); return;
                 case "serverHelp": ServerHelp(); return;
                 case "help": Help(); return;
-                case "presets": using (var form = new LauncherForm(dryRun)) form.ShowDialog(this); Publish(); return;
-                case "apply": case "disable": case "restore": RequestConfirmation(action); return;
+
+                case "disableManaged": case "disableAll":
+                    if (confirmation is not null && confirmation.Operation is not ("disableManaged" or "disableAll")) return;
+                    confirmation = null; RequestConfirmation(action); return;
+                case "restore": RequestConfirmation(action, message.TryGetProperty("value", out var recovery) ? recovery.GetString() : null); return;
+                case "apply": case "disable": RequestConfirmation(action); return;
             }
         }
         catch (Exception error) when (error is IOException or InvalidDataException or JsonException or ArgumentException or UnauthorizedAccessException or System.Runtime.InteropServices.ExternalException or InvalidOperationException or KeyNotFoundException)
         {
             notice = error is InvalidDataException ? error.Message : "The action could not finish. Check the file's format, size and permissions. Your saved configurations are safe.";
-            LauncherStyle.ShowMessage(this, UiText.Text(notice), UiText.Text("Could not complete this action")); Publish();
+            Publish();
         }
     }
     private void OpenDocument()
     {
-        if (!ConfirmDiscard()) return;
-        using var dialog = new OpenFileDialog { Filter = UiText.Text("Theme configuration (*.dtheme)") + "|*.dtheme", Title = UiText.Text("Open a configuration and its assets") };
-        if (dialog.ShowDialog(this) != DialogResult.OK) return;
-        var value = ThemeConfiguration.Load(dialog.FileName); AssetImport.ValidateImages(value);
-        confirmation = null; configuration = value; documentPath = dialog.FileName; dirty = false; saved = true; revision++;
+        using var dialog = new OpenFileDialog { Filter = UiText.Text("Theme files") + " (*.dtheme;*.theme.css)|*.dtheme;*.theme.css", Title = UiText.Text("Import a theme") };
+        if (dialog.ShowDialog(this) == DialogResult.OK) ImportPath(dialog.FileName);
+    }
+    private void ImportPath(string path)
+    {
+        ThemeStore.CheckPath(path);
+        if (path.EndsWith(".theme.css", StringComparison.OrdinalIgnoreCase)) { importReview = CssThemeImporter.ReviewFile(path); Publish(); return; }
+        var value = ThemeConfiguration.Load(path); AssetImport.ValidateImages(value);
+        confirmation = null; configuration = value; documentPath = path; dirty = false; saved = true; revision++;
         notice = "Configuration opened. Review the target server before applying."; RenderPreview();
     }
-    private void ReviewCss()
+    private void ReviewCss() => OpenDocument();
+    private void ImportFolder()
     {
-        if (!ConfirmDiscard()) return;
-        using var dialog = new OpenFileDialog { Filter = "BetterDiscord (*.theme.css)|*.theme.css", Title = UiText.Text("Import a downloaded BetterDiscord theme") };
+        using var dialog = new FolderBrowserDialog { Description = UiText.Text("Import a folder"), UseDescriptionForTitle = true };
         if (dialog.ShowDialog(this) != DialogResult.OK) return;
-        importReview = CssThemeImporter.ReviewFile(dialog.FileName);
+        ReviewFolder(dialog.SelectedPath);
+    }
+    internal void ReviewFolder(string folder)
+    {
+        ThemeStore.CheckPath(folder);
+        var options = new EnumerationOptions { RecurseSubdirectories = true, AttributesToSkip = FileAttributes.ReparsePoint, IgnoreInaccessible = true, MaxRecursionDepth = 8 };
+        var paths = Directory.EnumerateFiles(folder, "*", options)
+            .Where(p => p.EndsWith(".dtheme", StringComparison.OrdinalIgnoreCase) || p.EndsWith(".theme.css", StringComparison.OrdinalIgnoreCase)).Take(101).ToArray();
+        if (paths.Length > 100) throw new InvalidDataException("Choose a folder with at most 100 theme files.");
+        importPaths = paths;
+        importCandidates = paths.Select((path, index) => {
+            bool supported = true; string reason = "";
+            try
+            {
+                ThemeStore.CheckPath(path);
+                if (path.EndsWith(".theme.css", StringComparison.OrdinalIgnoreCase)) { var review = CssThemeImporter.ReviewFile(path); supported = review.Supported; reason = string.Join(" ", review.Notes.Select(UiText.Text)); }
+                else { var value = ThemeConfiguration.Load(path); AssetImport.ValidateImages(value); }
+            }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException or JsonException or ArgumentException) { supported = false; reason = UiText.Text(error.Message); }
+            return (object)new { id = index.ToString(System.Globalization.CultureInfo.InvariantCulture), name = Path.GetRelativePath(folder, path), supported, reason = supported ? "" : reason };
+        }).ToArray();
         Publish();
     }
     private static object ReviewState(CssImportReview review) => new
@@ -227,16 +287,10 @@ internal sealed class BuilderForm : Form
             throw new InvalidDataException("Use an HTTPS destination without credentials.");
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true });
     }
-    private static string SubmissionDestination()
-    {
-        var configured = Environment.GetEnvironmentVariable("THEME_STUDIO_SUBMISSION_DISCORD");
-        if (Uri.TryCreate(configured, UriKind.Absolute, out var uri) && uri.Scheme == "https" && uri.UserInfo.Length == 0 &&
-            (uri.Host == "discord.gg" || uri.Host == "discord.com" && uri.AbsolutePath.StartsWith("/channels/", StringComparison.Ordinal))) return uri.AbsoluteUri;
-        return "https://github.com/PrimeBuild-pc/discord-theme-launcher/issues/new?template=theme_submission.yml";
-    }
+    private static string SubmissionDestination() => "https://github.com/PrimeBuild-pc/discord-theme-launcher/issues/new?template=theme_submission.yml";
     private void SaveDocument(bool share)
     {
-        var value = ReadConfiguration(); string? path = share ? null : documentPath;
+        var value = ReadConfiguration(false); string? path = share ? null : documentPath;
         if (path is null)
         {
             using var dialog = new SaveFileDialog { Filter = UiText.Text("Theme configuration (*.dtheme)") + "|*.dtheme", DefaultExt = "dtheme", AddExtension = true, FileName = "My-server-theme.dtheme", Title = UiText.Text(share ? "Share a copy with embedded assets" : "Save your configuration") };
@@ -277,11 +331,12 @@ internal sealed class BuilderForm : Form
     private void ServerHelp() => LauncherStyle.ShowMessage(this, UiText.Text(UiText.ServerHelpBody), UiText.Text(UiText.ServerHelpTitle), true);
     private void Help() => LauncherStyle.ShowMessage(this, UiText.Text(UiText.HelpBody), UiText.Text(UiText.HelpTitle), true);
 
-    private void RequestConfirmation(string operation)
+    private void RequestConfirmation(string operation, string? recoveryId = null)
     {
         if (busy || confirmation is not null) return;
         ThemeConfiguration? value = operation == "apply" ? ReadConfiguration() : null;
         if (value is not null && !ApplyReadiness.Evaluate(busy, validation, renderedRevision == revision && surface.Ready).CanApply) return;
+        if (operation == "restore" && recoveryId is not null && !store.RecoveryHistory().Any(e => e.Id == recoveryId)) return;
         string problem = "";
         bool setup = false, repair = false;
         if (!dryRun)
@@ -290,14 +345,14 @@ internal sealed class BuilderForm : Form
             {
                 client.ValidateEnvironment();
                 _ = store.InstalledSelection();
-                setup = !client.Patched; repair = setup && client.NeedsRepair;
+                setup = operation == "apply" && !client.Patched; repair = setup && client.NeedsRepair;
             }
             catch (Exception error)
             {
                 problem = error is InvalidOperationException or InvalidDataException ? error.Message : "The client or Vencord profile could not be checked. Review the installation and manual recovery guide.";
             }
         }
-        confirmation = OperationConfirmation.Create(operation, revision, value, setup, repair, problem);
+        confirmation = OperationConfirmation.Create(operation, revision, value, setup, repair, problem, recoveryId);
         Publish();
     }
 
@@ -343,7 +398,7 @@ internal sealed class BuilderForm : Form
         try
         {
             if (value is not null && (!surface.Ready || renderedRevision != revision)) throw new InvalidDataException("Wait for a valid preview of your latest edits before applying.");
-            client.ValidateEnvironment(); bool repair = client.NeedsRepair, setup = !client.Patched;
+            client.ValidateEnvironment(); bool repair = client.NeedsRepair, setup = operation == "apply" && !client.Patched;
             if (setup && !allowSetup) throw new InvalidOperationException("Vencord now needs installation / repair. Click Apply again and review the setup option before continuing.");
             busy = true; Publish(); byte[]? installer = null;
             if (setup)
@@ -357,15 +412,19 @@ internal sealed class BuilderForm : Form
             notice = "Closing Discord after your confirmation…"; Publish(); await client.StopAsync(); stopped = true;
             if (installer is not null) { notice = "Installing / repairing official Vencord…"; Publish(); await client.InstallVencordAsync(installer, repair); }
             notice = "Saving a recovery snapshot and updating managed themes…"; Publish();
-            await Task.Run(() => { if (operation == "restore") store.RestoreLast(); else store.ApplyPersonal(value); });
+            await Task.Run(() => {
+                if (operation == "restore") { if (confirmed.RecoveryId is { } id) store.RestoreSnapshot(id); else store.RestoreLast(); }
+                else if (operation is "disableManaged" or "disableAll") store.DisableThemes(operation == "disableAll");
+                else store.ApplyPersonal(value);
+            });
             notice = "Opening Discord and checking startup…"; Publish(); await client.OpenAsync(); stopped = false;
-            notice = operation == "apply" ? "Theme applied to server " + value!.Guild + ". Discord startup confirmed. Changes are local to you." : operation == "disable" ? "Personal theme disabled. Discord startup confirmed. Restore can undo this." : "Previous managed setup restored. Discord startup confirmed.";
+            notice = operation == "apply" ? "Theme applied to server " + value!.Guild + ". Discord startup confirmed. Changes are local to you." : operation == "disable" ? "Personal theme disabled. Discord startup confirmed. Restore can undo this." : operation is "disableManaged" or "disableAll" ? "Theme styling disabled. Files preserved. Discord startup confirmed." : "Previous managed setup restored. Discord startup confirmed.";
         }
         catch (Exception error)
         {
             notice = error is InvalidDataException or InvalidOperationException ? error.Message : "Setup could not finish. Check the profile, disk space and manual recovery guide.";
             if (stopped) notice += " No automatic retry was made.";
-            LauncherStyle.ShowMessage(this, UiText.Text(notice), UiText.Text("Operation did not complete"));
+
         }
         finally { busy = false; Publish(); }
     }

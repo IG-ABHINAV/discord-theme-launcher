@@ -1,18 +1,21 @@
-THEME STUDIO / DISCORD THEME LAUNCHER 0.3.0-beta.8 - WINDOWS X64
+THEME STUDIO / DISCORD THEME LAUNCHER 0.3.0-beta.9 - WINDOWS X64
 
-1. Extract the ZIP. Run DiscordThemeLauncher.exe normally, not as Administrator.
-   The interface is English by default. Italian, Spanish, Russian and German are in the
-   header language menu. These instructions stay in English.
-2. Create starts in neutral Fluent Dark with no server selected. Choose your
-   server ID / Discord channel link. Community offers four credited designs,
-   including Zenit Gold -- by JACKPOT71, and downloaded .theme.css import.
-   Review compatibility/resources before accepting. Unsupported CSS is rejected.
-3. Use Style and Artwork to customize. Editing stays in preview by default.
-4. Save or Share theme to keep a .dtheme file with its selected assets/licenses.
-5. Click Apply to Discord. Review the theme and server in the overlay.
-6. Finish calls/streams and save drafts, then choose Continue & apply.
-   Discord restarts only after this confirmation. Back to preview / Esc cancels.
-   Missing Vencord setup is offered in the same overlay with explicit consent.
+1. Extract the ZIP and run DiscordThemeLauncher.exe without Administrator rights.
+2. Home offers Create a theme, Import a theme, and Choose a template.
+3. Editor contains Server, Style, Artwork and Files beside the preview.
+   Import .dtheme/.theme.css or a folder. Review compatibility before accepting.
+4. Save your .dtheme locally or export a portable copy. Server selection is
+   optional until you apply. Propose a theme explains the GitHub issue process;
+   you attach and submit it yourself. No automatic upload or PR is created.
+5. Choose a target server, click Apply to Discord, review and confirm the restart.
+   Missing Vencord setup is offered with explicit consent when needed.
+6. Recovery > Restore Discord asks whether to disable launcher themes only or
+   all local/online themes and QuickCSS. Files and plugins are preserved. You
+   can also select a previously applied setup from history.
+
+English, Italian, Spanish, Russian and German are in the language menu.
+Synthetic preview content follows that language; authored theme names remain.
+Help and confirmations are overlays within this application.
 
 There is no separate preview-only product mode or external restart checkbox.
 A disabled Apply means the configuration/preview is not ready or an operation
@@ -25,12 +28,9 @@ The launcher never joins servers, reads messages or changes server settings.
 
 One personal theme is active at a time. Apply replaces that slot and disables
 a bundled theme targeting the same server. Other server presets remain enabled.
-Disable personal theme removes the slot. Restore previous setup recovers the
-last managed files/enablement; the restore is itself reversible.
-
-Recovery > Open original presets opens the previous multi-server setup. Applying that selection
-replaces the personal slot too and removes unchecked bundled themes. Unrelated
-themes, plugins, QuickCSS, online theme links and preferences are preserved.
+Recovery disables styling without deleting theme files. Full reset also disables
+online links and QuickCSS; a snapshot allows undoing that choice. Plugins
+and unrelated preferences are preserved in both reset modes.
 
 The EXE embeds verified preset CSS/fonts/artwork. Vencord users can configure
 offline. Optional upstream Vencord installation requires Internet access.

@@ -56,13 +56,34 @@ File.WriteAllText(store.SettingsPath, """{"enabledThemes":["SomeoneElse.theme.cs
 File.WriteAllText(Path.Combine(store.ThemesDirectory, "SomeoneElse.theme.css"), "/* unrelated */");
 File.WriteAllText(Path.Combine(store.ThemesDirectory, "PrimeBuild.theme.css"), "/* custom old version */");
 var quickCss = Path.Combine(vencord, "settings", "quickCss.css"); File.WriteAllText(quickCss, "/* existing customization */");
+
+store.DisableThemes(false);
+var managedReset = JsonNode.Parse(File.ReadAllText(store.SettingsPath))!;
+Check(managedReset["enabledThemes"]!.AsArray().Select(n => n!.GetValue<string>()).SequenceEqual(new[] { "SomeoneElse.theme.css" }) && managedReset["useQuickCss"]!.GetValue<bool>(), "launcher reset preserves external themes and QuickCSS");
+Check(File.Exists(Path.Combine(store.ThemesDirectory, "PrimeBuild.theme.css")), "reset never deletes managed theme files");
+store.RestoreLast();
+store.DisableThemes(true);
+var allReset = JsonNode.Parse(File.ReadAllText(store.SettingsPath))!;
+Check(allReset["enabledThemes"]!.AsArray().Count == 0 && allReset["themeLinks"]!.AsArray().Count == 0 && !allReset["useQuickCss"]!.GetValue<bool>(), "all-themes reset disables local, remote and QuickCSS styling");
+Check(allReset["plugins"]!["Other"]!["enabled"]!.GetValue<bool>() && File.ReadAllText(quickCss) == "/* existing customization */", "all reset preserves plugin preferences and original QuickCSS file");
+store.RestoreLast();
+var resetUndo = JsonNode.Parse(File.ReadAllText(store.SettingsPath))!;
+Check(resetUndo["themeLinks"]!.AsArray().Count == 1 && resetUndo["useQuickCss"]!.GetValue<bool>() && resetUndo["enabledThemes"]!.AsArray().Count == 2, "all-themes reset can restore every theme setting");
+Check(store.RecoveryHistory().Any(entry => entry.Themes.Contains(catalog.Themes[0].Name)), "recovery history lists previously applied managed setups");
+Reject(() => store.RestoreSnapshot("../outside"), "history selection rejects path traversal");
+var untargeted = new ThemeConfiguration { Name = "A reusable design", Guild = "" };
+var untargetedPath = Path.Combine(fixture, "untargeted.dtheme");
+untargeted.Save(untargetedPath);
+Check(ThemeConfiguration.Load(untargetedPath).Guild == "", "a reusable design saves and reopens before choosing a target");
+Reject(() => ThemeCompiler.Compile(untargeted), "an untargeted saved design still cannot be applied");
 var all = catalog.Themes.ToDictionary(t => t.File, t => File.ReadAllBytes(Path.Combine(root, t.File)));
 store.Apply(catalog.Themes.Select(t => t.Id).ToArray(), all);
 Check(store.InstalledSelection().Length == 3, "all selected themes installed and enabled");
 Check(File.ReadAllText(Path.Combine(store.ThemesDirectory, "SomeoneElse.theme.css")) == "/* unrelated */", "unrelated theme bytes preserved");
 var settings = JsonNode.Parse(File.ReadAllText(store.SettingsPath))!;
 Check(settings["plugins"]!["Other"]!["enabled"]!.GetValue<bool>() && settings["themeLinks"]![0]!.GetValue<string>() == "https://example.invalid/other.css" && File.ReadAllText(quickCss) == "/* existing customization */", "plugins, online themes and QuickCSS unchanged");
-Check(!Directory.EnumerateFiles(state, "*", SearchOption.AllDirectories).Any(path => File.ReadAllText(path).Contains("https://example.invalid")), "backup does not copy unrelated settings or credentials");
+Check(!Directory.EnumerateFiles(state, "snapshot.json", SearchOption.AllDirectories).Any(path => File.ReadAllText(path).Contains("plugins")), "backup does not copy plugin settings or credentials");
+Check(!File.ReadAllText(Path.Combine(state, "backups", File.ReadAllText(Path.Combine(state,"last-backup.txt")), "snapshot.json")).Contains("https://example.invalid"), "ordinary apply does not copy unrelated styling");
 // Settings changed after applying must survive restoring the managed subset.
 settings["newPreference"] = "keep-me"; File.WriteAllText(store.SettingsPath, settings.ToJsonString());
 store.RestoreLast();
@@ -232,5 +253,11 @@ File.WriteAllText(Path.Combine(previewDirectory, "custom.html"), ThemePreview.Ht
 File.WriteAllText(Path.Combine(previewDirectory, "native.html"), ThemePreview.Html(config with { Font = "native", Banner = "none", Background = "none" }));
 File.WriteAllText(Path.Combine(previewDirectory, "escaped.html"), ThemePreview.Html(portable with { Name = "</style><script>alert('name')</script>", CustomFont = customFont with { License = "</style><script>alert('license')</script>*/" } }));
 Check(!ThemePreview.Html(config with { Name = "<untrusted>" }).Contains("<untrusted>"), "preview escapes user-authored labels");
+var namedHistory = new ThemeStore(Path.Combine(fixture, "NamedProfile"), Path.Combine(fixture, "NamedState"), catalog);
+namedHistory.ApplyPersonal(new ThemeConfiguration { Name = "My saved violet theme", Guild = "987654321012345678" });
+namedHistory.DisableThemes(false);
+var namedEntry = namedHistory.RecoveryHistory().Single(e => e.Themes.Contains("My saved violet theme"));
+namedHistory.RestoreSnapshot(namedEntry.Id);
+Check(namedHistory.PersonalEnabled, "named history restores the chosen previous personal design");
 Console.WriteLine($"{checks} checks passed. Fixture: {fixture}");
 // Intentional: leave the temporary test fixture for inspection; never recurse over an unchecked root.

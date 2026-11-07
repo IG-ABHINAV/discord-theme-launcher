@@ -44,7 +44,8 @@ public static class ThemeCompiler
     public static string Compile(ThemeConfiguration config)
     {
         config.Validate();
-        if (config.Imported is not null) return CssThemeImporter.Compile(config.Imported, config.Guild);
+        string designLabel = "/* Theme Studio design: " + config.Name.Replace("*/", "* /") + " */\n";
+        if (config.Imported is not null) return designLabel + CssThemeImporter.Compile(config.Imported, config.Guild);
         var preset = BundledCatalog.Themes.Single(t => t.Id == (config.Preset == "fluent" ? "primebuild" : config.Preset));
         string css = PresetCss(preset.Id);
         css = css[css.IndexOf("@scope", StringComparison.Ordinal)..].Replace(preset.Guild, config.Guild);
@@ -103,7 +104,7 @@ public static class ThemeCompiler
             // Neutral headings use Discord's native sizing as well as its native family.
             css = Regex.Replace(css, @"font-size:\s*(?:22|18|16)px;", "font-size: inherit;");
         }
-        return "/* @name Personal Server Theme\n * @author PrimeBuild\n * @version " + BundledCatalog.Version + "\n * Local client styling for server " + config.Guild + ". Generated from a validated .dtheme configuration.\n */\n" + face + css;
+        return designLabel + "/* @name Personal Server Theme\n * @author PrimeBuild\n * @version " + BundledCatalog.Version + "\n * Local client styling for server " + config.Guild + ". Generated from a validated .dtheme configuration.\n */\n" + face + css;
     }
 
     private static string Art(string choice, ThemeAsset? asset, string key) => choice switch

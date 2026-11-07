@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <AssemblyName>DiscordThemeLauncher</AssemblyName><Product>Discord Theme Launcher</Product><ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>DiscordThemeLauncher</AssemblyName><Product>Discord Theme Launcher</Product><ApplicationManifest>app.manifest</ApplicationManifest><ApplicationIcon>../../assets/app-icon.ico</ApplicationIcon>
     <PublishSingleFile>true</PublishSingleFile><SelfContained>true</SelfContained><IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <DebugType>none</DebugType><EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
@@ -13,6 +13,8 @@
     <EmbeddedResource Include="../../assets/officina-preview.png;../../assets/primebuild-dev-preview.png;../../assets/fantafort-preview.png" LogicalName="%(Filename)%(Extension)"/>
     <EmbeddedResource Include="../../assets/fonts/*.ttf" LogicalName="%(Filename)%(Extension)"/>
     <EmbeddedResource Include="../../assets/fonts/OFL.txt" LogicalName="NotoSans-OFL.txt"/>
+    <EmbeddedResource Include="../../assets/app-icon.ico" LogicalName="app-icon.ico"/>
+    <EmbeddedResource Include="../../assets/app-icon.svg" LogicalName="ui/app-icon.svg"/>
     <EmbeddedResource Include="ui/*" LogicalName="ui/%(Filename)%(Extension)"/>
   </ItemGroup>
   <Target Name="RemoveUnusedWebViewWpf" BeforeTargets="ResolveAssemblyReferences">
