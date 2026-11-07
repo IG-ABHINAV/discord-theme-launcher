@@ -4,6 +4,8 @@ Draft beta.8, Windows x64, .NET 10, Node 24 and pinned Chromium/WebView2. Tests 
 
 Verified commands: `npm run verify` (Core and browser checks), `dotnet run --project launcher/WindowsTests/WindowsTests.csproj -c Release` (native/WebView integration), and `./scripts/package-windows.ps1` (self-contained Release EXE and portable ZIP). The native suite additionally catches long German consent wrapping. Final review added detached-settings hit-testing so an unstyled portal must also remain visible above the imported pane, and a combined embedded-image pixel budget before preview allocation.
 
+Final reviewed outcomes: **98 Core checks, 55 browser tests and 45 native Windows/WebView checks passed**. Portable ZIP extraction, extracted EXE identity, all release hashes, required notices and beta.8 product version were verified. The packaged `--safe-preview` process remained alive for ten seconds; no accessible window title was available and it was stopped after observation. This is a process smoke check, not proof of a loaded interactive UI or normal close. The EXE remains `NotSigned`.
+
 ## Tested
 
 - CSS build/audit, November class aliases, current/previous layouts, baseline startup completeness checks and missing-patcher recovery.
