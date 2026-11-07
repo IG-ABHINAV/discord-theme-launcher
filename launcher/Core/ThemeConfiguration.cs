@@ -28,6 +28,7 @@ public sealed record ThemeConfiguration
     public ThemeAsset? CustomFont { get; init; }
     public ThemeAsset? CustomBanner { get; init; }
     public ThemeAsset? CustomBackground { get; init; }
+    public ImportedTheme? Imported { get; init; }
     public const int MaxFileBytes = 24 * 1024 * 1024;
     public static readonly string[] Presets = ["primebuild", "primebuild-dev", "fantafort"];
     public static readonly string[] Palettes = ["primebuild", "primebuild-dev", "fantafort", "blurple", "custom"];
@@ -51,6 +52,7 @@ public sealed record ThemeConfiguration
         if (Schema != 1) throw new InvalidDataException("This configuration version is not supported.");
         if (string.IsNullOrWhiteSpace(Name) || Name.Length > 80 || Name.Any(char.IsControl)) throw new InvalidDataException("Use a theme name of 1–80 characters.");
         if (Guild != ParseGuild(Guild)) throw new InvalidDataException("Save the target as a server ID.");
+        if (Imported is not null) _ = CssThemeImporter.Compile(Imported, Guild);
         if (!Presets.Append("fluent").Contains(Preset) || !Palettes.Contains(Palette) || !Presets.Append("native").Append("custom").Contains(Font) ||
             !Presets.Append("none").Append("custom").Contains(Banner) || !Presets.Append("none").Append("custom").Contains(Background))
             throw new InvalidDataException("Unknown preset, palette, font or artwork choice.");

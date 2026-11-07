@@ -7,12 +7,18 @@ namespace CommunityThemes;
 public static class ThemeCompiler
 {
     public const string PersonalFile = "PersonalServer.theme.css";
-    private static string Resource(string name)
+    internal static string Resource(string name)
     {
         using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(name) ?? throw new InvalidDataException("Bundled theme resource is missing.");
         using var reader = new StreamReader(stream); return reader.ReadToEnd();
     }
     public static Catalog BundledCatalog => Catalog.Parse(Resource("catalog.json"));
+    public static string ServerScope(string guild)
+    {
+        guild = ThemeConfiguration.ParseGuild(guild);
+        string css = PresetCss("primebuild"); int start = css.IndexOf("@scope", StringComparison.Ordinal);
+        return css[start..css.IndexOf('{', start)].Trim().Replace(BundledCatalog.Themes.Single(t => t.Id == "primebuild").Guild, guild);
+    }
     public static string PresetCss(string id)
     {
         var theme = BundledCatalog.Themes.SingleOrDefault(t => t.Id == id) ?? throw new InvalidDataException("Unknown preset.");
@@ -32,6 +38,7 @@ public static class ThemeCompiler
     public static string Compile(ThemeConfiguration config)
     {
         config.Validate();
+        if (config.Imported is not null) return CssThemeImporter.Compile(config.Imported, config.Guild);
         var preset = BundledCatalog.Themes.Single(t => t.Id == (config.Preset == "fluent" ? "primebuild" : config.Preset));
         string css = PresetCss(preset.Id);
         css = css[css.IndexOf("@scope", StringComparison.Ordinal)..].Replace(preset.Guild, config.Guild);
