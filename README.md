@@ -1,84 +1,108 @@
-# Theme Studio · Discord Theme Launcher
+<p align="center">
+  <img src="assets/app-icon.svg" width="88" height="88" alt="Theme Studio icon">
+</p>
+<h1 align="center">Theme Studio</h1>
+<p align="center"><strong>Create a Discord theme. Make it yours. Choose where it belongs.</strong></p>
+<p align="center">
+  A Windows editor for creating, previewing and sharing themes for the servers and private chats you choose.<br>
+  Start from an empty template, customize a community design, or import compatible BetterDiscord CSS.
+</p>
+<p align="center">
+  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.11"><img src="https://img.shields.io/badge/release-v0.3.0--beta.11-8b7cf6?style=flat-square" alt="Release v0.3.0-beta.11"></a>
+  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/actions/workflows/check.yml"><img src="https://github.com/PrimeBuild-pc/discord-theme-launcher/actions/workflows/check.yml/badge.svg?branch=main" alt="Build and tests"></a>
+  <img src="https://img.shields.io/badge/platform-Windows%20x64-0078d4?style=flat-square" alt="Windows x64">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-3da77a?style=flat-square" alt="MIT license"></a>
+</p>
+<p align="center">
+  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.11"><strong>Download beta.11</strong></a>
+  &nbsp;·&nbsp; <a href="docs/INSTALLATION.md">Installation</a>
+  &nbsp;·&nbsp; <a href="#contributing">Contribute</a>
+  &nbsp;·&nbsp; <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/issues">Report an issue</a>
+</p>
+<p align="center">
+  <img src="assets/theme-studio-create.png" width="1100" alt="Theme Studio editor and live Discord preview with synthetic conversations">
+  <br><sub>Local editing and an illustrative preview. Theme application requires your confirmation.</sub>
+</p>
 
-Create, edit, preview, save and share a Discord theme for your chosen servers and specific DM chats. Start with neutral **Fluent Dark**, customize a community design, or import a compatible downloaded BetterDiscord `.theme.css`. Review it before applying and restore your previous setup when needed.
+<h2 id="why-theme-studio">Your theme, your chosen conversations</h2>
 
-**Changes affect your local Discord client.** Other members choose whether to install a shared theme themselves. This app does not alter a server for everyone, discover membership, read messages, or request Discord credentials.
+Theme Studio brings **creation, editing, preview, targeting, sharing and recovery** into one desktop app. Use [BetterDiscord's theme gallery](https://betterdiscord.app/themes) to find a design, download its CSS, then import and review it in the editor.
 
-This branch prepares **0.3.0-beta.11** as a draft, not a public release. Build a portable candidate using the commands below. [Published releases](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases) may predate this workflow.
+<table>
+  <tr>
+    <td width="33%" valign="top"><strong>Create &amp; customize</strong><br>Three-color palettes, reusable artwork, 64 fonts on demand and custom font import. Save named themes, palettes and images locally.</td>
+    <td width="33%" valign="top"><strong>Preview &amp; target</strong><br>Edit beside a live preview. Apply one theme to your selected servers and specific DM chats, with up to 16 targets of each kind.</td>
+    <td width="33%" valign="top"><strong>Share &amp; restore</strong><br>Export portable themes with their assets. Review every application and restore earlier setups from local recovery snapshots.</td>
+  </tr>
+</table>
 
-![Fluent Dark editor with synthetic conversations](assets/theme-studio-create.png)
+**Themes affect your local client.** Other members install shared themes themselves. No Discord login, token, bot or server permissions are required.
 
-## Home, Editor, Templates
+<h2 id="get-started">Get started</h2>
 
-1. **Home** offers three actions: create a theme, import a theme, or choose a template.
-2. **Editor** keeps **Server**, **Style**, **Artwork** and **Files** together beside the live preview. Start with Fluent Dark, customize a template, or import `.dtheme` / compatible downloaded BetterDiscord `.theme.css` files. Folder import includes subfolders (up to eight levels and 100 theme files), reports incompatible files, and lets you choose a design to edit.
-3. **Templates** has Standard and My themes tabs. Standard starts with an empty neutral template and contains Prime Build, Prime Build Dev, FantaFort and credited Zenit Gold. Choose one to customize in the editor, or [browse BetterDiscord themes](https://betterdiscord.app/themes) and import your downloaded file. Compatibility is reviewed before accepting CSS; not every BetterDiscord theme is supported.
-4. **Save** keeps your editable `.dtheme`; **Export a copy** creates a portable copy with assets, licenses and original imported bytes. **Save as new theme** creates another local profile; rename or reopen profiles under Templates → My themes. A target is optional while saving. **Source and license** details remain available under Files.
-5. **Apply to Discord** requires an explicit server and a valid preview. Review the theme and target, finish calls and save drafts, then confirm. Vencord setup is offered with consent only when applying requires it.
-6. **Recovery → Restore Discord** opens one embedded dialog: disable launcher themes only, or all local/online themes and QuickCSS. Both preserve files and plugins and save a recovery snapshot. Alternatively select a previously applied setup from the history. Full resets also save the three styling settings needed to undo that reset; other preferences are never copied or reverted.
+1. Download the **Windows x64 portable ZIP** from the [beta.11 release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.11), extract it and run `DiscordThemeLauncher.exe` without Administrator privileges.
+2. Open **Templates** and choose an empty or community template, or import a downloaded `.theme.css` / `.dtheme` file in **Editor → Files**. Folder import is also available.
+3. In **Editor**, set your targets, colors, typography and artwork. Save your theme locally or use **Save as new theme** to keep a separate variation.
+4. Choose **Apply to Discord**, review the current theme and targets, finish calls or streams, then confirm. Discord restarts during application.
 
-English, Italian, Spanish, Russian and **German** are available from the header. The synthetic preview conversation follows the selected language; theme names, source code, author credits and user-created content stay as authored. Help, discard prompts and recovery are embedded overlays in the application. Language persists for the Windows user; documentation remains English.
+**Requirements:** Windows x64, the standard per-user stable Discord installation, and [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/). Vencord is required for themes; setup and recognized broken-install repair are described in the [installation guide](docs/INSTALLATION.md). The app bundles .NET, so no separate .NET installation is needed. The executable is currently **unsigned**.
 
-## Community designs
+<h2 id="inside-the-editor">Inside the editor</h2>
 
-| Design | Author / source | License and capabilities |
+| Section | What you can do |
+| --- | --- |
+| **Server** | Enter server IDs/channel links and optional DM channel IDs/message links. |
+| **Style** | Customize supported design options, save named three-color palettes, and choose or import fonts. Imported CSS exposes its supported variables. |
+| **Artwork** | Import banners/backgrounds, see actual image thumbnails, and reuse images from your local library. |
+| **Files** | Import files or folders, save local profiles, export portable copies, and propose a community theme. |
+
+Saved items show a **✓ Saved** check; save buttons reactivate when there are changes. Closing with pending edits offers **Save and close**, **Discard**, or **Keep editing**. Reopening resumes the last clean document and selected section.
+
+Local profiles appear under **Templates → My themes**. A `.dtheme` export includes the selected assets, font license and preserved imported source, so the recipient can reopen and customize it. Save before choosing a target if you are still designing.
+
+<details>
+<summary><strong>Fonts, artwork and local storage</strong></summary>
+
+- **64 additional font families** are searchable and downloaded only when selected. Downloads are hash-verified and cached; selected fonts and licenses travel with the exported theme. Display headings/channels change while messages keep native typography. [Font catalog](docs/FONT-CATALOG.md).
+- **PNG/JPEG artwork** is normalized and embedded. Imported images stay usable if their original files move. Static TTF/OTF import remains available with a redistribution license. [Format and limits](docs/CONFIGURATIONS.md).
+- Themes, palettes and images live under `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\library`. Session state and recovery snapshots are stored beside that library. Upgrading the portable app preserves these local files.
+
+</details>
+
+English, Italian, Spanish, Russian and **German** are supported. The illustrative preview follows the chosen language; author names and user-created content remain as written.
+
+<h2 id="templates">Included templates</h2>
+
+| Template | Author | Starting point |
 | --- | --- | --- |
-| Prime Build — Build Your Dream | [PrimeBuild-pc](https://github.com/PrimeBuild-pc/discord-theme-launcher) | MIT; palette, typography and artwork |
-| Prime Build Dev — Software House | [PrimeBuild-pc](https://github.com/PrimeBuild-pc/discord-theme-launcher) | MIT; palette, typography and artwork |
-| FantaFort — Arena | [PrimeBuild-pc](https://github.com/PrimeBuild-pc/discord-theme-launcher) | MIT; palette, typography and artwork |
-| **Zenit Gold — by JACKPOT71** | [JACKPOT71](https://github.com/JACKPOT71) · [zenit-gold](https://github.com/JACKPOT71/zenit-gold) | MIT; original gold design, banner and mascot; supported variables; explicit server-pane adaptation |
+| **Empty template** | Theme Studio | Neutral Fluent Dark for a new design. |
+| **Prime Build** | [PrimeBuild-pc](https://github.com/PrimeBuild-pc) | Hardware-inspired colors, artwork and typography. |
+| **Prime Build Dev** | [PrimeBuild-pc](https://github.com/PrimeBuild-pc) | Developer-inspired colors, artwork and typography. |
+| **FantaFort** | [PrimeBuild-pc](https://github.com/PrimeBuild-pc) | Arena-inspired colors, artwork and typography. |
+| **Zenit Gold — by JACKPOT71** | [JACKPOT71](https://github.com/JACKPOT71) · [original theme](https://github.com/JACKPOT71/zenit-gold) | Original gold design with a reviewed, offline, target-scoped adaptation. |
 
-Zenit v2.2.1 is pinned to commit `64cc7a1eaf77dc3b081d5fd0637d8dc165b273c6`. Copyright © 2026 ZENIT / Jackpot and the [original MIT license](assets/community/zenit-gold/LICENSE) are retained. Server adaptation is by Theme Studio, with author consent supplied by Lorenzo. Montserrat is bundled from pinned Google Fonts source under [SIL OFL 1.1](assets/community/zenit-gold/font/OFL.txt); preview makes no Google Fonts request.
+Zenit Gold retains its author's MIT notice, original artwork and offline Montserrat font. Source version and adaptation details are recorded in [the import documentation](docs/BETTERDISCORD-IMPORT.md).
 
-![Community gallery with source and author actions](assets/theme-studio-community.png)
+<h2 id="compatibility-and-recovery">Compatibility &amp; recovery</h2>
 
-## Compatible CSS import, with limits
+- **BetterDiscord import is a supported subset.** The app reviews a file before accepting it and reports unsupported rules or resources. Arbitrary remote resources are not fetched for preview. Not every gallery theme can be imported. [Import compatibility](docs/BETTERDISCORD-IMPORT.md).
+- **Apply uses the current document's targets only.** It replaces the single personal-theme slot and disables other launcher presets, preserving their files. External themes remain enabled and can still affect appearance.
+- **DM themes require visible message markers.** Empty chats or an incompatible Discord layout keep the theme off. The app does not fetch private messages. [Server and DM targeting](docs/TARGETS.md).
+- **Recovery keeps files and plugins.** Disable launcher themes only, disable all styling including external themes and QuickCSS, or restore a previous setup. Each operation saves a recovery snapshot. [Recovery guide](docs/INSTALLATION.md#restore-previous-setup).
 
-This is a **supported subset**, not universal BetterDiscord compatibility. A native parser retains the imported design and confines supported rules to the chosen server pane. It handles root rules, embedded images, grouping rules, named animations and contained fixed backgrounds. It does not substitute a built-in preset.
+Automatic setup supports stable Discord and the default Vencord profile. Store/PTB/Canary, custom profiles and other operating systems are outside automatic support. Discord updates can change theme selectors. See [compatibility](docs/COMPATIBILITY.md) and [tested coverage and remaining limits](docs/THEME-STUDIO-VALIDATION.md).
 
-Remote/relative resources, unknown global rules, nested CSS, unsafe document-root layouts and unsupported font/import registrations produce a report before accepting the file. No arbitrary preview resources are fetched. The pinned Zenit font import has a reviewed offline adapter. Global settings and detached portals retain their normal appearance. Obsolete third-party Discord selectors may have no effect.
+<h2 id="contributing">Contributing</h2>
 
-CSS source is limited to 2 MiB; `.dtheme` to 24 MiB. Source and SHA-256 are retained and revalidated on reopen/apply. Original CSS export may be global when installed directly elsewhere; share `.dtheme` for the server-targeted workflow. See [the precise compatibility model and pinned provenance](docs/BETTERDISCORD-IMPORT.md).
+**Report a bug:** [open an issue](https://github.com/PrimeBuild-pc/discord-theme-launcher/issues) with the app version, Windows/Discord variant, reproduction steps and expected behavior. Use synthetic conversations in screenshots and omit account data.
 
-Custom PNG/JPEG artwork is normalized to PNG, at most 8 MiB, 4096 px per side and 16 million pixels. Static TTF/OTF imports require redistribution and editable embedding rights and a license, at most 2 MiB. Do not redistribute assets without permission. Hashes detect corruption, not authorship or licensing.
+**Propose a theme:** export your `.dtheme`, attach it as a ZIP to the [theme submission form](https://github.com/PrimeBuild-pc/discord-theme-launcher/issues/new?template=theme_submission.yml), and include a preview, author/source and redistribution license. **Propose a theme** in the app opens this same process. A maintainer reviews inclusion; the app does not upload files or create a PR automatically.
 
-## Reusable customization
+**Contribute code:** open a focused PR with the behavior change and relevant validation. Use synthetic fixtures and isolated test profiles; do not commit real Discord messages, user theme libraries or credentials.
 
-Custom palettes have three colors: Accent, Dark surface and Panels. Name/save a palette, select it later, or create a new palette from the current colors. Overly bright surface/panel controls show an inline red error. Artwork shows the actual selected image; Save banner / Save background stores it in My images, which can be reused for either role in another theme. Imported designs keep their source metadata when artwork is replaced.
+<h3>Build and test</h3>
 
-Theme profiles, palettes and reusable images live under `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\library`. They survive application upgrades and never depend on the original image path. Export a copy remains available for portable .dtheme files. Local Save updates the open local profile; Save as new theme preserves it and creates a separate variant.
-
-## Servers and private chats
-
-Enter multiple server IDs/links, one per line or separated by commas. You can also target specific DM channel IDs or DM message links. Each category is limited to 16 targets. The same personal theme applies to those explicit targets; settings and unrelated conversations keep their normal styling.
-
-Other server is removed from the app's preview controls. The DM preview appears only when DM targets are entered and shows private-chat navigation and messages. DM detection requires a visible message row with the selected channel ID, alongside the selected Home context. Empty chats, unavailable message markers or an incompatible Discord layout keep the theme off. No messages/account data are fetched by the launcher. See [target scope and compatibility](docs/TARGETS.md).
-
-## Fonts on demand
-
-Editor → Style offers **64 additional Google Fonts families**, searchable by name and grouped as sans serif, serif, display, handwriting and monospace. Font files are downloaded only when selected, checked with pinned SHA-256 values and cached locally. No system font installation is required. Your own static TTF/OTF import remains available.
-
-The selected font and its OFL license are embedded in `.dtheme`, so reopening or sharing that theme needs no new font download. A failed download keeps the previous font. Fonts customize display headings/channels; messages keep their native readable typography. [Catalog provenance and storage](docs/FONT-CATALOG.md).
-
-![Searchable font selection in the editor](assets/theme-studio-fonts.png)
-
-## Suggest a theme
-
-**Propose a theme** first explains the process in the app, then opens the [GitHub issue submission form](https://github.com/PrimeBuild-pc/discord-theme-launcher/issues/new?template=theme_submission.yml). Supply author/source, a synthetic-data preview, the file or pinned source, and license information. Human review precedes inclusion; submission never installs or publishes automatically.
-
-Save a `.dtheme` copy and attach it as a ZIP with a preview, author/source and redistribution license. The user submits the issue personally with a GitHub account. The launcher does not upload files, create a pull request, send email or publish a theme automatically.
-
-## Windows setup
-
-The executable and taskbar window use the bundled Theme Studio icon. The portable build is self-contained .NET 10 for Windows x64. Extract its ZIP and run `DiscordThemeLauncher.exe` normally, without Administrator privileges. The UI requires **Microsoft Edge WebView2 Runtime**, never installed silently. Optional Vencord setup uses its pinned official installer.
-
-Automatic application supports per-user stable Discord and the default Vencord profile. Store/PTB/Canary, custom profiles, unknown loaders, linked folders and other platforms are outside automatic support. The EXE is **unsigned**. No security settings are changed. This independent project is not affiliated with Discord or Vencord; Vencord is unofficial and has terms/account implications.
-
-Read [Installation and recovery](docs/INSTALLATION.md), [Compatibility](docs/COMPATIBILITY.md), [Configuration format](docs/CONFIGURATIONS.md), and [tested/not-tested evidence](docs/THEME-STUDIO-VALIDATION.md).
-
-## Development
-
-Node 22+, .NET 10 SDK and pinned npm dependencies are required. Windows is required for native integration and packaging. After editing `assets/app-icon.svg`, regenerate its multi-size ICO with `node scripts/build-icon.mjs`.
+Use **Node.js 22+**, the **.NET 10 SDK** and the pinned npm dependencies. Windows is required for native integration and packaging.
 
 ```sh
 npm ci
@@ -86,13 +110,27 @@ npx playwright install chromium
 npm run verify
 ```
 
+On Windows:
+
 ```powershell
 dotnet run --project launcher/WindowsTests/WindowsTests.csproj -c Release
 ./scripts/package-windows.ps1
 ```
 
-Tests use isolated profiles and synthetic conversations. Native integration and the separate agent-desktop smoke check do not cover Windows reboot behavior. No real Discord profile is modified by tests. See [architecture](docs/ARCHITECTURE.md), [acceptance progress](docs/THEME-STUDIO-PROGRESS.md), and the [credited preview for Lorenzo](docs/ZENIT-PREVIEW.md).
+`npm run verify` regenerates the themes and runs CSS/resource audits, JavaScript checks, Core tests and Chromium tests. Windows integration exercises the real WebView2 host. Packaging writes the executable, portable ZIP, standalone preset CSS, catalog, licenses and release checksums under `dist/release`.
 
-## Credits and licenses
+| Location | Responsibility |
+| --- | --- |
+| `launcher/Core` | Configuration, CSS import/compilation, local libraries and reversible theme transactions. |
+| `launcher/Windows` | WinForms host, WebView2 editor and Windows/Discord integration. |
+| `src` / `assets` | Theme sources, catalogs, artwork, fonts and third-party notices. |
+| `tests` / `launcher/*Tests` | Synthetic browser fixtures and isolated Core/native integration tests. |
+| `scripts` | Generation, validation and portable packaging. |
 
-Original code/artwork: [MIT](LICENSE), maintained by [PrimeBuild-pc](https://github.com/PrimeBuild-pc). Community names/logos identify their owners. Zenit retains JACKPOT71's copyright and MIT notice. Noto Sans, Rajdhani, JetBrains Mono, Bangers and Montserrat retain SIL OFL notices. Test-only Dracula source retains its [MIT license](tests/imports/dracula/LICENSE). Portable packages include .NET and WebView2 SDK notices. Discord's proprietary fonts and Vencord binaries are not bundled.
+Edit UI copy in `launcher/Windows/ui/studio-copy.json` and `studio-de.json`, then run `npm run build`; the corresponding portion of `i18n.js` is generated. Keep generated CSS, `catalog.json` and `SHA256SUMS.txt` in sync. See [architecture](docs/ARCHITECTURE.md) for implementation boundaries and [validation](docs/THEME-STUDIO-VALIDATION.md) for test coverage.
+
+<h2 id="license-and-credits">License &amp; credits</h2>
+
+Theme Studio is maintained by [PrimeBuild-pc](https://github.com/PrimeBuild-pc) under the [MIT license](LICENSE). Zenit Gold is **by JACKPOT71**, with its [original MIT notice](assets/community/zenit-gold/LICENSE) retained. Bundled fonts retain their SIL OFL notices; portable packages include .NET and WebView2 SDK notices. Community assets remain subject to their own licenses.
+
+<sub>An independent project, not affiliated with Discord, Vencord or BetterDiscord. Vencord is an unofficial client modification; its use is subject to Discord's terms. Discord fonts and Vencord binaries are not bundled.</sub>

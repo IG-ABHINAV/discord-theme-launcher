@@ -1,14 +1,15 @@
 # Changelog
 
-## 0.3.0-beta.11 - 2026-11-07 (unreleased)
+## 0.3.0-beta.11 - 2026-11-07
 
+- Refresh the README with an HTML header, badges, product preview, quick start and focused contributor documentation.
 - Remove the duplicate Save as new theme action in Files.
 - Show a persistent saved check on theme, palette and image buttons; disable redundant saves until values change. Keep draft palette names while editing colors.
 - Apply only the open theme to its explicit targets, disabling older launcher presets while preserving their files, external themes, plugins and recovery snapshots.
 - Resume the last document, local profile identity, editor section, Templates tab and preview context.
 - Flush pending edits before closing and offer embedded Save and close, Discard or Keep editing; include pending palette names and keep validation failures visible. Discarded edits stay discarded on reopening.
 
-## 0.3.0-beta.10 - 2026-11-07 (unreleased)
+## 0.3.0-beta.10 - 2026-11-07 (included in beta.11)
 
 - Order navigation as Home, Templates, Editor, Recovery, Help; add an empty template and Standard / My themes tabs.
 - Save, select, rename and duplicate local theme profiles; save and reuse named three-color palettes.
@@ -17,7 +18,7 @@
 - Apply one theme to up to 16 explicit server IDs and 16 explicit DM channel IDs. Hide Other server; show a real DM conversation preview only when DM targets are configured. DM styling requires visible message markers from the selected chat and stays off when detection fails.
 - Preserve existing schema-one themes and assets. Local libraries persist under the user profile; saving does not restart Discord.
 
-## 0.3.0-beta.9 - 2026-11-07 (unreleased)
+## 0.3.0-beta.9 - 2026-11-07 (included in beta.11)
 
 - Add 64 searchable, categorized Google Fonts families downloaded on selection, pinned SHA-256 verification, reusable local cache and embedded OFL licenses; retain custom font import.
 - Add the Theme Studio executable/window icon at Windows sizes 16–256 px.
@@ -27,7 +28,7 @@
 - Embed Help, submission guidance and unsaved-edit prompts in the application. GitHub issue submission is user-operated, with no automatic upload or PR.
 - Replace the legacy recovery window with an embedded reset choice (launcher themes or all styling) and selectable setup history. Reset preserves files/plugins and can itself be undone.
 
-## 0.3.0-beta.8 - 2026-11-07 (unreleased)
+## 0.3.0-beta.8 - 2026-11-07 (included in beta.11)
 
 - Start in neutral Fluent Dark with an explicit server target; organize Create, Community and My themes.
 - Add Zenit Gold — by JACKPOT71 with pinned MIT source/artwork and an offline Montserrat server adaptation.
@@ -38,7 +39,7 @@
 - Keep all beta.7 November class fixes and startup/recovery regressions.
 - Draft build only: unsigned; accessible-desktop, live-account and Windows reboot checks remain pending.
 
-## 0.3.0-beta.7 - 2026-11-07 (unreleased)
+## 0.3.0-beta.7 - 2026-11-07 (included in beta.11)
 
 - Restore the three server themes after Discord changed its CSS class names. Keep exact aliases for the previous and current layouts, including personal theme typography and custom backgrounds.
 - Preserve the selected-server guard: other servers, DMs and unknown layouts remain outside the theme.

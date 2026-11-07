@@ -37,4 +37,4 @@ Windows reboot/power cycle, real confirmed Discord application/reset (including 
 
 BetterDiscord import remains a supported subset; remote or relative resource graphs, unreviewed global registrations and unsupported CSS produce a compatibility report. Only one personal slot is active at once. There is no automatic theme upload or pull-request creation; the user submits a GitHub issue and maintainers review it.
 
-No public release or main merge is part of this draft. Earlier beta.8 evidence remains in the task's historical progress record. See [import limits](BETTERDISCORD-IMPORT.md) and [acceptance history](THEME-STUDIO-PROGRESS.md).
+Beta.11 is prepared for publication with user authorization after review. Earlier beta.8 draft constraints and evidence remain in the task's historical progress record. See [import limits](BETTERDISCORD-IMPORT.md) and [acceptance history](THEME-STUDIO-PROGRESS.md).

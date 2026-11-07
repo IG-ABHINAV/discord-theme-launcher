@@ -1,6 +1,6 @@
 # Installation, updates and recovery
 
-Theme Studio beta.9 starts at Home with create, import and template actions. One Editor contains Server, Style, Artwork and Files. Import individual .dtheme/.theme.css files or a folder and review compatibility. Save without a server; select a target before applying. German and the other supported languages cover the synthetic preview as well as controls. Submission uses a user-operated GitHub issue form after an embedded explanation.
+Theme Studio beta.11 starts at Home with create, import and template actions. One Editor contains Server, Style, Artwork and Files. Import individual .dtheme/.theme.css files or a folder and review compatibility. Save without a server; select a target before applying. German and the other supported languages cover the synthetic preview as well as controls. Submission uses a user-operated GitHub issue form after an embedded explanation.
 
 ## Supported automatic setup
 
@@ -8,7 +8,7 @@ The beta launcher targets Windows x64, standard per-user stable Discord in `%LOC
 
 ## Portable launcher (recommended)
 
-1. Download/extract the [portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.6), then run the EXE normally.
+1. Download/extract the [portable ZIP](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.11), then run the EXE normally.
 2. Select your target in Server and customize the design in Style/Artwork. All editing remains a preview.
 3. Save/share a `.dtheme` configuration if desired.
 4. Click **Apply to Discord**. Review the theme and target server in the overlay. It explains that Discord will restart and changes are local to this client.
@@ -41,7 +41,9 @@ Paths:
 - Theme files: `%APPDATA%\Vencord\themes`.
 - Backup history: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\backups`.
 - Recovery reference: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\last-backup.txt`.
-- Last saved/applied configuration: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\last-configuration.dtheme`. This editing document is independent of theme restoration. Editing alone does not write it; Save, Share or confirmed application can persist it. The development-only safe simulation never writes it.
+- Last saved/applied configuration: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\last-configuration.dtheme`. This editing document is independent of theme restoration. Editing alone does not write it; local Save or confirmed application can persist it. Exporting a copy does not mark the local profile saved. The development-only safe simulation never writes it.
+- Session state: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\studio-session.json`. A clean exit restores the document, local identity, editor section and preview context. Unsaved edits, including pending palette names, offer Save and close, Discard or Keep editing.
+- Reusable themes, palettes and images: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\library`.
 - Verified upstream installer, if needed: `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\downloads`.
 
 Keep the backup folder if you want to undo earlier changes. Nothing in these local folders is uploaded by the launcher. Downloads are ordinary HTTPS requests to GitHub and its release delivery infrastructure; provider request logging is outside this project.
@@ -74,7 +76,7 @@ No Nitro, bot, server boost or server administrator permission is needed. Each m
 Download `SHA256SUMS.txt` from the same release. On Windows:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.6-windows-x64-portable.zip
+Get-FileHash -Algorithm SHA256 -LiteralPath .\DiscordThemeLauncher-0.3.0-beta.11-windows-x64-portable.zip
 ```
 
 Compare it with the corresponding filename in the release checksum file. The repository-root checksum file covers generated themes; the release checksum file also covers the launcher, ZIP and catalog. A hash checks integrity, not publisher identity.

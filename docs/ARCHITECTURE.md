@@ -28,7 +28,7 @@ The normal flow is:
 3. If the user opted into first-time Vencord setup, download and verify the official CLI installer.
 4. Stop only verified stable Discord processes under the current user's standard installation, after the explicit calls/drafts acknowledgement.
 5. Run the official installer if needed; otherwise leave Vencord's installation alone.
-6. Snapshot the four managed theme files and enablement. Apply selected files and merge only their `enabledThemes` entries into current settings.
+6. Snapshot managed theme files and enablement. Personal Apply enables only the current document and disables other launcher presets; external themes and unrelated settings are preserved.
 7. Validate the runtime again, reopen Discord, and wait for a loaded Discord window before reporting success.
 
 File replacement uses a temporary sibling file and an atomic rename. A durable backup reference is written before the first profile mutation. A failed apply attempts restoration. Restore reads current settings and merges the saved managed subset; unrelated preferences changed since the snapshot survive. Restore also saves a new snapshot so it can be undone.
