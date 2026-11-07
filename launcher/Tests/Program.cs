@@ -277,6 +277,32 @@ fontHandler.Damaged = true;
 bool rejectedFont = false;
 try { await FontLibrary.LoadAsync(fontHttp, "alata", Path.Combine(fixture,"RejectedFontCache")); } catch (InvalidDataException) { rejectedFont = true; }
 Check(rejectedFont && !Directory.Exists(Path.Combine(fixture,"RejectedFontCache")), "damaged download cannot create a usable font cache");
+var library = new LocalLibrary(Path.Combine(fixture, "Library"));
+var libraryThemeId = library.SaveTheme(untargeted with { Name = "My theme" });
+library.SaveTheme(library.LoadTheme(libraryThemeId) with { Name = "Renamed theme" }, libraryThemeId);
+Check(new LocalLibrary(library.Root).Themes().Single().Name == "Renamed theme", "local theme profiles persist and rename without losing assets");
+Reject(() => library.LoadTheme("../escape"), "local library identifiers cannot escape storage");
+var paletteId = library.SavePalette(new PaletteProfile("", "Violet", "#aabbff", "#101218", "#252939"));
+Check(new LocalLibrary(library.Root).Palettes().Single().Id == paletteId, "named three-color palettes persist independently of themes");
+var imageId = library.SaveImage("Reusable banner", portable.CustomBackground!);
+Check(new LocalLibrary(library.Root).LoadImage(imageId).Asset.Sha256 == portable.CustomBackground!.Sha256, "reusable image library preserves normalized bytes across sessions");
+var multi = config with { Palette = "custom", Guild = "987654321012345678", AdditionalGuilds = ["1206415718728601600"], DmChannels = ["876543210123456789"], Panel = "#252939" };
+var multiCss = ThemeCompiler.Compile(multi);
+Check(multiCss.Contains("guildsnav___1206415718728601600") && multiCss.Contains("chat-messages-876543210123456789-") && multiCss.Contains("--pb-panel: #252939"), "one compiled theme scopes to multiple servers and an explicit DM chat with a third color");
+File.WriteAllText(Path.Combine(previewDirectory,"multi-target.html"), ThemePreview.Html(multi));
+Check(ThemeConfiguration.ParseTargets("987654321012345678, 1206415718728601600\n987654321012345678").Length == 2, "server target input normalizes multiple IDs and removes duplicates");
+Check(ThemeConfiguration.ParseTargets("https://discord.com/channels/@me/876543210123456789/111111111111111111", true).Single() == "876543210123456789", "DM message links resolve to the channel rather than message or user IDs");
+Reject(() => ThemeConfiguration.ParseTargets("https://discord.com/channels/@me/876543210123456789"), "server target input cannot accept a DM link");
+var dmOnly = multi with { Guild = "", AdditionalGuilds = [] };
+dmOnly.Save(Path.Combine(fixture,"DM.dtheme"));
+Check(ThemeConfiguration.Load(Path.Combine(fixture,"DM.dtheme")).DmChannels.SequenceEqual(dmOnly.DmChannels), "DM-only profiles roundtrip without inventing a server");
+File.WriteAllText(Path.Combine(previewDirectory,"dm-only.html"), ThemePreview.Html(dmOnly));
+var importedArt = zenit with { Background = "custom", CustomBackground = portable.CustomBackground };
+Check(ThemeCompiler.Compile(importedArt).Contains(portable.CustomBackground!.DataUri), "saved artwork can override an imported source without removing original metadata");
+File.WriteAllText(Path.Combine(previewDirectory,"zenit-artwork.html"), ThemePreview.Html(importedArt));
+var assetsId = library.SaveTheme(portable with { Name = "Portable artwork" });
+Check(library.LoadTheme(assetsId).CustomBackground!.Sha256 == portable.CustomBackground!.Sha256 && library.LoadTheme(assetsId).CustomFont!.Sha256 == portable.CustomFont!.Sha256, "local theme profiles retain exact embedded artwork and font licenses");
+Reject(() => library.SavePalette(new PaletteProfile("", "Bright", "#aabbff", "#101218", "#ffffff")), "saved palette panels must remain readable");
 Console.WriteLine($"{checks} checks passed. Fixture: {fixture}");
 // Intentional: leave the temporary test fixture for inspection; never recurse over an unchecked root.
 

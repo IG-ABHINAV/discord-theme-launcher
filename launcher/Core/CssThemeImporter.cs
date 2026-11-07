@@ -57,10 +57,10 @@ public static class CssThemeImporter
         { return new(false, null, [error is InvalidDataException ? error.Message : "The stylesheet is not valid UTF-8 or contains a damaged embedded resource."], [], []); }
     }
 
-    public static string Compile(ImportedTheme theme, string guild)
+    public static string Compile(ImportedTheme theme, string guild, long additionalImagePixels = 0)
     {
         guild = ThemeConfiguration.ParseGuild(guild);
-        var result = Analyze(theme, guild);
+        var result = Analyze(theme, guild, additionalImagePixels);
         string Comment(string text) => text.Replace("*/", "* /");
         return "/* Imported server adaptation; original author: " + Comment(theme.Author) + "\nSource: " + Comment(theme.Source) +
             "\nOriginal SHA-256: " + theme.Sha256 + "\n" + Comment(theme.License) + "\n*/\n" + result.Css;
@@ -80,7 +80,7 @@ public static class CssThemeImporter
         public readonly Dictionary<string, ImportVariable> Variables = [];
     }
 
-    private static Analysis Analyze(ImportedTheme theme, string guild)
+    private static Analysis Analyze(ImportedTheme theme, string guild, long additionalImagePixels = 0)
     {
         if (theme.Original is null || theme.Original.Length is < 1 or > MaxBytes || theme.Sha256 is null || theme.Edits is null || theme.Edits.Count > 128 ||
             theme.Name is null || theme.Name.Length > 160 || theme.Author is null || theme.Author.Length > 200 ||
@@ -92,7 +92,8 @@ public static class CssThemeImporter
         var rules = CssSyntax.Rules(css); var result = new Analysis();
         string alias = "ts-" + theme.Sha256[..12] + "-";
         var keyframes = new Dictionary<string, string>();
-        var imageHashes = new HashSet<string>(); long imagePixels = 0;
+        if (additionalImagePixels is < 0 or > 32_000_000) throw new InvalidDataException("Embedded images exceed the combined 32 million pixel preview budget. Use fewer or smaller images.");
+        var imageHashes = new HashSet<string>(); long imagePixels = additionalImagePixels;
         void FindAnimations(List<CssRule> nodes)
         {
             foreach (var rule in nodes)

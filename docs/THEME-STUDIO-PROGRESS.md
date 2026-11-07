@@ -1,6 +1,10 @@
 # Theme Studio acceptance evidence
 
-## Local beta.9 refinement — 2026-11-07
+## Local beta.10 refinement — 2026-11-07
+
+Local theme/palette/image libraries, three palette colors with inline validation, actual artwork thumbnails, empty template, reordered navigation, multi-server and guarded DM targeting implemented. Pink Hard Disk preserved locally. Validation: 127 Core, 64 browser and 61 native Windows checks.
+
+## Historical local beta.9 refinement — 2026-11-07
 
 64 searchable on-demand font families with pinned content and portable licenses added. Home / Editor / Templates, embedded Help/discard/recovery, two reset scopes and named history, individual/folder imports, target-optional saving, localized illustrative preview and executable/window icon implemented. Current validation: 115 Core + 59 browser + 55 native Windows checks. Interactive packaged Home/help/icon inspection completed with agent-desktop. GitHub issue submission is the primary user-operated path; the former environment-based Discord override is removed. See [current validation](THEME-STUDIO-VALIDATION.md).
 

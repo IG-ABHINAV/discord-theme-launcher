@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0-beta.10 - 2026-11-07 (unreleased)
+
+- Order navigation as Home, Templates, Editor, Recovery, Help; add an empty template and Standard / My themes tabs.
+- Save, select, rename and duplicate local theme profiles; save and reuse named three-color palettes.
+- Make overly bright surface/panel errors visible beside their controls, in red, with accessible invalid-state markers.
+- Show actual imported-art thumbnails, including changes with the same filename; save reusable images and select them for banners/backgrounds across themes, including imported designs.
+- Apply one theme to up to 16 explicit server IDs and 16 explicit DM channel IDs. Hide Other server; show a real DM conversation preview only when DM targets are configured. DM styling requires visible message markers from the selected chat and stays off when detection fails.
+- Preserve existing schema-one themes and assets. Local libraries persist under the user profile; saving does not restart Discord.
+
 ## 0.3.0-beta.9 - 2026-11-07 (unreleased)
 
 - Add 64 searchable, categorized Google Fonts families downloaded on selection, pinned SHA-256 verification, reusable local cache and embedded OFL licenses; retain custom font import.

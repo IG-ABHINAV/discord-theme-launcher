@@ -18,10 +18,15 @@ public sealed record ThemeConfiguration
     public int Schema { get; init; } = 1;
     public string Name { get; init; } = "My server theme";
     public string Guild { get; init; } = "";
+    public string[] AdditionalGuilds { get; init; } = [];
+    public string[] DmChannels { get; init; } = [];
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string[] TargetGuilds => (Guild.Length == 0 ? Array.Empty<string>() : new[] { Guild }).Concat(AdditionalGuilds).ToArray();
     public string Preset { get; init; } = "fluent";
     public string Palette { get; init; } = "custom";
     public string Accent { get; init; } = "#8791ff";
     public string Surface { get; init; } = "#202020";
+    public string? Panel { get; init; }
     public string Font { get; init; } = "native";
     public string Banner { get; init; } = "none";
     public string Background { get; init; } = "none";
@@ -47,18 +52,39 @@ public sealed record ThemeConfiguration
         return input;
     }
 
+    public static string[] ParseTargets(string input, bool directMessages = false)
+    {
+        var tokens = Regex.Split(input.Trim(), @"[\s,;]+").Where(t => t.Length > 0).ToArray();
+        if (tokens.Length > 16) throw new InvalidDataException("Choose at most 16 servers or DM chats.");
+        return tokens.Select(token => {
+            if (directMessages && Uri.TryCreate(token, UriKind.Absolute, out var uri) && uri.Scheme == "https" && uri.Host == "discord.com")
+            {
+                var parts = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length is 3 or 4 && parts[0] == "channels" && parts[1] == "@me" && (parts.Length == 3 || Regex.IsMatch(parts[3], "^[0-9]{17,20}$"))) token = parts[2];
+                else throw new InvalidDataException("Use a DM channel ID or an https://discord.com/channels/@me/channel link.");
+            }
+            return ParseGuild(token);
+        }).Distinct().ToArray();
+    }
+
     public void Validate(bool requireTarget = true)
     {
         if (Schema != 1) throw new InvalidDataException("This configuration version is not supported.");
         if (string.IsNullOrWhiteSpace(Name) || Name.Length > 80 || Name.Any(char.IsControl)) throw new InvalidDataException("Use a theme name of 1–80 characters.");
-        if ((requireTarget || Guild != "") && Guild != ParseGuild(Guild)) throw new InvalidDataException("Save the target as a server ID.");
-        if (Imported is not null) _ = CssThemeImporter.Compile(Imported, Guild == "" && !requireTarget ? "987654321012345678" : Guild);
+        if (Guild is null || AdditionalGuilds is null || DmChannels is null || AdditionalGuilds.Length > 15 || DmChannels.Length > 16)
+            throw new InvalidDataException("Invalid theme targets.");
+        if (requireTarget && TargetGuilds.Length == 0 && DmChannels.Length == 0) throw new InvalidDataException("Choose at least one server or DM chat.");
+        if (TargetGuilds.Any(g => g != ParseGuild(g)) || DmChannels.Any(g => g != ParseGuild(g)) ||
+            TargetGuilds.Distinct().Count() != TargetGuilds.Length || DmChannels.Distinct().Count() != DmChannels.Length)
+            throw new InvalidDataException("Save each target as a unique channel or server ID.");
+        if (Imported is not null) _ = CssThemeImporter.Compile(Imported, TargetGuilds.FirstOrDefault() ?? "987654321012345678");
         if (!Presets.Append("fluent").Contains(Preset) || !Palettes.Contains(Palette) || !Presets.Append("native").Append("custom").Contains(Font) ||
             !Presets.Append("none").Append("custom").Contains(Banner) || !Presets.Append("none").Append("custom").Contains(Background))
             throw new InvalidDataException("Unknown preset, palette, font or artwork choice.");
-        if (Accent is null || Surface is null || !Regex.IsMatch(Accent, "^#[a-fA-F0-9]{6}$") || !Regex.IsMatch(Surface, "^#[a-fA-F0-9]{6}$")) throw new InvalidDataException("Colors must use #RRGGBB.");
+        if (Accent is null || Surface is null || Panel is not null && !Regex.IsMatch(Panel, "^#[a-fA-F0-9]{6}$") || !Regex.IsMatch(Accent, "^#[a-fA-F0-9]{6}$") || !Regex.IsMatch(Surface, "^#[a-fA-F0-9]{6}$")) throw new InvalidDataException("Colors must use #RRGGBB.");
         // Fixed light message text needs a dark surface, including underneath bright imported images.
         if (Palette == "custom" && Luminance(Surface) > .055) throw new InvalidDataException("Choose a darker surface to keep messages and the composer readable.");
+        if (Palette == "custom" && Panel is not null && Luminance(Panel) > .055) throw new InvalidDataException("Choose a darker panel color to keep text readable.");
         ValidateAsset(CustomFont, true); ValidateAsset(CustomBanner, false); ValidateAsset(CustomBackground, false);
         if (Font == "custom" && CustomFont is null || Banner == "custom" && CustomBanner is null || Background == "custom" && CustomBackground is null)
             throw new InvalidDataException("Import the selected custom asset first.");

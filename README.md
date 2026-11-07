@@ -1,10 +1,10 @@
 # Theme Studio · Discord Theme Launcher
 
-Create, edit, preview and share a Discord theme for the server you choose. Start with neutral **Fluent Dark**, customize a community design, or import a compatible downloaded BetterDiscord `.theme.css`. Review it before applying and restore your previous setup when needed.
+Create, edit, preview, save and share a Discord theme for your chosen servers and specific DM chats. Start with neutral **Fluent Dark**, customize a community design, or import a compatible downloaded BetterDiscord `.theme.css`. Review it before applying and restore your previous setup when needed.
 
 **Changes affect your local Discord client.** Other members choose whether to install a shared theme themselves. This app does not alter a server for everyone, discover membership, read messages, or request Discord credentials.
 
-This branch prepares **0.3.0-beta.9** as a draft, not a public release. Build a portable candidate using the commands below. [Published releases](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases) may predate this workflow.
+This branch prepares **0.3.0-beta.10** as a draft, not a public release. Build a portable candidate using the commands below. [Published releases](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases) may predate this workflow.
 
 ![Fluent Dark editor with synthetic conversations](assets/theme-studio-create.png)
 
@@ -12,8 +12,8 @@ This branch prepares **0.3.0-beta.9** as a draft, not a public release. Build a 
 
 1. **Home** offers three actions: create a theme, import a theme, or choose a template.
 2. **Editor** keeps **Server**, **Style**, **Artwork** and **Files** together beside the live preview. Start with Fluent Dark, customize a template, or import `.dtheme` / compatible downloaded BetterDiscord `.theme.css` files. Folder import includes subfolders (up to eight levels and 100 theme files), reports incompatible files, and lets you choose a design to edit.
-3. **Templates** contains Prime Build, Prime Build Dev, FantaFort and credited Zenit Gold. Choose one to customize in the editor, or [browse BetterDiscord themes](https://betterdiscord.app/themes) and import your downloaded file. Compatibility is reviewed before accepting CSS; not every BetterDiscord theme is supported.
-4. **Save** keeps your editable `.dtheme`; **Export a copy** creates a portable copy with assets, licenses and original imported bytes. A target server is optional while saving. **Source and license** details remain available under Files.
+3. **Templates** has Standard and My themes tabs. Standard starts with an empty neutral template and contains Prime Build, Prime Build Dev, FantaFort and credited Zenit Gold. Choose one to customize in the editor, or [browse BetterDiscord themes](https://betterdiscord.app/themes) and import your downloaded file. Compatibility is reviewed before accepting CSS; not every BetterDiscord theme is supported.
+4. **Save** keeps your editable `.dtheme`; **Export a copy** creates a portable copy with assets, licenses and original imported bytes. **Save as new theme** creates another local profile; rename or reopen profiles under Templates → My themes. A target is optional while saving. **Source and license** details remain available under Files.
 5. **Apply to Discord** requires an explicit server and a valid preview. Review the theme and target, finish calls and save drafts, then confirm. Vencord setup is offered with consent only when applying requires it.
 6. **Recovery → Restore Discord** opens one embedded dialog: disable launcher themes only, or all local/online themes and QuickCSS. Both preserve files and plugins and save a recovery snapshot. Alternatively select a previously applied setup from the history. Full resets also save the three styling settings needed to undo that reset; other preferences are never copied or reverted.
 
@@ -41,6 +41,18 @@ Remote/relative resources, unknown global rules, nested CSS, unsafe document-roo
 CSS source is limited to 2 MiB; `.dtheme` to 24 MiB. Source and SHA-256 are retained and revalidated on reopen/apply. Original CSS export may be global when installed directly elsewhere; share `.dtheme` for the server-targeted workflow. See [the precise compatibility model and pinned provenance](docs/BETTERDISCORD-IMPORT.md).
 
 Custom PNG/JPEG artwork is normalized to PNG, at most 8 MiB, 4096 px per side and 16 million pixels. Static TTF/OTF imports require redistribution and editable embedding rights and a license, at most 2 MiB. Do not redistribute assets without permission. Hashes detect corruption, not authorship or licensing.
+
+## Reusable customization
+
+Custom palettes have three colors: Accent, Dark surface and Panels. Name/save a palette, select it later, or create a new palette from the current colors. Overly bright surface/panel controls show an inline red error. Artwork shows the actual selected image; Save banner / Save background stores it in My images, which can be reused for either role in another theme. Imported designs keep their source metadata when artwork is replaced.
+
+Theme profiles, palettes and reusable images live under `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\library`. They survive application upgrades and never depend on the original image path. Export a copy remains available for portable .dtheme files. Local Save updates the open local profile; Save as new theme preserves it and creates a separate variant.
+
+## Servers and private chats
+
+Enter multiple server IDs/links, one per line or separated by commas. You can also target specific DM channel IDs or DM message links. Each category is limited to 16 targets. The same personal theme applies to those explicit targets; settings and unrelated conversations keep their normal styling.
+
+Other server is removed from the app's preview controls. The DM preview appears only when DM targets are entered and shows private-chat navigation and messages. DM detection requires a visible message row with the selected channel ID, alongside the selected Home context. Empty chats, unavailable message markers or an incompatible Discord layout keep the theme off. No messages/account data are fetched by the launcher. See [target scope and compatibility](docs/TARGETS.md).
 
 ## Fonts on demand
 

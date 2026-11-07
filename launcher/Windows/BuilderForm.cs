@@ -2,9 +2,9 @@ using System.Text.Json;
 
 namespace CommunityThemes;
 
-internal sealed record StudioValues(string Name, string Guild, string Preset, string Palette, string Accent, string Surface, string Font, string Banner, string Background)
+internal sealed record StudioValues(string Name, string Guild, string Preset, string Palette, string Accent, string Surface, string Font, string Banner, string Background, string? Panel = null, string Dms = "")
 {
-    public static StudioValues From(ThemeConfiguration c) => new(c.Name, c.Guild, c.Preset, c.Palette, c.Accent, c.Surface, c.Font, c.Banner, c.Background);
+    public static StudioValues From(ThemeConfiguration c) => new(c.Name, string.Join("\n", c.TargetGuilds), c.Preset, c.Palette, c.Accent, c.Surface, c.Font, c.Banner, c.Background, c.Panel ?? c.Surface, string.Join("\n", c.DmChannels));
 }
 
 internal sealed class BuilderForm : Form
@@ -12,6 +12,9 @@ internal sealed class BuilderForm : Form
     private readonly bool dryRun;
     private readonly DiscordClient client = new();
     private readonly ThemeStore store;
+    private readonly LocalLibrary library;
+    private string? localThemeId;
+    private string paletteId = "";
     private readonly StudioSurface surface = new();
     private ThemeConfiguration configuration = new();
     private int revision, renderedRevision = -1;
@@ -31,6 +34,8 @@ internal sealed class BuilderForm : Form
     {
         dryRun = safePreview;
         store = new ThemeStore(client.VencordRoot, client.StateRoot, ThemeCompiler.BundledCatalog);
+        library = new LocalLibrary(dryRun ? Path.Combine(Path.GetTempPath(), "ThemeStudio-library-" + Guid.NewGuid().ToString("N")) : Path.Combine(client.StateRoot, "library"));
+        surface.LocalImageRequested = id => library.LoadImage(id).Asset;
         BackColor = LauncherStyle.Surface; ForeColor = LauncherStyle.Text; Font = LauncherStyle.Font(); AutoScaleMode = AutoScaleMode.Dpi;
         Text = UiText.Format("Theme Studio · Discord Theme Launcher — {0}", ThemeCompiler.BundledCatalog.Version);
         ClientSize = new Size(1420, 900); MinimumSize = new Size(1020, 700); StartPosition = FormStartPosition.CenterScreen;
@@ -43,7 +48,9 @@ internal sealed class BuilderForm : Form
         if (dryRun) configuration = new ThemeConfiguration { Name = "Your community", Guild = "987654321012345678" };
         else if (File.Exists(DraftPath))
         {
-            try { var draft = ThemeConfiguration.Load(DraftPath); AssetImport.ValidateImages(draft); configuration = draft; saved = true; }
+            try { var draft = ThemeConfiguration.Load(DraftPath); AssetImport.ValidateImages(draft); configuration = draft; saved = true;
+                var encoded = JsonSerializer.Serialize(configuration, Catalog.JsonOptions);
+                localThemeId = library.Themes().Where(t => t.Name == configuration.Name).FirstOrDefault(t => JsonSerializer.Serialize(library.LoadTheme(t.Id), Catalog.JsonOptions) == encoded)?.Id; }
             catch { notice = "The last configuration could not be reopened. Open another .dtheme file or start a new one."; }
         }
         FormClosing += (_, e) => {
@@ -69,7 +76,9 @@ internal sealed class BuilderForm : Form
 
     private ThemeConfiguration ReadConfiguration(bool requireTarget = true)
     {
-        var value = configuration with { Name = configuration.Name.Trim(), Guild = !requireTarget && configuration.Guild.Trim().Length == 0 ? "" : ThemeConfiguration.ParseGuild(configuration.Guild),
+        var guilds = ThemeConfiguration.ParseTargets(string.Join("\n", configuration.TargetGuilds));
+        var dms = ThemeConfiguration.ParseTargets(string.Join("\n", configuration.DmChannels), true);
+        var value = configuration with { Name = configuration.Name.Trim(), Guild = guilds.FirstOrDefault() ?? "", AdditionalGuilds = guilds.Skip(1).ToArray(), DmChannels = dms,
             CustomFont = configuration.Font == "custom" ? configuration.CustomFont : null,
             CustomBanner = configuration.Banner == "custom" ? configuration.CustomBanner : null,
             CustomBackground = configuration.Background == "custom" ? configuration.CustomBackground : null };
@@ -89,11 +98,14 @@ internal sealed class BuilderForm : Form
     private void Changed() { confirmation = null; revision++; dirty = true; RenderPreview(); }
     private void RenderPreview()
     {
+        surface.SetArtwork(configuration);
         try
         {
             // A synthetic target lets a new design render without choosing a real server implicitly.
-            var value = configuration.Guild.Length == 0 ? configuration with { Guild = "987654321012345678" } : ReadConfiguration();
-            validation = configuration.Guild.Length == 0 ? "Choose a target server before applying." : "";
+            var current = ReadConfiguration(false);
+            bool targetMissing = current.TargetGuilds.Length == 0 && current.DmChannels.Length == 0;
+            var value = targetMissing ? current with { Guild = "987654321012345678" } : current;
+            validation = targetMissing ? "Choose at least one server or DM chat." : "";
             renderedRevision = revision; surface.Render(value);
         }
         catch (InvalidDataException error) { validation = error.Message; renderedRevision = -1; }
@@ -107,19 +119,19 @@ internal sealed class BuilderForm : Form
         catch { notice = "The Vencord profile could not be read. Check the manual recovery guide."; }
         var patched = client.Patched;
         var readiness = ApplyReadiness.Evaluate(busy, validation, renderedRevision == revision && surface.Ready);
-        surface.Publish(new { type = "state", values = StudioValues.From(configuration), assets = new { font = configuration.CustomFont?.Name, banner = configuration.CustomBanner?.Name, background = configuration.CustomBackground?.Name },
+        surface.Publish(new { type = "state", values = StudioValues.From(configuration), assets = new { font = configuration.CustomFont?.Name, banner = configuration.CustomBanner?.Name, background = configuration.CustomBackground?.Name, bannerHash = configuration.CustomBanner?.Sha256, backgroundHash = configuration.CustomBackground?.Sha256 },
             busy, dirty, saved, version = ThemeCompiler.BundledCatalog.Version, notice = UiText.Text(notice),
-            validation = UiText.Text(validation), previewId = surface.PreviewId, previewUri = renderedRevision == revision && (validation.Length == 0 || validation == "Choose a target server before applying.") ? surface.PreviewUri : "",
+            validation = UiText.Text(validation), previewId = surface.PreviewId, previewUri = renderedRevision == revision && (validation.Length == 0 || validation == "Choose at least one server or DM chat.") ? surface.PreviewUri : "",
             canApply = readiness.CanApply, applyReason = UiText.Text(readiness.Reason), applyAction = readiness.Action, applyActionLabel = readiness.ActionLabel.Length == 0 ? "" : UiText.Text(readiness.ActionLabel),
             canDisable = canDisable && !busy, canRestore = canRestore && !busy,
             designs = CommunityGallery.Designs,
             fonts = FontLibrary.Choices.Select(f => new { f.Id, f.Family, f.Category, fileName = Path.GetFileName(f.Path) }),
-            recoveryHistory = history,
+            recoveryHistory = history, localThemes = library.Themes(), localPalettes = library.Palettes(), localImages = library.Images(), paletteId, localThemeId,
             discardPending = pendingDiscard.HasValue || pendingClose, importCandidates,
             imported = configuration.Imported is { } imported ? ReviewState(CssThemeImporter.Inspect(imported)) : null,
             importReview = importReview is null ? null : ReviewState(importReview),
             confirmation = confirmation is { } pending ? new { pending.Id, pending.Operation, themeName = pending.Configuration?.Name,
-                guild = pending.Configuration?.Guild, serverName = ThemeCompiler.BundledCatalog.Themes.FirstOrDefault(t => t.Guild == pending.Configuration?.Guild)?.Server ?? UiText.Text("Selected server"),
+                guild = pending.Configuration is { } targets ? string.Join(", ", targets.TargetGuilds) : "", dms = pending.Configuration?.DmChannels, serverName = pending.Configuration is { } scope && (scope.TargetGuilds.Length != 1 || scope.DmChannels.Length > 0) ? UiText.Text("Selected targets") : ThemeCompiler.BundledCatalog.Themes.FirstOrDefault(t => t.Guild == pending.Configuration?.Guild)?.Server ?? UiText.Text("Selected server"),
                 pending.RequiresSetup, pending.Repair, pending.RecoveryId, problem = UiText.Text(pending.Problem) } : null,
             installation = UiText.Text(patched ? "Discord + Vencord ready. No installation needed." : client.Unbootable ? "Discord cannot start because Vencord's patcher.js is missing. The launcher repairs it with the official installer." : client.Found ? "Discord found. Apply will offer official Vencord setup if needed." : "Standard Discord desktop was not found for this Windows user."),
             language = UiText.Current });
@@ -131,11 +143,36 @@ internal sealed class BuilderForm : Form
         if (busy && action != "previewReady") return;
         try
         {
-            if (dirty && !discardApproved && action is ("community" or "new" or "open" or "importCss" or "importFolder"))
+            if (dirty && !discardApproved && action is ("community" or "new" or "open" or "importCss" or "importFolder" or "loadLocalTheme"))
             { pendingDiscard = message.Clone(); Publish(); return; }
             switch (action)
             {
                 case "loaded": Publish(); return;
+                case "libraryRefresh": library.Refresh(); Publish(); return;
+                case "loadLocalTheme":
+                    string themeId = message.GetProperty("value").GetString() ?? "";
+                    var loaded = library.LoadTheme(themeId); AssetImport.ValidateImages(loaded);
+                    configuration = loaded; localThemeId = themeId; paletteId = ""; documentPath = null; dirty = false; saved = true; confirmation = null; revision++; RenderPreview(); return;
+                case "renameLocalTheme":
+                    string renameId = message.GetProperty("value").GetString() ?? "";
+                    string newName = message.GetProperty("name").GetString() ?? "";
+                    library.SaveTheme(library.LoadTheme(renameId) with { Name = newName }, renameId);
+                    if (localThemeId == renameId) { configuration = configuration with { Name = newName }; Changed(); }
+                    Publish(); return;
+                case "savePalette":
+                    paletteId = library.SavePalette(new PaletteProfile(paletteId, message.GetProperty("name").GetString() ?? "", configuration.Accent, configuration.Surface, configuration.Panel ?? configuration.Surface)); Publish(); return;
+                case "loadPalette":
+                    var palette = library.LoadPalette(message.GetProperty("value").GetString() ?? ""); paletteId = palette.Id;
+                    configuration = configuration with { Palette = "custom", Accent = palette.Accent, Surface = palette.Surface, Panel = palette.Panel }; Changed(); return;
+                case "newPalette": paletteId = ""; configuration = configuration with { Palette = "custom" }; Changed(); return;
+                case "saveImage":
+                    var selectedImage = message.GetProperty("kind").GetString() == "banner" ? configuration.CustomBanner : configuration.CustomBackground;
+                    if (selectedImage is null) return;
+                    library.SaveImage(message.GetProperty("name").GetString() ?? "", selectedImage); Publish(); return;
+                case "loadImage":
+                    var image = library.LoadImage(message.GetProperty("value").GetString() ?? "");
+                    var nextImage = message.GetProperty("kind").GetString() == "banner" ? configuration with { Banner = "custom", CustomBanner = image.Asset } : configuration with { Background = "custom", CustomBackground = image.Asset };
+                    AssetImport.ValidateImages(nextImage); configuration = nextImage; Changed(); return;
                 case "cancelDiscard": pendingDiscard = null; pendingClose = false; Publish(); return;
                 case "discardEdits":
                     if (!pendingClose && pendingDiscard is null) return;
@@ -164,23 +201,24 @@ internal sealed class BuilderForm : Form
                     Publish(); return;
                 case "edit":
                     var edits = message.GetProperty("values").Deserialize<StudioValues>(Catalog.JsonOptions) ?? throw new InvalidDataException("Invalid editor values.");
-                    var strings = new[] { edits.Name, edits.Guild, edits.Preset, edits.Palette, edits.Accent, edits.Surface, edits.Font, edits.Banner, edits.Background };
-                    if (strings.Any(s => s is null || s.Length > 256)) throw new InvalidDataException("Editor values exceed the supported limits.");
-                    configuration = configuration with { Name = edits.Name, Guild = edits.Guild, Preset = edits.Preset, Palette = edits.Palette, Accent = edits.Accent, Surface = edits.Surface, Font = edits.Font, Banner = edits.Banner, Background = edits.Background };
+                    var strings = new[] { edits.Name, edits.Guild, edits.Preset, edits.Palette, edits.Accent, edits.Surface, edits.Font, edits.Banner, edits.Background, edits.Panel ?? edits.Surface, edits.Dms };
+                    if (strings.Any(s => s is null || s.Length > 2048)) throw new InvalidDataException("Editor values exceed the supported limits.");
+                    if (configuration.Palette != edits.Palette) paletteId = "";
+                    configuration = configuration with { Name = edits.Name, Guild = edits.Guild, AdditionalGuilds = [], DmChannels = System.Text.RegularExpressions.Regex.Split(edits.Dms.Trim(), @"[\s,;]+").Where(v => v.Length > 0).ToArray(), Panel = edits.Panel ?? edits.Surface, Preset = edits.Preset, Palette = edits.Palette, Accent = edits.Accent, Surface = edits.Surface, Font = edits.Font, Banner = edits.Banner, Background = edits.Background };
                     Changed(); return;
                 case "preset":
                     string id = message.GetProperty("value").GetString() ?? "";
                     if (!ThemeConfiguration.Presets.Contains(id)) return;
-                    configuration = CommunityGallery.Create(id, configuration.Guild); Changed(); return;
+                    configuration = CommunityGallery.Create(id, configuration.Guild) with { AdditionalGuilds = configuration.AdditionalGuilds, DmChannels = configuration.DmChannels }; Changed(); return;
                 case "community":
-                    configuration = CommunityGallery.Create(message.GetProperty("value").GetString() ?? "", configuration.Guild);
-                    documentPath = null; saved = false; Changed(); return;
+                    configuration = CommunityGallery.Create(message.GetProperty("value").GetString() ?? "", configuration.Guild) with { AdditionalGuilds = configuration.AdditionalGuilds, DmChannels = configuration.DmChannels };
+                    documentPath = null; localThemeId = null; paletteId = ""; saved = false; Changed(); return;
                 case "importCss": ReviewCss(); return;
                 case "cancelImport": importReview = null; Publish(); return;
                 case "acceptImport":
                     if (importReview is not { Supported: true, Theme: { } theme }) return;
-                    configuration = new ThemeConfiguration { Name = theme.Name.Length > 80 ? theme.Name[..80] : theme.Name, Guild = configuration.Guild, Imported = theme };
-                    importReview = null; documentPath = null; saved = false; Changed(); return;
+                    configuration = new ThemeConfiguration { Name = theme.Name.Length > 80 ? theme.Name[..80] : theme.Name, Guild = configuration.Guild, AdditionalGuilds = configuration.AdditionalGuilds, DmChannels = configuration.DmChannels, Imported = theme };
+                    importReview = null; documentPath = null; localThemeId = null; paletteId = ""; saved = false; Changed(); return;
                 case "importVariable":
                     if (configuration.Imported is null) return;
                     string key = message.GetProperty("name").GetString() ?? "", edit = message.GetProperty("value").GetString() ?? "";
@@ -194,7 +232,7 @@ internal sealed class BuilderForm : Form
                 case "communityAuthor":
                     OpenExternal(CommunityGallery.Designs.Single(d => d.Id == message.GetProperty("value").GetString()).AuthorUrl); return;
                 case "previewReady":
-                    if (renderedRevision == revision) validation = !surface.Ready ? "The design or display font did not load. Choose another font or reload the preview." : configuration.Guild.Length == 0 ? "Choose a target server before applying." : "";
+                    if (renderedRevision == revision) validation = !surface.Ready ? "The design or display font did not load. Choose another font or reload the preview." : configuration.TargetGuilds.Length == 0 && configuration.DmChannels.Length == 0 ? "Choose at least one server or DM chat." : "";
                     Publish(); return;
                 case "refresh": RenderPreview(); return;
                 case "cancelConfirmation":
@@ -208,9 +246,14 @@ internal sealed class BuilderForm : Form
                     if (!OperationConfirmation.TryTake(ref confirmation, confirmationId, revision, out var confirmed)) { Publish(); return; }
                     await OperateAsync(confirmed!, allowSetup); return;
                 case "new":
-                    confirmation = null; configuration = new ThemeConfiguration { Name = UiText.Text("My server theme"), Guild = "" }; documentPath = null; dirty = saved = false; revision++; RenderPreview(); return;
+                    confirmation = null; configuration = new ThemeConfiguration { Name = UiText.Text("My server theme"), Guild = "" }; documentPath = null; localThemeId = null; paletteId = ""; dirty = saved = false; revision++; RenderPreview(); return;
                 case "open": OpenDocument(); return;
                 case "save": SaveDocument(false); return;
+                case "saveLocalCopy":
+                    var copy = ReadConfiguration(false) with { Name = message.GetProperty("name").GetString() ?? "" };
+                    copy.Validate(false); localThemeId = library.SaveTheme(copy);
+                    configuration = copy; dirty = false; saved = true; confirmation = null; revision++;
+                    if (!dryRun) copy.Save(DraftPath); RenderPreview(); return;
                 case "share": SaveDocument(true); return;
                 case "exportCss": ExportOriginalCss(); return;
                 case "downloadFont": await DownloadFontAsync(message.GetProperty("value").GetString() ?? ""); return;
@@ -245,7 +288,7 @@ internal sealed class BuilderForm : Form
         ThemeStore.CheckPath(path);
         if (path.EndsWith(".theme.css", StringComparison.OrdinalIgnoreCase)) { importReview = CssThemeImporter.ReviewFile(path); Publish(); return; }
         var value = ThemeConfiguration.Load(path); AssetImport.ValidateImages(value);
-        confirmation = null; configuration = value; documentPath = path; dirty = false; saved = true; revision++;
+        confirmation = null; configuration = value; documentPath = path; localThemeId = null; paletteId = ""; dirty = false; saved = true; revision++;
         notice = "Configuration opened. Review the target server before applying."; RenderPreview();
     }
     private void ReviewCss() => OpenDocument();
@@ -292,15 +335,20 @@ internal sealed class BuilderForm : Form
     private static string SubmissionDestination() => "https://github.com/PrimeBuild-pc/discord-theme-launcher/issues/new?template=theme_submission.yml";
     private void SaveDocument(bool share)
     {
-        var value = ReadConfiguration(false); string? path = share ? null : documentPath;
-        if (path is null)
+        var value = ReadConfiguration(false);
+        if (share)
         {
-            using var dialog = new SaveFileDialog { Filter = UiText.Text("Theme configuration (*.dtheme)") + "|*.dtheme", DefaultExt = "dtheme", AddExtension = true, FileName = "My-server-theme.dtheme", Title = UiText.Text(share ? "Share a copy with embedded assets" : "Save your configuration") };
-            if (dialog.ShowDialog(this) != DialogResult.OK) return; path = dialog.FileName;
+            var name = string.Concat(value.Name.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '-' : c));
+            using var dialog = new SaveFileDialog { Filter = UiText.Text("Theme configuration (*.dtheme)") + "|*.dtheme", DefaultExt = "dtheme", AddExtension = true, FileName = name + ".dtheme", Title = UiText.Text("Share a copy with embedded assets") };
+            if (dialog.ShowDialog(this) != DialogResult.OK) return;
+            value.Save(dialog.FileName);
         }
-        value.Save(path); if (!share) { documentPath = path; dirty = false; saved = true; }
+        else
+        {
+            localThemeId = library.SaveTheme(value, localThemeId); dirty = false; saved = true;
+        }
         if (!dryRun) value.Save(DraftPath);
-        notice = share ? "Portable copy saved with selected assets and font license. Send it to members yourself; each member applies it locally." : "Your configuration and selected assets are saved together.";
+        notice = share ? "Portable copy saved with selected assets and font license. Send it to members yourself; each member applies it locally." : "Theme saved in your local templates.";
         Publish();
     }
     private void ExportOriginalCss()
@@ -439,7 +487,7 @@ internal sealed class BuilderForm : Form
                 else store.ApplyPersonal(value);
             });
             notice = "Opening Discord and checking startup…"; Publish(); await client.OpenAsync(); stopped = false;
-            notice = operation == "apply" ? "Theme applied to server " + value!.Guild + ". Discord startup confirmed. Changes are local to you." : operation == "disable" ? "Personal theme disabled. Discord startup confirmed. Restore can undo this." : operation is "disableManaged" or "disableAll" ? "Theme styling disabled. Files preserved. Discord startup confirmed." : "Previous managed setup restored. Discord startup confirmed.";
+            notice = operation == "apply" ? "Theme applied. Discord startup confirmed. Changes are local to you." : operation == "disable" ? "Personal theme disabled. Discord startup confirmed. Restore can undo this." : operation is "disableManaged" or "disableAll" ? "Theme styling disabled. Files preserved. Discord startup confirmed." : "Previous managed setup restored. Discord startup confirmed.";
         }
         catch (Exception error)
         {

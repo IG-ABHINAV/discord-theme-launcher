@@ -142,15 +142,15 @@ internal static class Program
                 Check(builder.SimulatedOperations == 1, "late edits invalidate the native confirmation snapshot");
                 await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'edit',values:{...state.values,name:'Your community'}})");
                 await StudioState("state.values.name==='Your community' && !document.getElementById('apply').disabled");
-                Check(await studioCore.ExecuteScriptAsync("document.querySelector('label[for=guild]').textContent.includes('Server ID') && document.querySelectorAll('[data-preset]').length===4") == "true", "studio exposes labeled server selection and four credited community designs");
+                Check(await studioCore.ExecuteScriptAsync("document.querySelector('label[for=guild]').textContent.includes('Server ID') && document.querySelectorAll('[data-preset]').length===5") == "true", "studio exposes labeled server selection and four credited community designs");
                 Check(await studioCore.ExecuteScriptAsync("[...document.querySelectorAll('.preset-card img')].every(image=>image.complete&&image.naturalWidth>0)") == "true", "actual native studio loads all bundled preset artwork");
                 await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'preset',value:'fantafort'})");
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!studio.Ready || await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") != "\"#f5db36\"") await Task.Delay(100, timeout.Token);
                 Check(true, "native preset selection updates the real preview through the validated bridge");
-                await studioCore.ExecuteScriptAsync("document.querySelector('[data-context=other]').click()");
+                await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.setPreviewContext('other')");
                 Check(await studioCore.ExecuteScriptAsync("document.getElementById('preview-status').textContent.includes('Outside your target server')") == "true", "native studio explains why the theme is off in another server");
-                await studioCore.ExecuteScriptAsync("document.querySelector('[data-context=target]').click()");
+                await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.setPreviewContext('target')");
                 Check(await studioCore.ExecuteScriptAsync("(()=>{const f=document.getElementById('preview');const r=f.contentDocument.querySelector('.scrollableContainer__74017').getBoundingClientRect();return r.bottom<=f.clientHeight})()") == "true", "native preview keeps the composer within its frame");
                 string studioSource = studioCore.Source;
                 await studioCore.ExecuteScriptAsync("location.href='https://example.invalid/blocked'"); await Task.Delay(150);
@@ -188,7 +188,7 @@ internal static class Program
                 Check(UiText.Current == "de", "German WebView selection reaches native localization");
                 Check(await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentDocument.querySelector('.welcome-title').textContent==='Ein Ort, der sich nach dir anfühlt.'") == "true", "German translates the native illustrative preview");
                 await studioCore.ExecuteScriptAsync("document.querySelector('[data-action=help]').click()");
-                Check(await studioCore.ExecuteScriptAsync("document.getElementById('info-dialog').open && document.getElementById('info-body').textContent.includes('Erstelle ein Design')") == "true", "help is translated and embedded in the same WebView");
+                Check(await studioCore.ExecuteScriptAsync("document.getElementById('info-dialog').open && document.getElementById('info-body').textContent.includes('Wähle eine Vorlage')") == "true", "help is translated and embedded in the same WebView");
                 await studioCore.ExecuteScriptAsync("document.getElementById('info-close').click();document.querySelector('[data-page=recovery]').click();document.getElementById('restore').click()");
                 await StudioState("document.getElementById('reset-dialog').open");
                 Check(builder.SimulatedOperations == 1, "opening recovery does not perform an operation");
@@ -211,6 +211,19 @@ internal static class Program
                 await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'preset',value:'primebuild'})");
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!studio.Ready || await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--pb-accent').trim()") != "\"#ff6600\"") await Task.Delay(100, timeout.Token);
+                await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'edit',values:{...state.values,guild:'987654321012345678\\n1206415718728601600',dms:'876543210123456789',palette:'custom',accent:'#aabbff',surface:'#101218',panel:'#252939'}})");
+                await StudioState("state.values.guild.includes('1206415718728601600') && !document.getElementById('apply').disabled");
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-context=dm]').click()");
+                await StudioState("document.getElementById('preview').contentDocument.body.dataset.context==='dm'");
+                Check(await studioCore.ExecuteScriptAsync("document.getElementById('preview').contentWindow.getComputedStyle(document.getElementById('preview').contentDocument.querySelector('.base__5e434')).getPropertyValue('--pb-profile').trim().includes('personal')") == "true", "native multi-target configuration themes its selected DM conversation");
+                await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'savePalette',name:'Native violet'})");
+                await StudioState("state.localPalettes.some(p=>p.name==='Native violet' && p.panel==='#252939')");
+                Check(true,"native named palette retains all three custom colors");
+                await studioCore.ExecuteScriptAsync("document.querySelector('[data-context=target]').click();window.chrome.webview.postMessage({action:'saveLocalCopy',name:'Native saved profile'})");
+                await StudioState("state.localThemes.some(t=>t.name==='Native saved profile') && !state.dirty");
+                await studioCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'renameLocalTheme',value:state.localThemeId,name:'Renamed native profile'})");
+                await StudioState("state.localThemes.some(t=>t.name==='Renamed native profile')");
+                Check(true,"native saved themes can be named and renamed in the library");
                 // Edits made by this test are synthetic; do not open the user's unsaved-edits dialog on disposal.
                 builder.Hide();
                 using var importedBuilder = new BuilderForm(true);
@@ -226,7 +239,7 @@ internal static class Program
                 var importFolder = Path.Combine(fixture, "ImportFolder"); Directory.CreateDirectory(Path.Combine(importFolder,"nested"));
                 File.Copy("assets/community/zenit-gold/ZenitGold.theme.css", Path.Combine(importFolder,"Zenit.theme.css"));
                 File.WriteAllText(Path.Combine(importFolder,"Unsupported.theme.css"), "@import url('https://example.invalid/remote.css');");
-                new ThemeConfiguration { Name = "Reusable folder theme", Guild = "" }.Save(Path.Combine(importFolder,"nested","Reusable.dtheme"));
+                new ThemeConfiguration { Name = "Reusable folder theme", Guild = "", Banner = "custom", CustomBanner = imported, Background = "custom", CustomBackground = imported }.Save(Path.Combine(importFolder,"nested","Reusable.dtheme"));
                 importedBuilder.ReviewFolder(importFolder);
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (await importedCore.ExecuteScriptAsync("document.getElementById('folder-dialog').open && document.querySelectorAll('#folder-files button').length===3") != "true") await Task.Delay(50, timeout.Token);
@@ -235,6 +248,21 @@ internal static class Program
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
                     while (!importedSurface.Ready || await importedCore.ExecuteScriptAsync("state.values.name==='Reusable folder theme' && !document.getElementById('folder-dialog').open") != "true") await Task.Delay(50, timeout.Token);
                 Check(importedBuilder.SimulatedOperations == 0, "selecting an imported folder design opens it in preview without applying");
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (await importedCore.ExecuteScriptAsync("[...document.querySelectorAll('[data-banner=custom] img,[data-background=custom] img')].length===2 && [...document.querySelectorAll('[data-banner=custom] img,[data-background=custom] img')].every(i=>i.complete&&i.naturalWidth>0)") != "true") await Task.Delay(50,timeout.Token);
+                Check(true, "actual selected-art endpoints load both custom image thumbnails");
+                await importedCore.ExecuteScriptAsync("window.chrome.webview.postMessage({action:'saveImage',kind:'banner',name:'Reusable native image'})");
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (await importedCore.ExecuteScriptAsync("state.localImages.length===1") != "true") await Task.Delay(50,timeout.Token);
+                await importedCore.ExecuteScriptAsync("document.querySelector('[data-images-kind=background]').click()");
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (await importedCore.ExecuteScriptAsync("document.querySelector('#saved-images img')?.naturalWidth>0") != "true") await Task.Delay(50,timeout.Token);
+                Check(true, "saved image endpoint renders the reusable image library");
+                await importedCore.ExecuteScriptAsync("document.getElementById('image-library-close').click();window.chrome.webview.postMessage({action:'save'})");
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+                    while (await importedCore.ExecuteScriptAsync("state.localThemes.length===1 && Boolean(state.localThemeId)") != "true") await Task.Delay(50,timeout.Token);
+                Check(importedBuilder.SimulatedOperations==0, "native local Save retains the reusable profile without restarting Discord or a file picker");
+
 
                 await importedCore.ExecuteScriptAsync("document.querySelector('[data-preset=\"zenit-gold\"]').click()");
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20)))

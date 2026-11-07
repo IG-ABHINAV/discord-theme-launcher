@@ -160,7 +160,7 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         byte[]? css = configuration is null ? null : System.Text.Encoding.UTF8.GetBytes(ThemeCompiler.Compile(configuration));
         var settings = ReadSettings();
         var enabled = Enabled(settings).Where(name => name != ThemeCompiler.PersonalFile &&
-            !catalog.Themes.Any(t => t.File == name && t.Guild == configuration?.Guild)).ToList();
+            !catalog.Themes.Any(t => t.File == name && configuration?.TargetGuilds.Contains(t.Guild) == true)).ToList();
         if (css is not null) enabled.Add(ThemeCompiler.PersonalFile);
         var folder = SaveSnapshot(settings);
         AtomicWrite(LastPath, System.Text.Encoding.UTF8.GetBytes(Path.GetFileName(folder)));

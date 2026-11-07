@@ -2,13 +2,13 @@
 
 ## Format and target
 
-`.dtheme` is versioned JSON data: schema 1, at most 24 MiB. It stores the exact target ID, preset/palette/font/artwork choices, custom colors and selected embedded assets. Assets contain a display filename, MIME type, bytes, SHA-256 and optional license. Packages are never extracted and filenames do not become paths. Compatible CSS imports add a bounded `Imported` record with exact original bytes, SHA-256, author/source/license and validated variable edits. Source is reparsed on reopen/compile/apply. Unknown schemas, HTML, scripts, arbitrary resources and unsupported CSS are refused. See [CSS import](BETTERDISCORD-IMPORT.md).
+`.dtheme` is versioned JSON data: schema 1, at most 24 MiB. It stores the first target ID, optional AdditionalGuilds and DmChannels, optional Panel color, preset/palette/font/artwork choices, custom colors and selected embedded assets. Assets contain a display filename, MIME type, bytes, SHA-256 and optional license. Packages are never extracted and filenames do not become paths. Compatible CSS imports add a bounded `Imported` record with exact original bytes, SHA-256, author/source/license and validated variable edits. Source is reparsed on reopen/compile/apply. Unknown schemas, HTML, scripts, arbitrary resources and unsupported CSS are refused. See [CSS import](BETTERDISCORD-IMPORT.md).
 
 The generated `PersonalServer.theme.css` is disposable output; retain the configuration for editing/sharing. Newer launchers may regenerate CSS from the same schema with updated Discord selectors. There are no external references, cloud synchronization or automatic updates.
 
 New themes use neutral Fluent Dark, native typography, no artwork and no server target. The editor can preview a synthetic example before target selection; saving allows an empty target; application requires a valid explicit server. Earlier schema-one files retain their explicit choices. One personal theme can be active; multiple portable files can be saved. Imported CSS preserves its supported author design instead of becoming a recolored built-in preset. Original export writes exact source bytes, which may be global when installed directly elsewhere; share `.dtheme` for the targeted editor workflow.
 
-Target selection accepts a 17–20 digit unsigned server ID or HTTPS Discord channel link. Invite links and arbitrary hosts are refused. The UI explains **User Settings > Advanced > Developer Mode**, then **right-click server > Copy Server ID**. The launcher never reads Discord account storage or requests credentials. Users must already belong to the server.
+Server target selection accepts one or more 17–20 digit unsigned server ID or HTTPS Discord channel link. Invite links and arbitrary hosts are refused. The UI explains **User Settings > Advanced > Developer Mode**, then **right-click server > Copy Server ID**. The launcher never reads Discord account storage or requests credentials. Users must already belong to the server.
 
 ## Compilation and readability
 
@@ -41,3 +41,5 @@ One personal slot, `PersonalServer.theme.css`, is active at a time. Apply replac
 **Recovery > Restore Discord** disables either the launcher-managed themes or all local/online themes plus QuickCSS. Reset preserves files and plugins. Previous applied setups can be selected from the history. A full reset snapshots only enabledThemes, themeLinks and useQuickCss so that those explicit changes can be undone; ordinary recovery merges the managed subset into current settings. New snapshots store four managed filenames and SHA-256 for existing files. All sources are verified before restoration. Old three-file backups restore their own subset and retain the personal slot. Plugins and other preferences stay outside management. External theme settings are changed only by the explicit all-themes reset.
 
 Original standalone CSS retains community IDs. Existing 0.2.x installations require no destructive migration. Save personal configurations before replacing the portable application with a newer version.
+
+Local Save stores an editable profile under the launcher library. Save as new theme duplicates the configuration under a new local identity. Named three-color palettes and reusable normalized images are independent library items. DM targets accept channel IDs or message links; see [target compatibility](TARGETS.md).

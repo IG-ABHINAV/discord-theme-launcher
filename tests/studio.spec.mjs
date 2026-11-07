@@ -12,6 +12,7 @@ async function studio(page,brokenResources=false){
     else if(url.pathname==='/app-icon.svg'){path='assets/app-icon.svg';contentType='image/svg+xml';}
     else if(['/studio.js','/studio.css','/i18n.js'].includes(url.pathname)){path='launcher/Windows/ui'+url.pathname;contentType=url.pathname.endsWith('js')?'text/javascript':'text/css';}
     else if(url.pathname.startsWith('/font/')){path='assets/fonts/NotoSans-'+(url.pathname.includes('bold')?'Bold':'Regular')+'.ttf';contentType='font/ttf';}
+    else if(url.pathname.startsWith('/selected-art/')||url.pathname.startsWith('/local-image/')){path='assets/prime-build-logo.png';contentType='image/png';}
     else if(url.pathname.startsWith('/art/')){const parts=url.pathname.split('/');if(parts[2]==='zenit-gold'){const css=await readFile(new URL('assets/community/zenit-gold/ZenitGold.theme.css',root),'utf8');const uri=css.match(/--zg-banner:\s*url\("([^"]+)"\)/)[1];await route.fulfill({body:Buffer.from(uri.split(',')[1],'base64'),contentType:'image/webp'});return;}path='assets/generated/'+parts[2]+'-'+parts[3]+'.svg';contentType='image/svg+xml';}
     else if(url.pathname==='/preview'){path='.local/builder-fixtures/'+(brokenResources?'zenit-gold':url.searchParams.get('preset')||'primebuild')+'.html';contentType='text/html';}
     else{await route.abort();return;}
@@ -22,13 +23,21 @@ async function studio(page,brokenResources=false){
   });
   await page.addInitScript(({designs,review,fonts})=>{
     let listener,revision=0;
-    const state={type:'state',designs,fonts,values:{name:'Your community',guild:'987654321012345678',preset:'fluent',palette:'custom',accent:'#8791ff',surface:'#202020',font:'native',banner:'none',background:'none'},assets:{},dirty:false,saved:false,busy:false,version:'0.3.0-beta.5',language:'en',notice:'Everything stays in preview until you confirm Apply.',validation:'',previewId:'1',previewUri:'https://theme-preview.invalid/preview?revision=1&preset=fluent',canApply:true,applyReason:'',applyAction:'',applyActionLabel:'',canDisable:false,canRestore:false,confirmation:null,installation:'Discord + Vencord ready.'};
+    const state={type:'state',designs,fonts,values:{name:'Your community',guild:'987654321012345678',preset:'fluent',palette:'custom',accent:'#8791ff',surface:'#202020',font:'native',banner:'none',background:'none',panel:'#202020',dms:''},assets:{},localThemes:[],localPalettes:[],localImages:[],paletteId:'',dirty:false,saved:false,busy:false,version:'0.3.0-beta.5',language:'en',notice:'Everything stays in preview until you confirm Apply.',validation:'',previewId:'1',previewUri:'https://theme-preview.invalid/preview?revision=1&preset=fluent',canApply:true,applyReason:'',applyAction:'',applyActionLabel:'',canDisable:false,canRestore:false,confirmation:null,installation:'Discord + Vencord ready.'};
     window.testSetupRequired=false;window.testConfirmationProblem='';
     window.patchTestState=patch=>{Object.assign(state,patch);listener?.({data:structuredClone(state)})};
     window.testMessages=[];
     window.chrome={webview:{addEventListener:(_,callback)=>listener=callback,postMessage:message=>{
       window.testMessages.push(message);
       if(message.action==='edit')state.values=message.values;
+      if(message.action==='save'){state.localThemes.push({id:'local'+state.localThemes.length,name:state.values.name});state.saved=true;state.dirty=false;}
+      if(message.action==='savePalette'){state.paletteId=state.paletteId||'palette'+state.localPalettes.length;const value={id:state.paletteId,name:message.name,accent:state.values.accent,surface:state.values.surface,panel:state.values.panel};state.localPalettes=state.localPalettes.filter(p=>p.id!==value.id).concat(value)}
+      if(message.action==='loadPalette'){const palette=state.localPalettes.find(p=>p.id===message.value);Object.assign(state.values,{palette:'custom',accent:palette.accent,surface:palette.surface,panel:palette.panel});state.paletteId=palette.id}
+      if(message.action==='newPalette'){state.paletteId='';state.values.palette='custom'}
+      if(message.action==='saveImage')state.localImages.push({id:'image'+state.localImages.length,name:message.name,sha256:state.assets[message.kind+'Hash']});
+      if(message.action==='loadImage'){state.values[message.kind]='custom';state.assets[message.kind]=state.localImages.find(i=>i.id===message.value).name;state.assets[message.kind+'Hash']=state.localImages.find(i=>i.id===message.value).sha256}
+      if(message.action==='renameLocalTheme')state.localThemes.find(t=>t.id===message.value).name=message.name;
+
       if(message.action==='downloadFont'){state.values.font='custom';state.assets.font=fonts.find(f=>f.id===message.value).fileName;}
       if(['preset','community'].includes(message.action)){if(message.value==='zenit-gold'){state.imported=review;state.values.preset='zenit-gold';state.values.font='native'}else{state.imported=null;for(const field of['preset','font','palette','banner','background'])state.values[field]=message.value;}}
       if(['importCss','open'].includes(message.action))state.importReview=review;
@@ -141,10 +150,10 @@ test('starting preset and isolation context have separate clear controls',async(
   await expect(page.locator('#preview-loading')).toBeHidden();
   await expect(page.locator('[data-preset="primebuild-dev"]')).toHaveAttribute('aria-pressed','true');
   await expect(page.frameLocator('#preview').locator('.chatContent_f75fb0')).toHaveCSS('background-color','rgb(16, 19, 27)');
-  await page.getByRole('button',{name:'Other server',exact:true}).click();
+  await page.frameLocator('#preview').locator('body').evaluate(()=>window.setPreviewContext('other'));
   await expect(page.getByRole('status')).toContainText('Outside your target server');
   await expect(page.frameLocator('#preview').locator('.base__5e434')).toHaveCSS('background-color','rgb(49, 51, 56)');
-  await page.getByRole('button',{name:'Your server',exact:true}).click();
+  await page.frameLocator('#preview').locator('body').evaluate(()=>window.setPreviewContext('target'));
   await expect(page.getByRole('status')).toContainText('Theme active');
   await page.getByRole('button',{name:'Templates',exact:true}).click();
   await page.getByRole('button',{name:'FantaFort',exact:true}).click();
@@ -199,7 +208,7 @@ test('interface defaults to English and can switch to Italian, Spanish and Russi
   await expect(page.getByRole('heading',{name:'Ваш сервер. Ваш стиль.'})).toBeVisible();
   await page.locator('#language').selectOption('en');
   await expect(page.getByRole('button',{name:'Apply to Discord',exact:true})).toBeVisible();
-  await expect(page.getByLabel('Server ID or channel link')).toBeVisible();
+  await expect(page.getByLabel('Server IDs or channel links')).toBeVisible();
 });
 
 test('community exposes four credited designs, catalog browsing and a working submission action',async({page})=>{
@@ -211,7 +220,7 @@ test('community exposes four credited designs, catalog browsing and a working su
   await expect(page.locator('#info-dialog')).toBeVisible();await page.locator('#info-continue').click();
   const actions=await page.evaluate(()=>window.testMessages.map(m=>m.action));
   expect(actions).toContain('browseThemes');expect(actions).toContain('submitTheme');expect(actions).not.toContain('confirmOperation');
-  await page.screenshot({path:'.local/studio-community-preview.png'});
+  await page.locator('.editor-scroll').evaluate(el=>el.scrollTop=0);await page.screenshot({path:'.local/studio-community-preview.png'});
 });
 
 test('downloaded CSS is reviewed before accepting, cancellation leaves the existing design untouched',async({page})=>{
@@ -294,4 +303,18 @@ test('font library offers fifty-plus searchable families without automatic downl
   expect(await page.evaluate(()=>window.testMessages.filter(m=>m.action==='downloadFont').map(m=>m.value))).toEqual(['alata']);
   await expect(page.locator('[data-action=importFont]')).toBeVisible();
   expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='confirmOperation'))).toBe(false);
+});
+
+test('local profiles and three-color palettes are named and available in Templates',async({page})=>{
+ await studio(page);expect(await page.locator('.rail [data-page]').evaluateAll(items=>items.map(i=>i.dataset.page))).toEqual(['home','community','editor','recovery']);
+ await page.locator('[data-page=community]').click();await expect(page.locator('[data-preset=fluent]')).toBeVisible();
+ await page.locator('[data-page=editor]').click();await page.locator('#theme-name').fill('Violet work');await page.locator('.file-actions [data-action=save]').click();await page.locator('[data-page=community]').click();await page.locator('#template-tab-local').click();await expect(page.locator('#local-themes')).toContainText('Violet work');
+ await page.locator('[data-page=editor]').click();await page.locator('[data-tab=style]').click();await expect(page.locator('#panel-picker')).toBeVisible();await page.locator('#palette-name').fill('My violet');await page.locator('#save-palette').click();await expect(page.locator('#saved-palettes')).toContainText('My violet');
+ await page.locator('#surface').fill('#ffffff');await expect(page.locator('#surface-warning')).toBeVisible();await expect(page.locator('#surface')).toHaveAttribute('aria-invalid','true');await expect(page.locator('#surface-warning')).toHaveCSS('color','rgb(255, 156, 170)');
+});
+test('custom artwork gets a real thumbnail and can be saved and reused',async({page})=>{
+ await studio(page);await page.evaluate(()=>window.patchTestState({assets:{banner:'banner.png',bannerHash:'first'},values:{...state.values,banner:'custom'}}));await page.locator('[data-tab=art]').click();
+ const thumbnail=page.locator('[data-banner=custom] img');await expect(thumbnail).toBeVisible();expect(await thumbnail.evaluate(i=>i.complete&&i.naturalWidth>0)).toBe(true);
+ await page.locator('#save-banner').click();await page.locator('#name-dialog-input').fill('Reusable art');await page.locator('#name-dialog-save').click();await page.locator('[data-images-kind=background]').click();await expect(page.locator('#saved-images')).toContainText('Reusable art');await page.locator('[data-saved-image]').click();
+ expect(await page.evaluate(()=>window.testMessages.find(m=>m.action==='loadImage').kind)).toBe('background');await expect(page.locator('[data-background=custom] img')).toBeVisible();
 });

@@ -104,3 +104,25 @@ test('configuration labels and license text cannot inject preview markup', async
   expect(await token(page)).toBe('#48cfae');
   expect(dialogs).toEqual([]);
 });
+
+
+test('multi-target theme styles selected servers and only the chosen DM conversation',async({page})=>{
+  await page.goto(new URL('../.local/builder-fixtures/multi-target.html',import.meta.url).href);
+  const root=page.locator('.base__5e434');const token=()=>root.evaluate(el=>getComputedStyle(el).getPropertyValue('--pb-profile').trim());
+  await expect.poll(token).toBe('"personal"');
+  await page.evaluate(()=>{const item=document.querySelector('[data-list-item-id=\"guildsnav___other\"]');item.dataset.listItemId='guildsnav___1206415718728601600';document.querySelectorAll('[aria-selected]').forEach(el=>el.setAttribute('aria-selected','false'));item.setAttribute('aria-selected','true')});await expect.poll(token).toBe('\"personal\"');
+  await page.evaluate(()=>window.setPreviewContext('dm'));
+  await expect(page.locator('.dm-navigation')).toBeVisible();await expect(page.locator('.server-navigation')).toBeHidden();
+  await expect(page.locator('#conversation-title')).toHaveText('@ Alex');await expect.poll(token).toBe('"personal"');
+  await page.evaluate(()=>window.setPreviewContext('dm-other'));await expect.poll(token).toBe('');
+  await page.evaluate(()=>window.setPreviewContext('dm'));await expect.poll(token).toBe('"personal"');
+  await page.locator('[data-fixture-message]').evaluateAll(items=>items.forEach(item=>item.remove()));await expect.poll(token).toBe('');
+  await page.evaluate(()=>{const decoy=document.createElement('div');decoy.id='chat-messages-876543210123456789-decoy';document.body.append(decoy)});await expect.poll(token).toBe('');
+});
+
+test('DM-only preview starts with an actual private conversation',async({page})=>{
+ await page.goto(new URL('../.local/builder-fixtures/dm-only.html',import.meta.url).href);await expect(page.locator('body')).toHaveAttribute('data-context','dm');await expect(page.locator('.dm-navigation')).toBeVisible();await expect(page.locator('.server-navigation')).toBeHidden();expect(await page.locator('.base__5e434').evaluate(el=>getComputedStyle(el).getPropertyValue('--pb-profile').trim())).toBe('"personal"');
+});
+test('imported themes can use reusable local artwork inside the selected scope',async({page})=>{
+ await page.goto(new URL('../.local/builder-fixtures/zenit-artwork.html',import.meta.url).href);await expect(page.locator('.chatContent_f75fb0')).toHaveCSS('background-image',/data:image\/png/);await page.evaluate(()=>setPreviewContext('other'));await expect(page.locator('.chatContent_f75fb0')).not.toHaveCSS('background-image',/data:image\/png/);
+});
