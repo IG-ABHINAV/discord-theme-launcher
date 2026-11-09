@@ -26,3 +26,5 @@ textarea{font:inherit;display:block;width:100%;resize:vertical;min-height:64px;m
 .template-tabs{position:sticky;top:0;background:var(--sidebar);z-index:2;padding-block:8px}
 
 button.save-complete { color: #8edbb3; opacity: 1; }
+
+.workflow-hint{margin:8px 0 0;line-height:1.5}.local-theme-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start}.local-theme-row>.outline-button{min-width:0}.local-theme-name{display:block;overflow-wrap:anywhere;white-space:normal}.local-theme-action{display:block;margin-top:5px;font-size:11px;color:var(--muted)}.local-theme-copy{grid-column:1/-1;justify-self:start;margin-top:-4px}.local-theme-row [aria-current=true]{border-color:#8992ff;background:#5865f21c}

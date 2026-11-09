@@ -204,7 +204,7 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
             {
                 CheckPath(path); var file = Path.Combine(path, "snapshot.json"); CheckPath(file);
                 var snapshot = JsonSerializer.Deserialize<Snapshot>(File.ReadAllText(file), Catalog.JsonOptions);
-                if (snapshot?.Themes is null || snapshot.Themes.Any(t => !ManagedFiles.Contains(t.File))) continue;
+                if (snapshot?.Themes is null || snapshot.Themes.Any(t => t is null || !ManagedFiles.Contains(t.File))) continue;
                 var names = snapshot.Themes.Where(t => t.Enabled && t.Existed).Select(t => t.Name ?? catalog.Themes.FirstOrDefault(d => d.File == t.File)?.Name ?? "Personal theme").ToArray();
                 if (names.Length > 0 || snapshot.Styling is not null) entries.Add(new(id, snapshot.Created ?? File.GetCreationTimeUtc(file), names));
             }
@@ -262,7 +262,7 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         var snapshotPath = Path.Combine(folder, "snapshot.json"); CheckPath(snapshotPath);
         var snapshot = JsonSerializer.Deserialize<Snapshot>(File.ReadAllText(snapshotPath), Catalog.JsonOptions) ?? throw new InvalidDataException("Invalid backup.");
         // Historical snapshots touch only their recorded managed subset; newer catalog entries are left alone.
-        if (snapshot.Themes is null || snapshot.Themes.Length < 1 || snapshot.Themes.Length > ManagedFiles.Length ||
+        if (snapshot.Themes is null || snapshot.Themes.Any(t => t is null) || snapshot.Themes.Length < 1 || snapshot.Themes.Length > ManagedFiles.Length ||
             snapshot.Themes.Select(t => t.File).Distinct().Count() != snapshot.Themes.Length ||
             snapshot.Themes.Any(t => !ManagedFiles.Contains(t.File)))
             throw new InvalidDataException("The backup does not match this launcher.");

@@ -8,13 +8,13 @@
   Start from an empty template, customize a community design, or import compatible BetterDiscord CSS.
 </p>
 <p align="center">
-  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.11"><img src="https://img.shields.io/badge/release-v0.3.0--beta.11-8b7cf6?style=flat-square" alt="Release v0.3.0-beta.11"></a>
+  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.12"><img src="https://img.shields.io/badge/release-v0.3.0--beta.12-8b7cf6?style=flat-square" alt="Release v0.3.0-beta.12"></a>
   <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/actions/workflows/check.yml"><img src="https://github.com/PrimeBuild-pc/discord-theme-launcher/actions/workflows/check.yml/badge.svg?branch=main" alt="Build and tests"></a>
   <img src="https://img.shields.io/badge/platform-Windows%20x64-0078d4?style=flat-square" alt="Windows x64">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-3da77a?style=flat-square" alt="MIT license"></a>
 </p>
 <p align="center">
-  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.11"><strong>Download beta.11</strong></a>
+  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.12"><strong>Download beta.12</strong></a>
   &nbsp;·&nbsp; <a href="docs/INSTALLATION.md">Installation</a>
   &nbsp;·&nbsp; <a href="#contributing">Contribute</a>
   &nbsp;·&nbsp; <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/issues">Report an issue</a>
@@ -40,10 +40,10 @@ Theme Studio brings **creation, editing, preview, targeting, sharing and recover
 
 <h2 id="get-started">Get started</h2>
 
-1. Download the **Windows x64 portable ZIP** from the [beta.11 release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.11), extract it and run `DiscordThemeLauncher.exe` without Administrator privileges.
+1. Download the **Windows x64 portable ZIP** from the [beta.12 release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.12), extract it and run `DiscordThemeLauncher.exe` without Administrator privileges.
 2. Open **Templates** and choose an empty or community template, or import a downloaded `.theme.css` / `.dtheme` file in **Editor → Files**. Folder import is also available.
-3. In **Editor**, set your targets, colors, typography and artwork. Save your theme locally or use **Save as new theme** to keep a separate variation.
-4. Choose **Apply to Discord**, review the current theme and targets, finish calls or streams, then confirm. Discord restarts during application.
+3. In **Editor**, set your targets, colors, typography and artwork. **Save theme** keeps the design in **My themes**; **Save a new copy…** keeps a separate variation.
+4. Choose **Review & apply**, review the current theme and all its targets, finish calls or streams, then confirm. Discord restarts during application.
 
 **Requirements:** Windows x64, the standard per-user stable Discord installation, and [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/). Vencord is required for themes; setup and recognized broken-install repair are described in the [installation guide](docs/INSTALLATION.md). The app bundles .NET, so no separate .NET installation is needed. The executable is currently **unsigned**.
 
@@ -51,14 +51,16 @@ Theme Studio brings **creation, editing, preview, targeting, sharing and recover
 
 | Section | What you can do |
 | --- | --- |
-| **Server** | Enter server IDs/channel links and optional DM channel IDs/message links. |
+| **Servers / DMs** | Set the theme name and optional description. Enter server IDs/channel links and optional DM channel IDs/message links. |
 | **Style** | Customize supported design options, save named three-color palettes, and choose or import fonts. Imported CSS exposes its supported variables. |
 | **Artwork** | Import banners/backgrounds, see actual image thumbnails, and reuse images from your local library. |
 | **Files** | Import files or folders, save local profiles, export portable copies, and propose a community theme. |
 
 Saved items show a **✓ Saved** check; save buttons reactivate when there are changes. Closing with pending edits offers **Save and close**, **Discard**, or **Keep editing**. Reopening resumes the last clean document and selected section.
 
-Local profiles appear under **Templates → My themes**. A `.dtheme` export includes the selected assets, font license and preserved imported source, so the recipient can reopen and customize it. Save before choosing a target if you are still designing.
+To reuse a design, choose **Home → Use a saved theme → Open in editor** (also under **Templates → My themes**). Make a small change or add another server on a new line, keeping the existing IDs. Choose **Save theme**, then **Review & apply**. Applying uses the complete current target list; it replaces the active personal theme rather than adding another active design. **Duplicate theme…** creates an independent saved copy without replacing your open draft.
+
+A `.dtheme` export includes the selected assets, font license and preserved imported source, so the recipient can reopen and customize it. Saving stays local and does not restart Discord. Save before choosing a target if you are still designing.
 
 <details>
 <summary><strong>Fonts, artwork and local storage</strong></summary>

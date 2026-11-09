@@ -1,6 +1,14 @@
 # Theme Studio tested / not tested
 
-Local beta.11, 2026-11-07, Windows x64, .NET 10 and Chromium/WebView2. All automated profile operations use temporary profiles and synthetic conversations; the user's Discord was not restarted or modified.
+Local beta.12, 2026-11-09, Windows x64, .NET 10 and Chromium/WebView2. All automated profile operations use temporary profiles and synthetic conversations; the user's Discord was not restarted or modified by those tests.
+
+## New beta.12 evidence
+
+139 Core checks, 83 Windows checks and 71 browser tests cover personal card metadata, optional description persistence, safe malformed-backup handling, saved-theme reuse, independent duplication, small edits, adding targets, review/cancellation and creation without implicit targets. The 80-character copy-name case retains a distinguishing copy label. The memory regression uses 24 actual WebView2 font responses: the old list retained 13,663,448 managed bytes after collection; after removing completed response roots the measured difference was -40 bytes. This measures retained managed buffers, not total browser memory.
+
+Startup no longer invokes automatic Vencord repair. The remaining install/repair path requires a valid reviewed operation and explicit setup consent. Reuse and apply tests use temporary profiles and simulated client operations. Native Home, My themes and multi-target editor captures were inspected.
+
+On 2026-11-09, the local PC's user confirmed that themes survive a PC reboot and Discord no longer crashes on startup. This manual observation is separate from automated simulation and does not establish behavior on other PCs. Clean VM deployment and live installer repair were not rerun for this release.
 
 ## New beta.11 evidence
 

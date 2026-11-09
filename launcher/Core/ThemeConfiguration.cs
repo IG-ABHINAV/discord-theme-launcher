@@ -17,6 +17,7 @@ public sealed record ThemeConfiguration
 {
     public int Schema { get; init; } = 1;
     public string Name { get; init; } = "My server theme";
+    public string Description { get; init; } = "";
     public string Guild { get; init; } = "";
     public string[] AdditionalGuilds { get; init; } = [];
     public string[] DmChannels { get; init; } = [];
@@ -71,6 +72,8 @@ public sealed record ThemeConfiguration
     {
         if (Schema != 1) throw new InvalidDataException("This configuration version is not supported.");
         if (string.IsNullOrWhiteSpace(Name) || Name.Length > 80 || Name.Any(char.IsControl)) throw new InvalidDataException("Use a theme name of 1–80 characters.");
+        if (Description is null || Description.Length > 280 || Description.Any(c => char.IsControl(c) && c is not ('\r' or '\n' or '\t')))
+            throw new InvalidDataException("Use a theme description of at most 280 characters.");
         if (Guild is null || AdditionalGuilds is null || DmChannels is null || AdditionalGuilds.Length > 15 || DmChannels.Length > 16)
             throw new InvalidDataException("Invalid theme targets.");
         if (requireTarget && TargetGuilds.Length == 0 && DmChannels.Length == 0) throw new InvalidDataException("Choose at least one server or DM chat.");

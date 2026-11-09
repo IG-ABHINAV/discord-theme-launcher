@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+## 0.3.0-beta.12 - 2026-11-09
+
+- Make saved designs reachable from Home, label Open in editor explicitly, and offer independent duplication without replacing the open draft. Clarify Save theme, Review & apply and adding targets in all five languages.
+- Disable editable fields and language changes while the host is busy, instead of silently dropping edits.
+- Require reviewed setup consent for Vencord repair; opening the editor no longer downloads an installer or closes Discord automatically.
+- Release completed WebView2 response buffers instead of retaining them until exit. Skip malformed recovery entries and reject them safely before restoration.
+- Remove the unreachable legacy launcher window and unused document-path bookkeeping. Add native end-to-end checks for reuse, small edits, duplication, multiple targets and cancellation.
+- Display the user-chosen name and `by you` on personal Vencord theme cards. Preserve original author credit on imported designs.
+- Add an optional, saved theme description in the Editor and show it on the Vencord card after application. Existing theme files remain compatible.
+
 ## 0.3.0-beta.11 - 2026-11-07
 
 - Refresh the README with an HTML header, badges, product preview, quick start and focused contributor documentation.

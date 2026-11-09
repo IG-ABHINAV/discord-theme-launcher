@@ -1,17 +1,21 @@
-THEME STUDIO / DISCORD THEME LAUNCHER 0.3.0-beta.11 - WINDOWS X64
+THEME STUDIO / DISCORD THEME LAUNCHER 0.3.0-beta.12 - WINDOWS X64
 
 1. Extract the ZIP and run DiscordThemeLauncher.exe without Administrator rights.
-2. Home offers Create a theme, Import a theme, and Choose a template.
-3. Editor contains Server, Style, Artwork and Files beside the preview.
+2. Home offers Create a theme, Use a saved theme, Import a theme, and Choose a template.
+3. Editor contains Servers / DMs, Style, Artwork and Files beside the preview.
    Import .dtheme/.theme.css or a folder. Review compatibility before accepting.
-4. Save profiles locally under Templates > My themes, or export a .dtheme copy.
+4. Save theme keeps profiles under Templates > My themes; export shares a .dtheme copy.
+   Use a saved theme > Open in editor reopens a design for small edits or new targets.
+   Duplicate theme makes an independent saved copy without replacing your draft.
+   Keep existing server IDs and add another on a new line to extend the target list.
    Style saves named three-color palettes; Artwork saves reusable images.
    Add multiple server IDs or optional DM channel/message links. DM styling
    needs a visible message from that chat; missing markers leave it unchanged.
    Target selection is
    optional until you apply. Propose a theme explains the GitHub issue process;
    you attach and submit it yourself. No automatic upload or PR is created.
-5. Choose a target server, click Apply to Discord, review and confirm the restart.
+5. Click Review & apply, check all targets and confirm the restart.
+   Application replaces the active personal design with this complete target list.
    Missing Vencord setup is offered with explicit consent when needed.
 6. Recovery > Restore Discord asks whether to disable launcher themes only or
    all local/online themes and QuickCSS. Files and plugins are preserved. You

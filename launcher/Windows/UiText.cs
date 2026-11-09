@@ -222,6 +222,7 @@ internal static partial class UiText
         ["Paste a server ID (17–20 digits) or an https://discord.com/channels/server/channel link. Invite links do not contain a server ID."] = "Incolla un ID server (17–20 cifre) o un link https://discord.com/channels/server/channel. I link di invito non contengono un ID server.",
         ["This configuration version is not supported."] = "Questa versione della configurazione non è supportata.",
         ["Use a theme name of 1–80 characters."] = "Usa un nome del tema di 1–80 caratteri.",
+        ["Use a theme description of at most 280 characters."] = "Usa una descrizione del tema di massimo 280 caratteri.",
         ["Save the target as a server ID."] = "Salva la destinazione come ID server.",
         ["Unknown preset, palette, font or artwork choice."] = "Preset, tavolozza, font o grafica sconosciuti.",
         ["Colors must use #RRGGBB."] = "I colori devono usare #RRGGBB.",

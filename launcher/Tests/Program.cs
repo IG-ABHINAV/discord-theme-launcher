@@ -117,12 +117,30 @@ if (!OperatingSystem.IsWindows())
     Reject(() => ThemeStore.CheckPath(Path.Combine(linked,"settings","settings.json")), "linked profile refused");
 }
 var config = new ThemeConfiguration { Name = "Synthetic community", Guild = "987654321012345678", Palette = "blurple" };
+// Vencord reads tags from the first documentation comment, not ordinary CSS comments.
+string VencordField(string css, string key)
+{
+    var header = css.Split("/**", 2).ElementAtOrDefault(1)?.Split("*/", 2)[0] ?? "";
+    return System.Text.RegularExpressions.Regex.Match(header, @"(?m)^\s*\*\s*@" + key + @"[\t ]+([^\r\n]*)").Groups[1].Value.Trim();
+}
+var cardConfiguration = System.Text.Json.JsonSerializer.Deserialize<ThemeConfiguration>("""{"name":"Pink Harddisk","guild":"987654321012345678","description":"Pink artwork for Giorgio."}""", Catalog.JsonOptions)!;
+var cardCss = ThemeCompiler.Compile(cardConfiguration);
+Check(VencordField(cardCss, "name") == "Pink Harddisk" && VencordField(cardCss, "author") == "you" && VencordField(cardCss, "description") == "Pink artwork for Giorgio.", "Vencord personal card displays the chosen name, by you and description");
+var cardPath = Path.Combine(fixture, "described.dtheme"); cardConfiguration.Save(cardPath);
+Check(ThemeConfiguration.Load(cardPath).Description == cardConfiguration.Description, "theme descriptions survive portable save and reopen");
+var escapedCard = ThemeCompiler.Compile(cardConfiguration with { Name = "Pink /** */", Description = "First line\r\n@author impostor */ body{color:red} /*" });
+Check(VencordField(escapedCard, "name") == "Pink / ** * /" && VencordField(escapedCard, "author") == "you" && VencordField(escapedCard, "description") == "First line @author impostor * / body{color:red} / *", "card text cannot terminate comments, truncate metadata or inject author tags");
+Reject(() => (cardConfiguration with { Description = new string('x', 281) }).Validate(), "overlong description rejected");
+Reject(() => (cardConfiguration with { Description = null! }).Validate(), "null description rejected");
+Reject(() => (cardConfiguration with { Description = "hidden\0text" }).Validate(), "control characters in descriptions rejected");
+Check(VencordField(ThemeCompiler.Compile(config), "description") == "Personal theme created with Theme Studio.", "an omitted description has a readable Vencord card fallback");
 Check(new ThemeConfiguration().Guild == "" && new ThemeConfiguration().Preset == "fluent", "new themes are neutral and have no implicit target server");
 var cssReview = CssThemeImporter.Review(System.Text.Encoding.UTF8.GetBytes("/** @name Teal glass */\n:root{--accent:#18bfae} body{background:#122026} .chat_f75fb0{border:2px solid var(--accent)}"), "Teal.theme.css");
 Check(cssReview.Supported && cssReview.Theme is not null, "self-contained imported design passes compatibility review");
 var importedCss = CssThemeImporter.Compile(cssReview.Theme!, "987654321012345678");
 Check(importedCss.Contains("--accent:#18bfae") && importedCss.Contains("border:2px solid var(--accent)"), "import compilation retains original design rather than substituting a preset");
 var zenit = CommunityGallery.Create("zenit-gold", config.Guild);
+Check(VencordField(ThemeCompiler.Compile(zenit with { Name = "My Zenit adaptation", Description = "My gold palette." }), "author") == zenit.Imported!.Author && VencordField(ThemeCompiler.Compile(zenit), "name") == zenit.Name, "personal card names preserve original author credit for imported designs");
 Check(CssThemeImporter.Load(Path.Combine(root, "assets/community/zenit-gold/ZenitGold.theme.css")).Sha256 == CssThemeImporter.ZenitHash, "a downloaded .theme.css file follows the same pinned import seam used by the native picker");
 Check(zenit.Imported!.Sha256 == CssThemeImporter.ZenitHash && ThemeCompiler.Compile(zenit).Contains("--zg-gold:#e6c15e"), "pinned Zenit original imports with its author design and offline font");
 var draculaReview = CssThemeImporter.Review(File.ReadAllBytes(Path.Combine(root, "tests/imports/dracula/DraculaBase.theme.css")), "Dracula.theme.css", "https://github.com/dracula/betterdiscord/tree/77e73629086e5b77381f87b255b9f96401c61ced", File.ReadAllText(Path.Combine(root, "tests/imports/dracula/LICENSE")));
@@ -150,6 +168,7 @@ Reject(() => CssThemeImporter.Compile(zenit.Imported! with { Edits = new() { ["-
 Reject(() => CssThemeImporter.Compile(zenit.Imported!, ""), "import application requires an explicit target");
 var legacyConfiguration = Path.Combine(fixture, "legacy-beta7.dtheme");
 File.WriteAllText(legacyConfiguration, """{"schema":1,"name":"Legacy saved theme","guild":"987654321012345678","preset":"primebuild-dev","palette":"primebuild-dev","accent":"#ff782e","surface":"#10131b","font":"primebuild-dev","banner":"primebuild-dev","background":"primebuild-dev"}""");
+Check(ThemeConfiguration.Load(legacyConfiguration).Description == "", "existing schema-one documents reopen without a description migration");
 Check(ThemeConfiguration.Load(legacyConfiguration).Preset == "primebuild-dev" && ThemeCompiler.Compile(ThemeConfiguration.Load(legacyConfiguration)).Contains("#ff782e"), "existing beta.7 schema-one configurations retain their explicit design choices");
 foreach (var design in new[] { zenit, new ThemeConfiguration { Name = "Dracula", Guild = config.Guild, Imported = draculaReview.Theme } })
 {
@@ -304,6 +323,11 @@ File.WriteAllText(Path.Combine(previewDirectory,"zenit-artwork.html"), ThemePrev
 var assetsId = library.SaveTheme(portable with { Name = "Portable artwork" });
 Check(library.LoadTheme(assetsId).CustomBackground!.Sha256 == portable.CustomBackground!.Sha256 && library.LoadTheme(assetsId).CustomFont!.Sha256 == portable.CustomFont!.Sha256, "local theme profiles retain exact embedded artwork and font licenses");
 Reject(() => library.SavePalette(new PaletteProfile("", "Bright", "#aabbff", "#101218", "#ffffff")), "saved palette panels must remain readable");
+var malformedSnapshotId = Guid.NewGuid().ToString("N");
+var malformedSnapshot = Path.Combine(state, "backups", malformedSnapshotId); Directory.CreateDirectory(malformedSnapshot);
+File.WriteAllText(Path.Combine(malformedSnapshot, "snapshot.json"), """{"themes":[null]}""");
+Check(store.RecoveryHistory().All(entry => entry.Id != malformedSnapshotId), "a malformed history item cannot hide other recoverable setups");
+Reject(() => store.RestoreSnapshot(malformedSnapshotId), "malformed history selection is rejected before writing profile files");
 Console.WriteLine($"{checks} checks passed. Fixture: {fixture}");
 // Intentional: leave the temporary test fixture for inspection; never recurse over an unchecked root.
 

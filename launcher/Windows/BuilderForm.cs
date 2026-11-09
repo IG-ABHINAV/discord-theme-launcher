@@ -2,9 +2,9 @@ using System.Text.Json;
 
 namespace CommunityThemes;
 
-internal sealed record StudioValues(string Name, string Guild, string Preset, string Palette, string Accent, string Surface, string Font, string Banner, string Background, string? Panel = null, string Dms = "")
+internal sealed record StudioValues(string Name, string Guild, string Preset, string Palette, string Accent, string Surface, string Font, string Banner, string Background, string? Panel = null, string Dms = "", string Description = "")
 {
-    public static StudioValues From(ThemeConfiguration c) => new(c.Name, string.Join("\n", c.TargetGuilds), c.Preset, c.Palette, c.Accent, c.Surface, c.Font, c.Banner, c.Background, c.Panel ?? c.Surface, string.Join("\n", c.DmChannels));
+    public static StudioValues From(ThemeConfiguration c) => new(c.Name, string.Join("\n", c.TargetGuilds), c.Preset, c.Palette, c.Accent, c.Surface, c.Font, c.Banner, c.Background, c.Panel ?? c.Surface, string.Join("\n", c.DmChannels), c.Description);
 }
 internal sealed record StudioLocation(string Page = "home", string EditorTab = "server", string TemplatesTab = "standard", string PreviewContext = "target");
 internal sealed record StudioSession(ThemeConfiguration Configuration, string? LocalThemeId, string PaletteId, bool Saved, StudioLocation Location);
@@ -36,7 +36,6 @@ internal sealed class BuilderForm : Form
     private string[]? importPaths;
     private object[]? importCandidates;
     internal int SimulatedOperations { get; private set; }
-    private string? documentPath;
     private string notice = "Design here. Preview here. Apply when you're ready.", validation = "";
     private string DraftPath => Path.Combine(documentRoot, "last-configuration.dtheme");
     private string SessionPath => Path.Combine(documentRoot, "studio-session.json");
@@ -108,8 +107,7 @@ internal sealed class BuilderForm : Form
         Shown += async (_, _) =>
         {
             LauncherStyle.DarkCaption(this);
-            try { await surface.InitializeAsync(); }
-            finally { if (!dryRun) await RepairUnbootableAsync(); }
+            await surface.InitializeAsync();
         };
         RenderPreview();
     }
@@ -249,7 +247,7 @@ internal sealed class BuilderForm : Form
                 case "loadLocalTheme":
                     string themeId = message.GetProperty("value").GetString() ?? "";
                     var loaded = library.LoadTheme(themeId); AssetImport.ValidateImages(loaded);
-                    configuration = loaded; localThemeId = themeId; paletteId = ""; documentPath = null; saved = true; MarkClean(); confirmation = null; revision++; RenderPreview(); return;
+                    configuration = loaded; localThemeId = themeId; paletteId = ""; saved = true; MarkClean(); confirmation = null; revision++; RenderPreview(); return;
                 case "renameLocalTheme":
                     string renameId = message.GetProperty("value").GetString() ?? "";
                     string newName = message.GetProperty("name").GetString() ?? "";
@@ -259,6 +257,10 @@ internal sealed class BuilderForm : Form
                         configuration = configuration with { Name = newName }; cleanConfiguration = cleanConfiguration with { Name = newName };
                         cleanKey = DocumentKey(cleanConfiguration); Changed();
                     }
+                    Publish(); return;
+                case "duplicateLocalTheme":
+                    var sourceTheme = library.LoadTheme(message.GetProperty("value").GetString() ?? "");
+                    library.SaveTheme(sourceTheme with { Name = message.GetProperty("name").GetString() ?? "" });
                     Publish(); return;
                 case "savePalette":
                     paletteId = library.SavePalette(new PaletteProfile(paletteId, message.GetProperty("name").GetString() ?? "", configuration.Accent, configuration.Surface, configuration.Panel ?? configuration.Surface)); Publish(); return;
@@ -292,10 +294,10 @@ internal sealed class BuilderForm : Form
                     Publish(); return;
                 case "edit":
                     var edits = message.GetProperty("values").Deserialize<StudioValues>(Catalog.JsonOptions) ?? throw new InvalidDataException("Invalid editor values.");
-                    var strings = new[] { edits.Name, edits.Guild, edits.Preset, edits.Palette, edits.Accent, edits.Surface, edits.Font, edits.Banner, edits.Background, edits.Panel ?? edits.Surface, edits.Dms };
+                    var strings = new[] { edits.Name, edits.Guild, edits.Preset, edits.Palette, edits.Accent, edits.Surface, edits.Font, edits.Banner, edits.Background, edits.Panel ?? edits.Surface, edits.Dms, edits.Description };
                     if (strings.Any(s => s is null || s.Length > 2048)) throw new InvalidDataException("Editor values exceed the supported limits.");
                     if (configuration.Palette != edits.Palette) paletteId = "";
-                    configuration = configuration with { Name = edits.Name, Guild = edits.Guild, AdditionalGuilds = [], DmChannels = System.Text.RegularExpressions.Regex.Split(edits.Dms.Trim(), @"[\s,;]+").Where(v => v.Length > 0).ToArray(), Panel = edits.Panel ?? edits.Surface, Preset = edits.Preset, Palette = edits.Palette, Accent = edits.Accent, Surface = edits.Surface, Font = edits.Font, Banner = edits.Banner, Background = edits.Background };
+                    configuration = configuration with { Name = edits.Name, Description = edits.Description, Guild = edits.Guild, AdditionalGuilds = [], DmChannels = System.Text.RegularExpressions.Regex.Split(edits.Dms.Trim(), @"[\s,;]+").Where(v => v.Length > 0).ToArray(), Panel = edits.Panel ?? edits.Surface, Preset = edits.Preset, Palette = edits.Palette, Accent = edits.Accent, Surface = edits.Surface, Font = edits.Font, Banner = edits.Banner, Background = edits.Background };
                     Changed(); return;
                 case "preset":
                     string id = message.GetProperty("value").GetString() ?? "";
@@ -303,13 +305,13 @@ internal sealed class BuilderForm : Form
                     configuration = CommunityGallery.Create(id, configuration.Guild) with { AdditionalGuilds = configuration.AdditionalGuilds, DmChannels = configuration.DmChannels }; Changed(); return;
                 case "community":
                     configuration = CommunityGallery.Create(message.GetProperty("value").GetString() ?? "", configuration.Guild) with { AdditionalGuilds = configuration.AdditionalGuilds, DmChannels = configuration.DmChannels };
-                    documentPath = null; localThemeId = null; paletteId = ""; saved = false; Changed(); return;
+                    localThemeId = null; paletteId = ""; saved = false; Changed(); return;
                 case "importCss": ReviewCss(); return;
                 case "cancelImport": importReview = null; Publish(); return;
                 case "acceptImport":
                     if (importReview is not { Supported: true, Theme: { } theme }) return;
                     configuration = new ThemeConfiguration { Name = theme.Name.Length > 80 ? theme.Name[..80] : theme.Name, Guild = configuration.Guild, AdditionalGuilds = configuration.AdditionalGuilds, DmChannels = configuration.DmChannels, Imported = theme };
-                    importReview = null; documentPath = null; localThemeId = null; paletteId = ""; saved = false; Changed(); return;
+                    importReview = null; localThemeId = null; paletteId = ""; saved = false; Changed(); return;
                 case "importVariable":
                     if (configuration.Imported is null) return;
                     string key = message.GetProperty("name").GetString() ?? "", edit = message.GetProperty("value").GetString() ?? "";
@@ -337,7 +339,7 @@ internal sealed class BuilderForm : Form
                     if (!OperationConfirmation.TryTake(ref confirmation, confirmationId, revision, out var confirmed)) { Publish(); return; }
                     await OperateAsync(confirmed!, allowSetup); return;
                 case "new":
-                    confirmation = null; configuration = new ThemeConfiguration { Name = UiText.Text("My server theme"), Guild = "" }; documentPath = null; localThemeId = null; paletteId = ""; saved = false; MarkClean(); revision++; RenderPreview(); return;
+                    confirmation = null; configuration = new ThemeConfiguration { Name = UiText.Text("My server theme"), Guild = "" }; localThemeId = null; paletteId = ""; saved = false; MarkClean(); revision++; RenderPreview(); return;
                 case "open": OpenDocument(); return;
                 case "save": SaveDocument(false); return;
                 case "saveLocalCopy":
@@ -380,7 +382,7 @@ internal sealed class BuilderForm : Form
         ThemeStore.CheckPath(path);
         if (path.EndsWith(".theme.css", StringComparison.OrdinalIgnoreCase)) { importReview = CssThemeImporter.ReviewFile(path); Publish(); return; }
         var value = ThemeConfiguration.Load(path); AssetImport.ValidateImages(value);
-        confirmation = null; configuration = value; documentPath = path; localThemeId = null; paletteId = ""; saved = true; MarkClean(); revision++;
+        confirmation = null; configuration = value; localThemeId = null; paletteId = ""; saved = true; MarkClean(); revision++;
         notice = "Configuration opened. Review the target server before applying."; RenderPreview();
     }
     private void ReviewCss() => OpenDocument();
@@ -522,33 +524,6 @@ internal sealed class BuilderForm : Form
         }
         confirmation = OperationConfirmation.Create(operation, revision, value, setup, repair, problem, recoveryId);
         Publish();
-    }
-
-    private async Task RepairUnbootableAsync()
-    {
-        if (busy || !client.Found || !client.Unbootable) return;
-        busy = true;
-        notice = "Discord cannot start because Vencord's patcher.js is missing. Downloading the official installer…";
-        Publish();
-        try
-        {
-            client.ValidateEnvironment();
-            using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(90) };
-            http.DefaultRequestHeaders.UserAgent.ParseAdd("PrimeBuild-DiscordThemeLauncher/" + ThemeCompiler.BundledCatalog.Version);
-            var installer = await ReleaseDownload.FetchAsync(http, ReleaseDownload.InstallerUri, ReleaseDownload.InstallerSha256, 32 * 1024 * 1024);
-            notice = "Closing the broken Discord window and repairing official Vencord…"; Publish();
-            await client.StopAsync();
-            await client.InstallVencordAsync(installer, true);
-            notice = "Opening Discord…"; Publish();
-            await client.OpenAsync();
-            notice = "Vencord repaired. Discord startup confirmed.";
-        }
-        catch (Exception error)
-        {
-            notice = error is InvalidOperationException or InvalidDataException ? error.Message : error is HttpRequestException ? "The download could not finish. Check your connection and the release page, then retry." : "Vencord repair could not finish. Check the connection and the manual recovery guide.";
-            LauncherStyle.ShowMessage(this, UiText.Text(notice), UiText.Text("Vencord repair"));
-        }
-        finally { busy = false; Publish(); }
     }
 
     private async Task OperateAsync(OperationConfirmation confirmed, bool allowSetup)

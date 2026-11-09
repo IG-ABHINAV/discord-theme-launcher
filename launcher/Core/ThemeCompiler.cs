@@ -56,7 +56,11 @@ public static class ThemeCompiler
     public static string Compile(ThemeConfiguration config)
     {
         config.Validate();
-        string designLabel = "/* Theme Studio design: " + config.Name.Replace("*/", "* /") + " */\n";
+        string Metadata(string value) => Regex.Replace(value.Trim(), @"\s+", " ").Replace("/*", "/ *").Replace("*/", "* /");
+        string designLabel = "/* Theme Studio design: " + Metadata(config.Name) + " */\n";
+        string author = config.Imported is { } imported ? (string.IsNullOrWhiteSpace(imported.Author) ? "Unknown Author" : imported.Author) : "you";
+        string description = string.IsNullOrWhiteSpace(config.Description) ? "Personal theme created with Theme Studio." : config.Description;
+        string header = "/**\n * @name " + Metadata(config.Name) + "\n * @author " + Metadata(author) + "\n * @description " + Metadata(description) + "\n * @version " + BundledCatalog.Version + "\n */\n";
         string scopeGuild = config.TargetGuilds.FirstOrDefault() ?? "987654321012345678";
         if (config.Imported is not null)
         {
@@ -68,7 +72,7 @@ public static class ThemeCompiler
             if (config.Background != "none") overrides += ":scope :is(.chatContent_f75fb0,.chatContent_z_gUBg){background-image:linear-gradient(#101013ed,#101013ed)," + Art(config.Background, config.CustomBackground, "chat-art") + "!important;background-size:cover!important;background-position:center!important;}";
             if (config.Banner != "none" && config.DmChannels.Length > 0) overrides += ":scope:has([data-list-item-id=\"guildsnav___home\"][aria-selected=\"true\"]) :is(.container__9293f,.container_ybUK7Z){background:linear-gradient(#10101388,#10101388)," + Art(config.Banner, config.CustomBanner, "hardware-art") + " center/cover no-repeat!important;min-height:112px;}";
             if (overrides.Length > 0) importedCss += ServerScope(scopeGuild) + "{" + overrides + "}";
-            return designLabel + importedCss.Replace(ServerScope(scopeGuild), TargetScope(config));
+            return designLabel + header + importedCss.Replace(ServerScope(scopeGuild), TargetScope(config));
         }
         var preset = BundledCatalog.Themes.Single(t => t.Id == (config.Preset == "fluent" ? "primebuild" : config.Preset));
         string css = PresetCss(preset.Id);
@@ -132,7 +136,7 @@ public static class ThemeCompiler
             css = Regex.Replace(css, @"font-size:\s*(?:22|18|16)px;", "font-size: inherit;");
         }
         css = css.Replace(ServerScope(scopeGuild), TargetScope(config));
-        return designLabel + "/* @name Personal Server Theme\n * @author PrimeBuild\n * @version " + BundledCatalog.Version + "\n * Local client styling for server " + config.Guild + ". Generated from a validated .dtheme configuration.\n */\n" + face + css;
+        return designLabel + header + face + css;
     }
 
     private static string Art(string choice, ThemeAsset? asset, string key) => choice switch

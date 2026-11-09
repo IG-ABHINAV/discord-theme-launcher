@@ -144,6 +144,7 @@ internal static partial class UiText
         ["Paste a server ID (17–20 digits) or an https://discord.com/channels/server/channel link. Invite links do not contain a server ID."] = "Вставьте ID сервера (17–20 цифр) или ссылку https://discord.com/channels/server/channel. Ссылки-приглашения не содержат ID сервера.",
         ["This configuration version is not supported."] = "Эта версия конфигурации не поддерживается.",
         ["Use a theme name of 1–80 characters."] = "Используйте название темы длиной 1–80 символов.",
+        ["Use a theme description of at most 280 characters."] = "Используйте описание темы длиной не более 280 символов.",
         ["Save the target as a server ID."] = "Сохраните цель как ID сервера.",
         ["Unknown preset, palette, font or artwork choice."] = "Неизвестный пресет, палитра, шрифт или графика.",
         ["Colors must use #RRGGBB."] = "Цвета должны быть в формате #RRGGBB.",

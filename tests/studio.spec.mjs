@@ -30,6 +30,8 @@ async function studio(page,brokenResources=false){
     window.chrome={webview:{addEventListener:(_,callback)=>listener=callback,postMessage:message=>{
       window.testMessages.push(message);
       if(message.action==='edit')state.values=message.values;
+      if(message.action==='loadLocalTheme'){const theme=state.localThemes.find(t=>t.id===message.value);if(theme){state.values={...state.values,...theme.values,name:theme.name};state.localThemeId=theme.id;state.saved=true;state.dirty=false;}}
+      if(message.action==='duplicateLocalTheme')state.localThemes.push({id:'duplicate'+state.localThemes.length,name:message.name});
       if(message.action==='save'){state.localThemes.push({id:'local'+state.localThemes.length,name:state.values.name});state.localThemeId='local'+(state.localThemes.length-1);state.saved=true;state.dirty=false;}
       if(message.action==='savePalette'){state.paletteId=state.paletteId||'palette'+state.localPalettes.length;const value={id:state.paletteId,name:message.name,accent:state.values.accent,surface:state.values.surface,panel:state.values.panel};state.localPalettes=state.localPalettes.filter(p=>p.id!==value.id).concat(value)}
       if(message.action==='loadPalette'){const palette=state.localPalettes.find(p=>p.id===message.value);Object.assign(state.values,{palette:'custom',accent:palette.accent,surface:palette.surface,panel:palette.panel});state.paletteId=palette.id}
@@ -61,15 +63,87 @@ async function studio(page,brokenResources=false){
   return requests;
 }
 
+test('theme card descriptions are labeled, flushed before save and restored from host state',async({page})=>{
+  await studio(page);
+  const description=page.getByLabel('Description (optional)',{exact:true});
+  await expect(description).toHaveAttribute('maxlength','280');
+  await expect(description).toHaveAttribute('aria-describedby','theme-description-hint');
+  await page.getByLabel('Theme name',{exact:true}).fill('Pink Harddisk');
+  await description.fill('Pink artwork for Giorgio.\nMade by me.');
+  await page.locator('.file-actions [data-action=save]').click();
+  const edits=await page.evaluate(()=>window.testMessages.filter(m=>m.action==='edit').at(-1).values);
+  expect(edits.name).toBe('Pink Harddisk');
+  expect(edits.description).toBe('Pink artwork for Giorgio.\nMade by me.');
+  await page.evaluate(()=>window.patchTestState({values:{...readEdits(),description:'Reopened description'}}));
+  await expect(description).toHaveValue('Reopened description');
+});
+
+test('Home exposes saved themes and opens their existing server list without creating a new design',async({page})=>{
+  await studio(page);
+  await page.evaluate(()=>window.patchTestState({localThemes:[{id:'existing',name:'Work theme',values:{guild:'987654321012345678\n876543210123456789'}}]}));
+  await page.locator('[data-page=home]').click();
+  await page.getByRole('button',{name:'Use a saved theme',exact:true}).click();
+  await expect(page.locator('#template-tab-local')).toHaveAttribute('aria-selected','true');
+  await page.getByRole('button',{name:'Edit Work theme',exact:true}).click();
+  await expect(page.getByLabel('Theme name',{exact:true})).toHaveValue('Work theme');
+  await expect(page.locator('#guild')).toHaveValue('987654321012345678\n876543210123456789');
+  await expect(page.locator('#targets-help')).toContainText('Keep existing IDs');
+  await expect(page.locator('#save-apply-hint')).toContainText('Save keeps your theme');
+  expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='new'||m.action==='confirmOperation'))).toBe(false);
+});
+
+test('a saved theme can be duplicated without replacing the open draft or changing Discord',async({page})=>{
+  await studio(page);
+  await page.evaluate(()=>window.patchTestState({dirty:true,localThemes:[{id:'original',name:'Original theme'}]}));
+  await page.locator('[data-page=home]').click();
+  await page.locator('#home-saved').click();
+  await page.getByRole('button',{name:'Duplicate theme… · Original theme',exact:true}).click();
+  await page.locator('#name-dialog-input').fill('Separate copy');
+  await page.locator('#name-dialog-save').click();
+  await expect(page.locator('#local-themes')).toContainText('Separate copy');
+  expect(await page.evaluate(()=>readEdits().name)).toBe('Your community');
+  expect(await page.evaluate(()=>window.testMessages.find(m=>m.action==='duplicateLocalTheme'))).toEqual({action:'duplicateLocalTheme',value:'original',name:'Separate copy'});
+  expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='confirmOperation'))).toBe(false);
+});
+
+test('saved theme names remain readable at the minimum desktop size and actions work by keyboard',async({page})=>{
+  await page.setViewportSize({width:1020,height:700});
+  await studio(page);
+  const name='Long'.repeat(20);
+  await page.evaluate(name=>window.patchTestState({localThemes:[{id:'long',name}]}),name);
+  await page.locator('[data-page=home]').click();
+  await page.locator('#home-saved').focus();await page.keyboard.press('Enter');
+  const edit=page.getByRole('button',{name:'Edit '+name,exact:true});
+  await edit.focus();
+  expect(await page.locator('.editor-scroll').evaluate(el=>el.scrollWidth<=el.clientWidth+1)).toBe(true);
+  await page.keyboard.press('Enter');
+  await expect(page.getByLabel('Theme name',{exact:true})).toHaveValue(name);
+  await page.locator('[data-page=home]').click();await page.locator('#home-saved').click();
+  await page.locator('[data-duplicate-theme]').click();
+  await expect(page.locator('#name-dialog-input')).toHaveValue(name.slice(0,75)+' copy');
+});
+
+test('busy operations disable name and language edits instead of silently dropping them',async({page})=>{
+  await studio(page);
+  await page.evaluate(()=>window.patchTestState({busy:true}));
+  await expect(page.getByLabel('Theme name',{exact:true})).toBeDisabled();
+  await expect(page.locator('#language')).toBeDisabled();
+  await expect(page.locator('#guild')).toBeDisabled();
+  await page.evaluate(()=>window.patchTestState({busy:false}));
+  await expect(page.getByLabel('Theme name',{exact:true})).toBeEnabled();
+});
+
 test('editing starts in preview and Apply opens a confirmation without applying',async({page})=>{
   await studio(page);
   await expect(page.locator('#mode-badge')).toHaveText('Preview');
   await expect(page.locator('#restart-ready')).toHaveCount(0);
   await expect(page.locator('#apply')).toBeEnabled();
-  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await page.getByRole('button',{name:'Review & apply',exact:true}).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.locator('#confirmation-theme')).toHaveText('Your community');
   await expect(page.locator('#confirmation-guild')).toHaveText('987654321012345678');
+  await expect(page.locator('#confirmation-description')).toContainText('all listed servers and DM chats');
+  await expect(page.locator('#confirmation-description')).toContainText('replaces the active personal design and disables older launcher presets');
   await expect(page.locator('#confirmation-cancel')).toBeFocused();
   expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='confirmOperation'))).toBe(false);
   await page.screenshot({path:'.local/studio-confirmation-preview.png'});
@@ -82,10 +156,10 @@ test('an undecodable embedded image blocks application and produces a resource f
 
 test('Back to preview and Escape cancel without sending application confirmation',async({page})=>{
   await studio(page);
-  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await page.getByRole('button',{name:'Review & apply',exact:true}).click();
   await page.getByRole('button',{name:'Back to preview',exact:true}).click();
   await expect(page.getByRole('dialog')).toBeHidden();
-  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await page.getByRole('button',{name:'Review & apply',exact:true}).click();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toBeHidden();
   await expect(page.getByLabel('Theme name',{exact:true})).toHaveValue('Your community');
@@ -94,7 +168,7 @@ test('Back to preview and Escape cancel without sending application confirmation
 
 test('Continue and apply confirms the reviewed operation once',async({page})=>{
   await studio(page);
-  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await page.getByRole('button',{name:'Review & apply',exact:true}).click();
   await page.getByRole('button',{name:'Continue & apply',exact:true}).click();
   await expect(page.getByRole('dialog')).toBeHidden();
   const confirmations=await page.evaluate(()=>window.testMessages.filter(m=>m.action==='confirmOperation'));
@@ -103,7 +177,7 @@ test('Continue and apply confirms the reviewed operation once',async({page})=>{
 
 test('first-time Vencord setup is offered inside the confirmation and requires consent',async({page})=>{
   await studio(page);await page.evaluate(()=>window.testSetupRequired=true);
-  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await page.getByRole('button',{name:'Review & apply',exact:true}).click();
   await expect(page.locator('#confirmation-install')).not.toBeChecked();
   await expect(page.getByRole('button',{name:'Continue & apply',exact:true})).toBeDisabled();
   await page.getByLabel('Install official Vencord for stable Discord',{exact:true}).check();
@@ -113,7 +187,7 @@ test('first-time Vencord setup is offered inside the confirmation and requires c
 
 test('unsupported installation is explained inside confirmation and cannot continue',async({page})=>{
   await studio(page);await page.evaluate(()=>window.testConfirmationProblem='Install the standard Discord desktop client first.');
-  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await page.getByRole('button',{name:'Review & apply',exact:true}).click();
   await expect(page.locator('#confirmation-problem')).toContainText('standard Discord');
   await expect(page.getByRole('button',{name:'Continue & apply',exact:true})).toBeDisabled();
   await page.getByRole('button',{name:'Back to preview',exact:true}).click();
@@ -178,11 +252,11 @@ for(const viewport of[{width:1040,height:720},{width:1365,height:900},{width:192
 test('editing and save actions remain previews until the explicit application confirmation',async({page})=>{
   await studio(page);
   await page.getByLabel('Theme name',{exact:true}).fill('My custom name');
-  await page.getByRole('button',{name:'Save',exact:true}).click();
+  await page.getByRole('button',{name:'Save theme',exact:true}).click();
   const actions=await page.evaluate(()=>window.testMessages.map(message=>message.action));
   expect(actions.lastIndexOf('edit')).toBeLessThan(actions.lastIndexOf('save'));
   expect(actions).not.toContain('confirmOperation');
-  await page.getByRole('button',{name:'Apply to Discord',exact:true}).click();
+  await page.getByRole('button',{name:'Review & apply',exact:true}).click();
   await expect(page.locator('#confirmation-theme')).toHaveText('My custom name');
   await page.getByRole('button',{name:'Back to preview',exact:true}).click();
 });
@@ -198,16 +272,16 @@ test('interface defaults to English and can switch to Italian, Spanish and Russi
   expect(catalog).toBe(true);
   await page.locator('#language').selectOption('it');
   await expect(page.locator('html')).toHaveAttribute('lang','it');
-  await expect(page.getByRole('button',{name:'Applica su Discord',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Rivedi e applica',exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Il tuo server. Il tuo stile.'})).toBeVisible();
   await page.locator('#language').selectOption('es');
-  await expect(page.getByRole('button',{name:'Aplicar en Discord',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Revisar y aplicar',exact:true})).toBeVisible();
   await page.locator('#language').selectOption('ru');
   await expect(page.locator('html')).toHaveAttribute('lang','ru');
-  await expect(page.getByRole('button',{name:'Применить в Discord',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Проверить и применить',exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Ваш сервер. Ваш стиль.'})).toBeVisible();
   await page.locator('#language').selectOption('en');
-  await expect(page.getByRole('button',{name:'Apply to Discord',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Review & apply',exact:true})).toBeVisible();
   await expect(page.getByLabel('Server IDs or channel links')).toBeVisible();
 });
 
@@ -264,7 +338,7 @@ test('unsupported CSS report blocks acceptance before any configuration change',
 for(const viewport of [{width:1040,height:720},{width:1365,height:900}])test(`German copy is complete and long labels stay usable at ${viewport.width}`,async({page})=>{
   await page.setViewportSize(viewport);await studio(page);await page.locator('#language').selectOption('de');
   expect(await page.evaluate(()=>Object.keys(I18N.en).every(key=>typeof I18N.de[key]==='string'&&I18N.de[key].length>0)&&Object.keys(I18N.en).length===Object.keys(I18N.de).length)).toBe(true);
-  await expect(page.getByRole('button',{name:'Auf Discord anwenden',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Prüfen und anwenden',exact:true})).toBeVisible();
   await page.locator('[data-page=recovery]').click();
   await expect(page.locator('#restore')).toHaveText('Discord zurücksetzen');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
