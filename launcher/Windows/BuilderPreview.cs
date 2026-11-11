@@ -9,7 +9,6 @@ internal sealed class BuilderPreview : Panel
     private readonly WebView2 web = new() { Dock = DockStyle.Fill, DefaultBackgroundColor = LauncherStyle.Base };
     private readonly Label fallback = new() { Text = UiText.Text("Preparing local preview…"), Dock = DockStyle.Fill, ForeColor = LauncherStyle.Muted, Padding = new Padding(24) };
     private string html = "";
-    private readonly List<Stream> responses = [];
     private string currentUri = "https://theme-preview.invalid/";
     private ulong navigation;
     private bool requireFont;
@@ -41,7 +40,7 @@ internal sealed class BuilderPreview : Panel
             core.WebResourceRequested += (_, e) =>
             {
                 bool local = e.Request.Uri == currentUri;
-                var stream = new MemoryStream(Encoding.UTF8.GetBytes(local ? html : "")); responses.Add(stream);
+                var stream = new MemoryStream(Encoding.UTF8.GetBytes(local ? html : ""), writable: false);
                 e.Response = environment.CreateWebResourceResponse(stream, local ? 200 : 403, local ? "OK" : "Blocked", "Content-Type: text/html; charset=utf-8\r\nCache-Control: no-store");
             };
             core.NavigationCompleted += async (_, e) =>
@@ -57,7 +56,6 @@ internal sealed class BuilderPreview : Panel
                 catch (Exception error) when (error is InvalidOperationException or System.Runtime.InteropServices.COMException) { fontLoaded = false; }
                 if (completed != navigation || IsDisposed) return;
                 Ready = e.IsSuccess && fontLoaded;
-                foreach (var response in responses) response.Dispose(); responses.Clear();
                 fallback.Visible = !Ready;
                 if (!Ready) fallback.Text = UiText.Text("Preview or display font could not load. Choose a supported font and rebuild the preview before applying.");
                 PreviewReady?.Invoke(this, EventArgs.Empty);
@@ -79,7 +77,7 @@ internal sealed class BuilderPreview : Panel
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing) { web.Dispose(); foreach (var response in responses) response.Dispose(); responses.Clear(); }
+        if (disposing) web.Dispose();
         base.Dispose(disposing);
     }
 }

@@ -1,4 +1,5 @@
 using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 
 namespace CommunityThemes;
 
@@ -15,8 +16,17 @@ internal static class AssetImport
         if (image.RawFormat.Guid != ImageFormat.Png.Guid && image.RawFormat.Guid != ImageFormat.Jpeg.Guid) throw new InvalidDataException("The file is not a PNG or JPEG image.");
         CheckDimensions(image);
         // Flatten to a new static PNG, dropping metadata, animation and original container content.
-        using var bitmap = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppArgb);
-        using (var graphics = Graphics.FromImage(bitmap)) graphics.DrawImage(image, 0, 0, image.Width, image.Height);
+        // Bound decoded memory in Discord as well as compressed file size; never upscale.
+        double scale = Math.Min(1, Math.Min(1920d / Math.Max(image.Width, image.Height), Math.Sqrt(2_073_600d / ((long)image.Width * image.Height))));
+        int width = Math.Max(1, (int)(image.Width * scale)), height = Math.Max(1, (int)(image.Height * scale));
+        using var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+        using (var graphics = Graphics.FromImage(bitmap))
+        {
+            graphics.CompositingMode = CompositingMode.SourceCopy;
+            graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            graphics.DrawImage(image, 0, 0, width, height);
+        }
         using var output = new MemoryStream(); bitmap.Save(output, ImageFormat.Png);
         var asset = ThemeAsset.Create(Path.GetFileNameWithoutExtension(path) + ".png", "image/png", output.ToArray());
         ThemeConfiguration.ValidateAsset(asset, false); return asset;

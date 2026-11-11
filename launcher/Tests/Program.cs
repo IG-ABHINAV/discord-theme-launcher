@@ -209,6 +209,14 @@ var portable = config with { Font = "custom", CustomFont = customFont, Banner = 
 var package = Path.Combine(fixture, "portable.dtheme"); portable.Save(package); var reopened = ThemeConfiguration.Load(package);
 Check(reopened.CustomFont!.Data.SequenceEqual(customFont.Data) && reopened.CustomBanner!.Data.SequenceEqual(png.Data) && reopened.CustomFont.License == customFont.License, "configuration round trip includes exact assets and license");
 Check(ThemeCompiler.Compile(portable) == ThemeCompiler.Compile(reopened), "reopened configuration generates identical CSS");
+var exposedCatalog = ThemeCompiler.BundledCatalog;
+exposedCatalog.Themes[0] = exposedCatalog.Themes[0] with { Guild = "111111111111111111" };
+Check(ThemeCompiler.BundledCatalog.Themes[0].Guild == catalog.Themes[0].Guild, "callers cannot mutate the cached bundled catalog");
+Reject(() => ThemeCompiler.PresetCss("../unknown"), "cached presets still reject unknown names");
+var originalData = png.Data.ToArray();
+png.Data[0] ^= 1;
+Reject(() => ThemeCompiler.Compile(portable), "cached presets do not bypass validation of mutable imported assets");
+originalData.CopyTo(png.Data, 0);
 Reject(() => (portable with { CustomBanner = png with { Sha256 = new string('0', 64) } }).Validate(), "tampered shared image rejected");
 Reject(() => (portable with { CustomFont = customFont with { License = "" } }).Validate(), "unlicensed custom font rejected");
 Reject(() => (portable with { CustomBanner = ThemeAsset.Create("active.svg", "image/svg+xml", System.Text.Encoding.UTF8.GetBytes("<svg onload='alert(1)'></svg>")) }).Validate(), "active SVG import rejected");

@@ -1,3 +1,13 @@
+# Validation — 0.3.0-beta.13
+
+Date: **2026-11-11**. Performance changes are based on published beta.12, preserving the newer editor, library, import and multi-target behavior. Local checks pass: **142 Core, 72 browser and 90 native Windows checks**. Preset/catalog/checksum and JavaScript checks pass. The compiler benchmark measures 86% fewer allocations for the explicit preset case and 63% fewer for two custom payloads. Square/portrait/landscape imports stay within the pixel cap, preserve alpha/aspect and do not upscale.
+
+The earlier main-Studio buffer-retention fix was already in beta.12; its native regression remains. This release also removes the legacy preview response list. [Performance audit](PERFORMANCE-AUDIT.md) records methodology, output equivalence, live-client observations and limits. The live restart measurements changed views and triggered upstream Vencord runtime changes, so their on/off difference is not a controlled performance result. Original Vencord settings, theme bytes and QuickCSS were preserved/restored.
+
+The release remains unsigned. Clean-VM first setup, long calls/streams, gaming frame times and every hardware/driver combination are not covered. No Call of Duty crash fix is claimed by this launcher release.
+
+## Historical validation
+
 # Validation - 0.3.0-beta.7 (local build)
 
 Date: **2026-11-07**. Reproduced missing themes on stable Discord 1.0.9267 (Electron 44.10.0 / Chromium 152): Vencord was loaded and all three CSS files were enabled, but Discord had replaced the hashed CSS classes. Added exact old/current aliases, retaining the structural and exact-server scope rather than broad substring selectors. Three current-layout preset regressions failed before the fix and passed afterward; custom personal-theme styling is covered too.

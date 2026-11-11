@@ -55,6 +55,25 @@ internal static class Program
                 using (var bitmap = new Bitmap(120, 80)) { using var graphics = Graphics.FromImage(bitmap); graphics.Clear(Color.White); bitmap.Save(jpg, ImageFormat.Jpeg); }
                 var imported = AssetImport.Image(jpg);
                 Check(imported.MediaType == "image/png" && imported.Name == "original.png", "JPEG import normalizes to a static PNG");
+                using (var importedContent = new MemoryStream(imported.Data))
+                using (var decoded = System.Drawing.Image.FromStream(importedContent))
+                    Check(decoded.Width == 120 && decoded.Height == 80, "small image imports are never upscaled");
+                foreach (var size in new[] { new Size(4000, 4000), new Size(4000, 2000), new Size(2000, 4000) })
+                {
+                    var largePath = Path.Combine(fixture, "large-valid.png");
+                    using (var bitmap = new Bitmap(size.Width, size.Height))
+                    {
+                        using var graphics = Graphics.FromImage(bitmap); graphics.Clear(Color.FromArgb(128, 100, 150, 200));
+                        bitmap.Save(largePath, ImageFormat.Png);
+                    }
+                    var reduced = AssetImport.Image(largePath);
+                    using var content = new MemoryStream(reduced.Data);
+                    using var decoded = new Bitmap(content);
+                    Check(Math.Max(decoded.Width, decoded.Height) <= 1920 && (long)decoded.Width * decoded.Height <= 2_073_600,
+                        "import caps decoded image memory for " + size);
+                    Check(Math.Abs((double)decoded.Width / decoded.Height - (double)size.Width / size.Height) < .002 && decoded.GetPixel(decoded.Width / 2, decoded.Height / 2).A == 128,
+                        "downscaling retains aspect ratio and transparency for " + size);
+                }
                 var config = new ThemeConfiguration { Background = "custom", CustomBackground = imported, Guild = "987654321012345678", Font = "fantafort" };
                 AssetImport.ValidateImages(config); Check(true, "normalized image can reopen from a shared package");
                 var invalid = Path.Combine(fixture, "active.png"); File.WriteAllText(invalid, "<svg onload='alert(1)'></svg>");

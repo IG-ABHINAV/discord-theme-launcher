@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.3.0-beta.13 - 2026-11-11
+
+- Cache the verified bundled presets and parsed catalog. Keep artwork payloads out of repeated palette, typography and target rewrites to reduce compilation allocations.
+- Downscale new image imports to at most 1920 px per side and 2,073,600 pixels, preserving proportions and transparency. Existing shared assets remain byte-preserving.
+- Release legacy preview response buffers without waiting for a later navigation. Keep the existing completed-resource retention regression from beta.12.
+- Remove the invisible photo decoration box below the existing chat-width threshold. Preserve exact server and DM targeting, imported-theme compatibility and saved libraries.
+- Document measured compiler allocation changes and their limits; no universal Discord RAM reduction or game-crash fix is claimed.
+
 ## 0.3.0-beta.12 - 2026-11-09
 
 - Make saved designs reachable from Home, label Open in editor explicitly, and offer independent duplication without replacing the open draft. Clarify Save theme, Review & apply and adding targets in all five languages.

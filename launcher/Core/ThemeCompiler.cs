@@ -7,17 +7,24 @@ namespace CommunityThemes;
 public static class ThemeCompiler
 {
     public const string PersonalFile = "PersonalServer.theme.css";
+    private static readonly Lazy<Catalog> catalog = new(() => Catalog.Parse(Resource("catalog.json")));
+    private static readonly Lazy<Dictionary<string, string>> presets = new(() => catalog.Value.Themes.ToDictionary(theme => theme.Id, theme =>
+    {
+        var css = Resource(theme.File);
+        ReleaseDownload.Verify(Encoding.UTF8.GetBytes(css), theme.Sha256, theme.Bytes);
+        return css;
+    }));
     internal static string Resource(string name)
     {
         using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(name) ?? throw new InvalidDataException("Bundled theme resource is missing.");
         using var reader = new StreamReader(stream); return reader.ReadToEnd();
     }
-    public static Catalog BundledCatalog => Catalog.Parse(Resource("catalog.json"));
+    public static Catalog BundledCatalog => catalog.Value with { Themes = catalog.Value.Themes.ToArray() };
     public static string ServerScope(string guild)
     {
         guild = ThemeConfiguration.ParseGuild(guild);
         string css = PresetCss("primebuild"); int start = css.IndexOf("@scope", StringComparison.Ordinal);
-        return css[start..css.IndexOf('{', start)].Trim().Replace(BundledCatalog.Themes.Single(t => t.Id == "primebuild").Guild, guild);
+        return css[start..css.IndexOf('{', start)].Trim().Replace(catalog.Value.Themes.Single(t => t.Id == "primebuild").Guild, guild);
     }
     public static string TargetScope(ThemeConfiguration config)
     {
@@ -33,8 +40,7 @@ public static class ThemeCompiler
     }
     public static string PresetCss(string id)
     {
-        var theme = BundledCatalog.Themes.SingleOrDefault(t => t.Id == id) ?? throw new InvalidDataException("Unknown preset.");
-        var css = Resource(theme.File); ReleaseDownload.Verify(Encoding.UTF8.GetBytes(css), theme.Sha256, theme.Bytes); return css;
+        return presets.Value.TryGetValue(id, out var css) ? css : throw new InvalidDataException("Unknown preset.");
     }
     private static string Pattern(string key) => "(--pb-" + key + ":\\s*)(url\\(\"[^\"]*\"\\)|[^;]+);";
     private static string Value(string css, string key) => Regex.Match(css, Pattern(key)).Groups[2].Value;
@@ -74,9 +80,11 @@ public static class ThemeCompiler
             if (overrides.Length > 0) importedCss += ServerScope(scopeGuild) + "{" + overrides + "}";
             return designLabel + header + importedCss.Replace(ServerScope(scopeGuild), TargetScope(config));
         }
-        var preset = BundledCatalog.Themes.Single(t => t.Id == (config.Preset == "fluent" ? "primebuild" : config.Preset));
+        var preset = catalog.Value.Themes.Single(t => t.Id == (config.Preset == "fluent" ? "primebuild" : config.Preset));
         string css = PresetCss(preset.Id);
         css = css[css.IndexOf("@scope", StringComparison.Ordinal)..].Replace(preset.Guild, scopeGuild);
+        // Keep embedded images out of repeated palette, typography and target rewrites.
+        css = Regex.Replace(css, Pattern("(?:hardware-art|chat-art|photo|sidebar-art|members-art)"), m => m.Groups[1].Value + "none;");
         string face = "";
         if (config.Font == "custom")
         {
@@ -113,8 +121,8 @@ public static class ThemeCompiler
             string palette = PresetCss(config.Palette);
             foreach (var key in new[] { "accent", "accent-text", "accent-rgb", "chat", "sidebar", "panel", "panel-raised", "border", "text-muted" }) css = Set(css, key, Value(palette, key));
         }
-        css = Set(css, "hardware-art", Art(config.Banner, config.CustomBanner, "hardware-art"));
-        css = Set(css, "chat-art", Art(config.Background, config.CustomBackground, "chat-art"));
+        css = Set(css, "hardware-art", "__PERSONAL_BANNER__");
+        css = Set(css, "chat-art", "__PERSONAL_BACKGROUND__");
         css = Set(css, "photo", config.Background is "custom" or "none" ? "none" : Value(PresetCss(config.Background), "photo"));
         if (config.Background is "custom" or "none")
             foreach (var key in new[] { "sidebar-art", "members-art" }) css = Set(css, key, "none");
@@ -136,6 +144,9 @@ public static class ThemeCompiler
             css = Regex.Replace(css, @"font-size:\s*(?:22|18|16)px;", "font-size: inherit;");
         }
         css = css.Replace(ServerScope(scopeGuild), TargetScope(config));
+        // Insert large imported payloads once, after all other CSS rewrites.
+        css = Regex.Replace(css, "__PERSONAL_BANNER__|__PERSONAL_BACKGROUND__", match => match.Value == "__PERSONAL_BANNER__"
+            ? Art(config.Banner, config.CustomBanner, "hardware-art") : Art(config.Background, config.CustomBackground, "chat-art"));
         return designLabel + header + face + css;
     }
 

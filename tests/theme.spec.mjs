@@ -214,3 +214,11 @@ for (const profile of catalog.themes) {
     expect(await token(page)).toBe('');
   });
 }
+
+test('decorative photo has no rendered box below the chat width threshold', async ({ page }) => {
+  const chat = page.locator('.chatContent_f75fb0');
+  await chat.evaluate(el => { el.style.width = '600px'; el.style.flex = 'none'; });
+  await expect.poll(() => chat.evaluate(el => getComputedStyle(el, '::after').display)).toBe('none');
+  await chat.evaluate(el => el.style.width = '800px');
+  await expect.poll(() => chat.evaluate(el => getComputedStyle(el, '::after').display)).toBe('block');
+});

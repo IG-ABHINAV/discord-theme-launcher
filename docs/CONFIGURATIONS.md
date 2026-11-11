@@ -22,6 +22,8 @@ Imported backgrounds get a 93% dark scrim in recognized chat/forum containers. C
 
 The Windows importer decodes PNG/JPEG inputs, limited to 8 MiB, 4096 px per side and 16 million pixels, then re-encodes them as static PNG without original metadata. Output must still fit the limit. Reopened shared images are decoded before entering the editor. GIF, SVG, WebP and animated-image import are unsupported.
 
+New image imports preserve aspect ratio and transparency, never upscale, and are reduced to at most 1920 px per side and 2,073,600 pixels. One 32-bit decoded pixel buffer is then at most about 7.9 MiB instead of 61 MiB at the input limit; browser/GPU copies and other overhead are additional. Existing `.dtheme` and library assets retain their bytes when reopened. Re-import a large image to receive the reduction; the original source file is never rewritten.
+
 Custom static TTF/OTF files are limited to 2 MiB. Core validation checks signatures, table bounds, required tables and OS/2 embedding flags. Restricted, preview/print-only and bitmap-only embedding are rejected. Variable fonts, collections and imported WOFF/WOFF2 are refused. Import requires a license TXT up to 64,000 bytes, bounded license text and confirmation of editable embedding and redistribution rights. Flags alone cannot establish copyright permission. See the [OpenType OS/2 specification](https://learn.microsoft.com/en-us/typography/opentype/spec/os2).
 
 Bundled fonts retain their unmodified bytes and SIL OFL notices. No fonts are installed system-wide. Missing glyphs may use native fallbacks.

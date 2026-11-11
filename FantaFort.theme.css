@@ -2,7 +2,7 @@
  * @name FantaFort — Arena
  * @author PrimeBuild
  * @authorLink https://github.com/PrimeBuild-pc
- * @version 0.3.0-beta.12
+ * @version 0.3.0-beta.13
  * @description Draft your roster. Own the arena. Server-scoped desktop theme. Disable to restore.
  * @website https://primebuild.website/
  * @source https://github.com/PrimeBuild-pc/discord-theme-launcher
@@ -257,6 +257,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   }
   :is(.chatContent_f75fb0, .chatContent_z_gUBg)::after, :is(.container_f369db, .container_BkGrJJ)::after {
     content: "";
+    display: none;
     position: absolute;
     z-index: -1;
     right: 0;
@@ -265,12 +266,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     height: 78%;
     background: var(--pb-photo) right bottom / contain no-repeat;
     pointer-events: none;
-    opacity: 0;
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 46%);
     mask-image: linear-gradient(90deg, transparent, #000 46%);
   }
   @container pb-chat (min-width: 720px) {
-    :is(.chatContent_f75fb0, .chatContent_z_gUBg)::after, :is(.container_f369db, .container_BkGrJJ)::after { opacity: 1; }
+    :is(.chatContent_f75fb0, .chatContent_z_gUBg)::after, :is(.container_f369db, .container_BkGrJJ)::after { display: block; }
   }
   :is(.scroller__36d07, .scroller_8AE1Qq), :is(.scrollerContent__36d07, .scrollerContent_8AE1Qq) { background: transparent; }
   :is(.container__9293f, .container_ybUK7Z) {
