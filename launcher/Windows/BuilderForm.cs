@@ -204,8 +204,8 @@ internal sealed class BuilderForm : Form
     private void Publish()
     {
         bool canDisable = false, canRestore = false;
-        RecoveryEntry[] history = [];
-        try { if (!dryRun) { canDisable = store.PersonalEnabled; canRestore = store.CanRestore; history = store.RecoveryHistory(); } }
+        RecoveryEntry[] history = []; string[] active = [];
+        try { if (!dryRun) { canDisable = store.PersonalEnabled; canRestore = store.CanRestore; history = store.RecoveryHistory(); active = store.ActiveThemeIds(); } }
         catch { notice = "The Vencord profile could not be read. Check the manual recovery guide."; }
         var patched = client.Patched;
         var readiness = ApplyReadiness.Evaluate(busy, validation, renderedRevision == revision && surface.Ready);
@@ -216,7 +216,7 @@ internal sealed class BuilderForm : Form
             canDisable = canDisable && !busy, canRestore = canRestore && !busy,
             designs = CommunityGallery.Designs,
             fonts = FontLibrary.Choices.Select(f => new { f.Id, f.Family, f.Category, fileName = Path.GetFileName(f.Path) }),
-            recoveryHistory = history, localThemes = library.Themes(), localPalettes = library.Palettes(), localImages = library.Images(), paletteId, localThemeId,
+            recoveryHistory = history, localThemes = library.Themes(), activeThemes = active, localPalettes = library.Palettes(), localImages = library.Images(), paletteId, localThemeId,
             discardPending = pendingDiscard.HasValue || pendingClose, closing = pendingClose, discardProblem = UiText.Text(discardProblem), location, importCandidates,
             imported = configuration.Imported is { } imported ? ReviewState(CssThemeImporter.Inspect(imported)) : null,
             importReview = importReview is null ? null : ReviewState(importReview),
@@ -262,6 +262,8 @@ internal sealed class BuilderForm : Form
                     var sourceTheme = library.LoadTheme(message.GetProperty("value").GetString() ?? "");
                     library.SaveTheme(sourceTheme with { Name = message.GetProperty("name").GetString() ?? "" });
                     Publish(); return;
+                case "activateLocalTheme": case "deactivateLocalTheme": case "deleteLocalTheme":
+                    await QuickThemeAsync(action, message.GetProperty("value").GetString() ?? ""); return;
                 case "savePalette":
                     paletteId = library.SavePalette(new PaletteProfile(paletteId, message.GetProperty("name").GetString() ?? "", configuration.Accent, configuration.Surface, configuration.Panel ?? configuration.Surface)); Publish(); return;
                 case "loadPalette":
@@ -501,6 +503,38 @@ internal sealed class BuilderForm : Form
     private void ServerHelp() => LauncherStyle.ShowMessage(this, UiText.Text(UiText.ServerHelpBody), UiText.Text(UiText.ServerHelpTitle), true);
     private void Help() => LauncherStyle.ShowMessage(this, UiText.Text(UiText.HelpBody), UiText.Text(UiText.HelpTitle), true);
 
+    // Quick per-theme toggles from My themes. Discord restarts only when it is running, because Vencord owns its settings file while open.
+    private async Task QuickThemeAsync(string action, string id)
+    {
+        var config = action == "activateLocalTheme" ? library.LoadTheme(id) : null;
+        if (config is not null) { AssetImport.ValidateImages(config); config.Validate(); }
+        bool delete = action == "deleteLocalTheme", wasActive = !dryRun && store.ActiveThemeIds().Contains(id);
+        if (dryRun || (delete && !wasActive)) { if (delete) DeleteLocal(id); else SimulatedOperations++; notice = delete ? "Theme deleted from My themes." : "Simulation complete. No Discord or Vencord files or processes were changed."; Publish(); return; }
+        bool running = false, stopped = false;
+        try
+        {
+            client.ValidateEnvironment(); busy = true;
+            running = System.Diagnostics.Process.GetProcessesByName("Discord").Any();
+            notice = running ? "Closing Discord to update your themes…" : "Updating your themes…"; Publish();
+            if (running) { await client.StopAsync(); stopped = true; }
+            await Task.Run(() => store.SetThemeActive(id, config));
+            if (delete) DeleteLocal(id);
+            if (running) { notice = "Opening Discord and checking startup…"; Publish(); await client.OpenAsync(); stopped = false; }
+            notice = delete ? "Theme disabled and deleted from My themes." : config is not null ? "Theme enabled. Other enabled themes stay active." : "Theme disabled. Other enabled themes stay active.";
+        }
+        catch (Exception error)
+        {
+            notice = error is InvalidDataException or InvalidOperationException ? error.Message : "Setup could not finish. Check the profile, disk space and manual recovery guide.";
+            if (stopped) notice += " No automatic retry was made.";
+        }
+        finally { busy = false; Publish(); }
+    }
+    private void DeleteLocal(string id)
+    {
+        library.DeleteTheme(id);
+        if (localThemeId == id) { localThemeId = null; saved = false; SaveSession(); }
+    }
+
     private void RequestConfirmation(string operation, string? recoveryId = null)
     {
         if (busy || confirmation is not null) return;
@@ -551,14 +585,16 @@ internal sealed class BuilderForm : Form
                 http.DefaultRequestHeaders.UserAgent.ParseAdd("PrimeBuild-DiscordThemeLauncher/" + ThemeCompiler.BundledCatalog.Version);
                 installer = await ReleaseDownload.FetchAsync(http, ReleaseDownload.InstallerUri, ReleaseDownload.InstallerSha256, 32 * 1024 * 1024);
             }
-            if (value is not null) await Task.Run(() => value.Save(DraftPath));
+            if (value is not null) { SaveDocument(false); await Task.Run(() => value.Save(DraftPath)); }
+            string? applyId = localThemeId;
             notice = "Closing Discord after your confirmation…"; Publish(); await client.StopAsync(); stopped = true;
             if (installer is not null) { notice = "Installing / repairing official Vencord…"; Publish(); await client.InstallVencordAsync(installer, repair); }
             notice = "Saving a recovery snapshot and updating managed themes…"; Publish();
             await Task.Run(() => {
                 if (operation == "restore") { if (confirmed.RecoveryId is { } id) store.RestoreSnapshot(id); else store.RestoreLast(); }
                 else if (operation is "disableManaged" or "disableAll") store.DisableThemes(operation == "disableAll");
-                else store.ApplyPersonal(value);
+                else if (value is not null) store.SetThemeActive(applyId!, value);
+                else store.ApplyPersonal(null);
             });
             notice = "Opening Discord and checking startup…"; Publish(); await client.OpenAsync(); stopped = false;
             notice = operation == "apply" ? "Theme applied. Discord startup confirmed. Changes are local to you." : operation == "disable" ? "Personal theme disabled. Discord startup confirmed. Restore can undo this." : operation is "disableManaged" or "disableAll" ? "Theme styling disabled. Files preserved. Discord startup confirmed." : "Previous managed setup restored. Discord startup confirmed.";

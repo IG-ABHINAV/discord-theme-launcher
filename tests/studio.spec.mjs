@@ -92,6 +92,24 @@ test('Home exposes saved themes and opens their existing server list without cre
   expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='new'||m.action==='confirmOperation'))).toBe(false);
 });
 
+test('My themes shows which themes are active with quick enable, disable and two-step delete',async({page})=>{
+  await studio(page);
+  await page.evaluate(()=>window.patchTestState({localThemes:[{id:'pink',name:'Pink'},{id:'arena',name:'Arena'}],activeThemes:['pink']}));
+  await page.locator('[data-page=home]').click();
+  await page.locator('#home-saved').click();
+  await expect(page.locator('[data-theme-status=pink]')).toHaveText('Active');
+  await expect(page.locator('[data-theme-status=arena]')).toHaveText('Inactive');
+  await page.locator('[data-toggle-theme=pink]').click();
+  await page.locator('[data-toggle-theme=arena]').click();
+  await page.locator('[data-delete-theme=arena]').click();
+  await expect(page.locator('[data-delete-theme=arena]')).toHaveText('Confirm delete');
+  expect(await page.evaluate(()=>window.testMessages.filter(m=>/LocalTheme$/.test(m.action)&&m.action!=='loadLocalTheme'))).toEqual([{action:'deactivateLocalTheme',value:'pink'},{action:'activateLocalTheme',value:'arena'}]);
+  await page.locator('[data-delete-theme=arena]').click();
+  expect(await page.evaluate(()=>window.testMessages.at(-1))).toEqual({action:'deleteLocalTheme',value:'arena'});
+  await page.evaluate(()=>window.patchTestState({busy:true}));
+  await expect(page.locator('[data-toggle-theme=pink]')).toBeDisabled();
+});
+
 test('a saved theme can be duplicated without replacing the open draft or changing Discord',async({page})=>{
   await studio(page);
   await page.evaluate(()=>window.patchTestState({dirty:true,localThemes:[{id:'original',name:'Original theme'}]}));
@@ -143,7 +161,7 @@ test('editing starts in preview and Apply opens a confirmation without applying'
   await expect(page.locator('#confirmation-theme')).toHaveText('Your community');
   await expect(page.locator('#confirmation-guild')).toHaveText('987654321012345678');
   await expect(page.locator('#confirmation-description')).toContainText('all listed servers and DM chats');
-  await expect(page.locator('#confirmation-description')).toContainText('replaces the active personal design and disables older launcher presets');
+  await expect(page.locator('#confirmation-description')).toContainText('your other enabled themes stay active');
   await expect(page.locator('#confirmation-cancel')).toBeFocused();
   expect(await page.evaluate(()=>window.testMessages.some(m=>m.action==='confirmOperation'))).toBe(false);
   await page.screenshot({path:'.local/studio-confirmation-preview.png'});

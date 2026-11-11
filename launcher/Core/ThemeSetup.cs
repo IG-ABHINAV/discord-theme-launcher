@@ -69,7 +69,13 @@ public sealed record RecoveryEntry(string Id, DateTimeOffset Created, string[] T
 
 public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog catalog)
 {
-    private string[] ManagedFiles => catalog.Themes.Select(t => t.File).Append(ThemeCompiler.PersonalFile).ToArray();
+    // Each saved library theme owns one Vencord file, so several targeted themes can stay enabled together.
+    public static string StudioFile(string id) => System.Text.RegularExpressions.Regex.IsMatch(id, "^[a-z0-9][a-z0-9-]{0,63}$")
+        ? "Studio-" + id + ".theme.css" : throw new InvalidDataException("Invalid local library identifier.");
+    private static bool IsStudioFile(string file) => System.Text.RegularExpressions.Regex.IsMatch(file, "^Studio-[a-z0-9][a-z0-9-]{0,63}\\.theme\\.css$");
+    private bool IsManaged(string file) => IsStudioFile(file) || file == ThemeCompiler.PersonalFile || catalog.Themes.Any(t => t.File == file);
+    private string[] ManagedFiles => catalog.Themes.Select(t => t.File).Append(ThemeCompiler.PersonalFile)
+        .Concat(Directory.Exists(ThemesDirectory) ? Directory.EnumerateFiles(ThemesDirectory, "Studio-*.theme.css").Select(Path.GetFileName).OfType<string>().Where(IsStudioFile) : []).ToArray();
     public string ThemesDirectory => Path.Combine(vencordRoot, "themes");
     public string SettingsPath => Path.Combine(vencordRoot, "settings", "settings.json");
     public string StateDirectory => stateRoot;
@@ -152,7 +158,54 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         catch { Restore(folder); throw; }
     }
 
-    public bool PersonalEnabled => Enabled(ReadSettings()).Contains(ThemeCompiler.PersonalFile) && File.Exists(Path.Combine(ThemesDirectory, ThemeCompiler.PersonalFile));
+    public string[] ActiveThemeIds()
+    {
+        var enabled = Enabled(ReadSettings());
+        return enabled.Where(f => IsStudioFile(f) && File.Exists(Path.Combine(ThemesDirectory, f))).Select(f => f[7..^10]).ToArray();
+    }
+
+    // Enables (configuration given) or disables one saved theme; every other enabled theme is kept.
+    public void SetThemeActive(string id, ThemeConfiguration? configuration)
+    {
+        string file = StudioFile(id), path = Path.Combine(ThemesDirectory, file); CheckPath(path);
+        byte[]? css = configuration is null ? null : System.Text.Encoding.UTF8.GetBytes(ThemeCompiler.Compile(configuration));
+        var settings = ReadSettings();
+        var enabled = Enabled(settings).Where(name => name != file).ToList();
+        if (css is not null) enabled.Add(file);
+        // The single legacy slot holding this same design is superseded by its per-theme file.
+        string personal = Path.Combine(ThemesDirectory, ThemeCompiler.PersonalFile); CheckPath(personal);
+        bool supersedes = configuration is not null && File.Exists(personal) &&
+            File.ReadLines(personal).FirstOrDefault() == "/* Theme Studio design: " + System.Text.RegularExpressions.Regex.Replace(configuration.Name.Trim(), @"\s+", " ").Replace("/*", "/ *").Replace("*/", "* /") + " */";
+        if (supersedes) enabled.Remove(ThemeCompiler.PersonalFile);
+        var folder = SaveSnapshot(settings, false, file);
+        AtomicWrite(LastPath, System.Text.Encoding.UTF8.GetBytes(Path.GetFileName(folder)));
+        try
+        {
+            if (css is not null) AtomicWrite(path, css);
+            else if (File.Exists(path)) File.Delete(path);
+            if (supersedes) File.Delete(personal);
+            UpgradeLegacy(enabled);
+            settings["enabledThemes"] = new JsonArray(enabled.Distinct().Select(s => (JsonNode?)JsonValue.Create(s)).ToArray());
+            AtomicWrite(SettingsPath, System.Text.Encoding.UTF8.GetBytes(settings.ToJsonString(Catalog.JsonOptions)));
+        }
+        catch { Restore(folder); throw; }
+    }
+
+    // Older launcher files used a :has() scope root that restyles all of Discord on every DOM change.
+    private void UpgradeLegacy(IEnumerable<string> enabled)
+    {
+        foreach (var file in enabled.Where(IsManaged))
+        {
+            var path = Path.Combine(ThemesDirectory, file); CheckPath(path);
+            if (!File.Exists(path)) continue;
+            var css = File.ReadAllText(path);
+            if (!css.Contains("@scope (", StringComparison.Ordinal)) continue;
+            try { AtomicWrite(path, System.Text.Encoding.UTF8.GetBytes(ThemeCompiler.Gate(css))); }
+            catch (InvalidDataException) { /* Unparseable legacy file: leave it untouched. */ }
+        }
+    }
+
+    public bool PersonalEnabled =>Enabled(ReadSettings()).Contains(ThemeCompiler.PersonalFile) && File.Exists(Path.Combine(ThemesDirectory, ThemeCompiler.PersonalFile));
 
     public void ApplyPersonal(ThemeConfiguration? configuration)
     {
@@ -204,7 +257,7 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
             {
                 CheckPath(path); var file = Path.Combine(path, "snapshot.json"); CheckPath(file);
                 var snapshot = JsonSerializer.Deserialize<Snapshot>(File.ReadAllText(file), Catalog.JsonOptions);
-                if (snapshot?.Themes is null || snapshot.Themes.Any(t => t is null || !ManagedFiles.Contains(t.File))) continue;
+                if (snapshot?.Themes is null || snapshot.Themes.Any(t => t is null || !IsManaged(t.File))) continue;
                 var names = snapshot.Themes.Where(t => t.Enabled && t.Existed).Select(t => t.Name ?? catalog.Themes.FirstOrDefault(d => d.File == t.File)?.Name ?? "Personal theme").ToArray();
                 if (names.Length > 0 || snapshot.Styling is not null) entries.Add(new(id, snapshot.Created ?? File.GetCreationTimeUtc(file), names));
             }
@@ -230,20 +283,21 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         RestoreSnapshot(File.ReadAllText(LastPath).Trim());
     }
 
-    private string SaveSnapshot(JsonObject settings, bool includeAll = false)
+    private string SaveSnapshot(JsonObject settings, bool includeAll = false, string? extra = null)
     {
         CheckPath(ThemesDirectory); CheckPath(stateRoot);
         var folder = Path.Combine(stateRoot, "backups", Guid.NewGuid().ToString("N"));
         CheckPath(folder);
-        foreach (var file in ManagedFiles) CheckPath(Path.Combine(ThemesDirectory, file));
+        var managed = (extra is null ? ManagedFiles : ManagedFiles.Append(extra)).Distinct().ToArray();
+        foreach (var file in managed) CheckPath(Path.Combine(ThemesDirectory, file));
         var enabled = Enabled(settings);
         JsonObject? styling = includeAll ? new JsonObject() : null;
         if (styling is not null) foreach (var key in new[] { "enabledThemes", "themeLinks", "useQuickCss" })
             if (settings.ContainsKey(key)) styling[key] = settings[key]?.DeepClone();
-        var snapshot = new Snapshot(ManagedFiles.Select(file => {
+        var snapshot = new Snapshot(managed.Select(file => {
             var path = Path.Combine(ThemesDirectory, file); bool exists = File.Exists(path);
             string? name = catalog.Themes.FirstOrDefault(d => d.File == file)?.Name;
-            if (exists && file == ThemeCompiler.PersonalFile)
+            if (exists && (file == ThemeCompiler.PersonalFile || IsStudioFile(file)))
             {
                 var label = System.Text.RegularExpressions.Regex.Match(File.ReadAllText(path), @"^/\* Theme Studio design: (.{1,80}) \*/", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                 if (label.Success) name = label.Groups[1].Value;
@@ -262,9 +316,9 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         var snapshotPath = Path.Combine(folder, "snapshot.json"); CheckPath(snapshotPath);
         var snapshot = JsonSerializer.Deserialize<Snapshot>(File.ReadAllText(snapshotPath), Catalog.JsonOptions) ?? throw new InvalidDataException("Invalid backup.");
         // Historical snapshots touch only their recorded managed subset; newer catalog entries are left alone.
-        if (snapshot.Themes is null || snapshot.Themes.Any(t => t is null) || snapshot.Themes.Length < 1 || snapshot.Themes.Length > ManagedFiles.Length ||
+        if (snapshot.Themes is null || snapshot.Themes.Any(t => t is null) || snapshot.Themes.Length < 1 || snapshot.Themes.Length > 512 ||
             snapshot.Themes.Select(t => t.File).Distinct().Count() != snapshot.Themes.Length ||
-            snapshot.Themes.Any(t => !ManagedFiles.Contains(t.File)))
+            snapshot.Themes.Any(t => !IsManaged(t.File)))
             throw new InvalidDataException("The backup does not match this launcher.");
         var settings = ReadSettings();
         // Validate every source/destination first; never partially restore an incomplete backup.

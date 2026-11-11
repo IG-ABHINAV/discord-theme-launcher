@@ -51,6 +51,12 @@ public sealed class LocalLibrary(string root)
     {
         id ??= Guid.NewGuid().ToString("N"); value.Save(FilePath("themes", id, ".dtheme")); themes = null; return id;
     }
+    public void DeleteTheme(string id)
+    {
+        string path = FilePath("themes", id, ".dtheme");
+        if (!File.Exists(path)) throw new InvalidDataException("Invalid local library identifier.");
+        File.Delete(path); themes = null;
+    }
     public PaletteProfile[] Palettes() => palettes ??= ReadValid(Ids("palettes", ".json"), LoadPalette).OrderBy(p => p.Name).ToArray();
     public PaletteProfile LoadPalette(string id)
     {

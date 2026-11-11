@@ -117,7 +117,7 @@
     "saved": "Saved",
     "saveClose": "Save & close",
     "saveContinue": "Save & continue",
-    "confirmApplyBody": "Apply this theme to all listed servers and DM chats. This replaces the active personal design and disables older launcher presets. Saved designs remain in My themes.",
+    "confirmApplyBody": "Apply this theme to all listed servers and DM chats. It is saved in My themes and enabled; your other enabled themes stay active.",
     "themeDescription": "Description (optional)",
     "descriptionPlaceholder": "A short description of your theme",
     "descriptionHint": "Shown on the theme card in Vencord. Up to 280 characters.",
@@ -132,7 +132,14 @@
     "page.server.sub": "Edit your theme, then choose its servers or DM chats.",
     "apply": "Review & apply",
     "applyTitle": "Review the current theme and targets before changing Discord",
-    "previewPromise": "Save: My themes · Apply: Discord after confirmation"
+    "previewPromise": "Save: My themes · Apply: Discord after confirmation",
+    "themeActive": "Active",
+    "themeInactive": "Inactive",
+    "enableTheme": "Enable",
+    "disableTheme": "Disable",
+    "deleteTheme": "Delete",
+    "confirmDelete": "Confirm delete",
+    "restartsIfOpen": "Discord restarts if it is open. Other enabled themes stay active."
   },
   "it": {
     "share": "Esporta una copia",
@@ -252,7 +259,7 @@
     "saved": "Salvato",
     "saveClose": "Salva e chiudi",
     "saveContinue": "Salva e continua",
-    "confirmApplyBody": "Applica questo tema a tutti i server e alle chat DM elencati. Sostituisce il tema personale attivo e disattiva i precedenti temi del launcher. I temi salvati restano in I miei temi.",
+    "confirmApplyBody": "Applica questo tema a tutti i server e alle chat DM elencati. Viene salvato in I miei temi e attivato; gli altri temi attivi restano attivi.",
     "themeDescription": "Descrizione (facoltativa)",
     "descriptionPlaceholder": "Una breve descrizione del tuo tema",
     "descriptionHint": "Compare nella card del tema in Vencord. Massimo 280 caratteri.",
@@ -267,7 +274,14 @@
     "page.server.sub": "Modifica il tema, poi scegli i server o le chat DM.",
     "apply": "Rivedi e applica",
     "applyTitle": "Rivedi il tema attuale e le destinazioni prima di modificare Discord",
-    "previewPromise": "Salva: I miei temi · Applica: Discord dopo conferma"
+    "previewPromise": "Salva: I miei temi · Applica: Discord dopo conferma",
+    "themeActive": "Attivo",
+    "themeInactive": "Non attivo",
+    "enableTheme": "Attiva",
+    "disableTheme": "Disattiva",
+    "deleteTheme": "Elimina",
+    "confirmDelete": "Conferma eliminazione",
+    "restartsIfOpen": "Discord si riavvia se è aperto. Gli altri temi attivi restano attivi."
   },
   "es": {
     "share": "Exportar una copia",
@@ -387,7 +401,7 @@
     "saved": "Guardado",
     "saveClose": "Guardar y cerrar",
     "saveContinue": "Guardar y continuar",
-    "confirmApplyBody": "Aplica este tema a todos los servidores y chats DM indicados. Sustituye el diseño personal activo y desactiva los temas anteriores del launcher. Los diseños guardados permanecen en Mis temas.",
+    "confirmApplyBody": "Aplica este tema a todos los servidores y chats DM indicados. Se guarda en Mis temas y se activa; tus demás temas activos siguen activos.",
     "themeDescription": "Descripción (opcional)",
     "descriptionPlaceholder": "Una breve descripción de tu tema",
     "descriptionHint": "Aparece en la tarjeta del tema en Vencord. Hasta 280 caracteres.",
@@ -402,7 +416,14 @@
     "page.server.sub": "Edita el tema y elige sus servidores o chats de MD.",
     "apply": "Revisar y aplicar",
     "applyTitle": "Revisa el tema actual y los destinos antes de cambiar Discord",
-    "previewPromise": "Guardar: Mis temas · Aplicar: Discord tras confirmar"
+    "previewPromise": "Guardar: Mis temas · Aplicar: Discord tras confirmar",
+    "themeActive": "Activo",
+    "themeInactive": "Inactivo",
+    "enableTheme": "Activar",
+    "disableTheme": "Desactivar",
+    "deleteTheme": "Eliminar",
+    "confirmDelete": "Confirmar eliminación",
+    "restartsIfOpen": "Discord se reinicia si está abierto. Los demás temas activos siguen activos."
   },
   "ru": {
     "share": "Экспортировать копию",
@@ -522,7 +543,7 @@
     "saved": "Сохранено",
     "saveClose": "Сохранить и закрыть",
     "saveContinue": "Сохранить и продолжить",
-    "confirmApplyBody": "Применить тему ко всем указанным серверам и личным чатам. Она заменит активную личную тему и отключит прежние темы лаунчера. Сохранённые темы останутся в разделе Мои темы.",
+    "confirmApplyBody": "Применить эту тему ко всем указанным серверам и чатам ЛС. Она сохраняется в «Мои темы» и включается; остальные включённые темы остаются активными.",
     "themeDescription": "Описание (необязательно)",
     "descriptionPlaceholder": "Краткое описание вашей темы",
     "descriptionHint": "Отображается на карточке темы в Vencord. До 280 символов.",
@@ -537,6 +558,13 @@
     "page.server.sub": "Измените тему и выберите серверы или личные чаты.",
     "apply": "Проверить и применить",
     "applyTitle": "Проверьте тему и выбранные чаты перед изменением Discord",
-    "previewPromise": "Сохранить: Мои темы · Применить: Discord после подтверждения"
+    "previewPromise": "Сохранить: Мои темы · Применить: Discord после подтверждения",
+    "themeActive": "Активна",
+    "themeInactive": "Не активна",
+    "enableTheme": "Включить",
+    "disableTheme": "Выключить",
+    "deleteTheme": "Удалить",
+    "confirmDelete": "Подтвердить удаление",
+    "restartsIfOpen": "Discord перезапустится, если открыт. Остальные включённые темы остаются активными."
   }
 }

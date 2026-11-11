@@ -1,4 +1,8 @@
-# Validation - 0.3.0-beta.14
+# Validation - 0.3.0-beta.15
+
+Date: **2026-11-12**. Several saved themes can stay enabled together. Local checks pass: **149 Core, 73 browser and 90 native Windows checks**. New Core checks cover two saved themes with a preset and an external theme enabled together, legacy preset upgrade to the style-gated format, disabling one theme without touching the others, recovery of quick toggles, removal of a newly enabled file on restore, replacement of a matching legacy personal slot and identifier path safety. A browser test covers the Active/Inactive badge, quick Enable/Disable, two-step Delete and busy-state disabling. On the development profile, four themes (PrimeBuild, PrimeBuild.dev, FantaFort and a personal design) were migrated to per-theme files; in the fixture each activates only on its own server and none on another server or in DMs.
+
+## Validation - 0.3.0-beta.14
 
 Date: **2026-11-11**. Compiled personal themes now gate descendant rules with `@container style()` instead of a `:has()` scope root. Local checks pass: **142 Core and 72 browser tests**, including exact server/DM isolation, hidden-rail and ambiguous-selection fail-closed cases, imported themes and multi-target output. The browser structure check now requires every top-level rule to carry the target guard and all other rules to sit in one style gate. See the [performance audit](PERFORMANCE-AUDIT.md) for the synthetic benchmark and its limits.
 

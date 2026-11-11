@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.3.0-beta.15 - 2026-11-12
+
+- Keep several themes enabled at once. Each saved theme gets its own Vencord file (`Studio-<id>.theme.css`); applying or toggling one theme no longer disables the others.
+- Show an Active/Inactive badge on every theme in My themes, with quick Enable, Disable and two-step Delete buttons. Discord restarts only if it is open; each change saves a recovery snapshot.
+- Review & apply saves the open theme in My themes and enables it. Enabled legacy launcher files are rewritten to the style-gated format, and a legacy personal slot holding the same design is replaced by its per-theme file.
+
 ## 0.3.0-beta.14 - 2026-11-11
 
 - Stop personal themes from restyling all of Discord on every DOM change. The `:has()` target guard is now evaluated once on the app root and the remaining rules are gated by an inherited `@container style()` flag. In a synthetic 9,300-node Chromium benchmark, one DOM mutation (new message, voice participant, selection change) dropped from about 170 ms to about 0.6 ms with one personal theme.

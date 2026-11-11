@@ -336,6 +336,26 @@ var malformedSnapshot = Path.Combine(state, "backups", malformedSnapshotId); Dir
 File.WriteAllText(Path.Combine(malformedSnapshot, "snapshot.json"), """{"themes":[null]}""");
 Check(store.RecoveryHistory().All(entry => entry.Id != malformedSnapshotId), "a malformed history item cannot hide other recoverable setups");
 Reject(() => store.RestoreSnapshot(malformedSnapshotId), "malformed history selection is rejected before writing profile files");
+{
+    // Several saved themes stay enabled together; toggling one never disables another.
+    var multiRoot = Path.Combine(fixture, "multi-vencord"); Directory.CreateDirectory(Path.Combine(multiRoot, "settings"));
+    File.WriteAllText(Path.Combine(multiRoot, "settings", "settings.json"), "{\"enabledThemes\":[\"Other.theme.css\"],\"keep\":1}");
+    var stack = new ThemeStore(multiRoot, Path.Combine(fixture, "multi-state"), catalog);
+    stack.Apply([catalog.Themes[0].Id], all);
+    string Enabled() => string.Join(",", JsonNode.Parse(File.ReadAllText(stack.SettingsPath))!["enabledThemes"]!.AsArray().Select(n => n!.GetValue<string>()));
+    var one = config with { Name = "One" }; var two = config with { Name = "Two", Guild = catalog.Themes[1].Guild };
+    stack.SetThemeActive("one", one); stack.SetThemeActive("two", two);
+    Check(stack.ActiveThemeIds().Order().SequenceEqual(["one", "two"]) && Enabled() == "Other.theme.css," + catalog.Themes[0].File + ",Studio-one.theme.css,Studio-two.theme.css", "two saved themes, a launcher preset and an external theme stay enabled together");
+    Check(File.ReadAllText(Path.Combine(stack.ThemesDirectory, catalog.Themes[0].File)) is var upgraded && !upgraded.Contains("@scope (") && upgraded.Contains("@container style(--pb-gate-"), "an enabled legacy preset is rewritten to the style-gated format");
+    stack.SetThemeActive("one", null);
+    Check(stack.ActiveThemeIds().SequenceEqual(["two"]) && !File.Exists(Path.Combine(stack.ThemesDirectory, "Studio-one.theme.css")) && Enabled().Contains(catalog.Themes[0].File), "disabling one theme keeps the others enabled");
+    stack.RestoreLast(); Check(stack.ActiveThemeIds().Order().SequenceEqual(["one", "two"]), "a quick disable is reversible from recovery");
+    stack.SetThemeActive("three", config with { Name = "Three" }); stack.RestoreLast();
+    Check(!stack.ActiveThemeIds().Contains("three") && !File.Exists(Path.Combine(stack.ThemesDirectory, "Studio-three.theme.css")), "restore removes a newly enabled theme file");
+    stack.ApplyPersonal(config with { Name = "Four" }); stack.SetThemeActive("four", config with { Name = "Four" });
+    Check(!stack.PersonalEnabled && !File.Exists(Path.Combine(stack.ThemesDirectory, ThemeCompiler.PersonalFile)) && stack.ActiveThemeIds().Contains("four"), "a legacy personal slot with the same design is replaced by its per-theme file");
+    Reject(() => stack.SetThemeActive("../escape", config), "theme identifiers cannot escape the themes folder");
+}
 Console.WriteLine($"{checks} checks passed. Fixture: {fixture}");
 // Intentional: leave the temporary test fixture for inspection; never recurse over an unchecked root.
 

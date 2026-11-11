@@ -132,7 +132,7 @@
   "confirmApplyTitle": "Dein Thema anwenden?",
   "confirmDisableTitle": "Persönliches Thema deaktivieren?",
   "confirmRestoreTitle": "Vorherige Einrichtung wiederherstellen?",
-  "confirmApplyBody": "Dieses Theme auf alle aufgeführten Server und Direktnachrichten anwenden. Es ersetzt das aktive persönliche Design und deaktiviert frühere Launcher-Themes. Gespeicherte Designs bleiben unter Meine Themes.",
+  "confirmApplyBody": "Dieses Design auf alle angegebenen Server und DM-Chats anwenden. Es wird in Meine Designs gespeichert und aktiviert; andere aktive Designs bleiben aktiv.",
   "confirmDisableBody": "Fahre fort, um das persönliche Thema aus deinem lokalen Client zu entfernen. Andere Themen bleiben erhalten.",
   "confirmRestoreBody": "Fahre fort, um die vorherigen verwalteten Themendateien und Aktivierungen wiederherzustellen. Andere Einstellungen bleiben erhalten.",
   "themeLabel": "THEMA",
@@ -258,5 +258,12 @@
   "duplicateTheme": "Design duplizieren…",
   "saveTheme": "Design speichern",
   "saveApplyHint": "Speichern behält dein Design unter Meine Designs. Prüfen und anwenden aktualisiert Discord.",
-  "targetsHelp": "Ein Server pro Zeile. Behalte vorhandene IDs und füge für einen weiteren Server eine Zeile hinzu."
+  "targetsHelp": "Ein Server pro Zeile. Behalte vorhandene IDs und füge für einen weiteren Server eine Zeile hinzu.",
+  "themeActive": "Aktiv",
+  "themeInactive": "Inaktiv",
+  "enableTheme": "Aktivieren",
+  "disableTheme": "Deaktivieren",
+  "deleteTheme": "Löschen",
+  "confirmDelete": "Löschen bestätigen",
+  "restartsIfOpen": "Discord startet neu, wenn es geöffnet ist. Andere aktive Designs bleiben aktiv."
 }
