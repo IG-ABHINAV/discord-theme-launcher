@@ -1,4 +1,18 @@
-# Performance audit — 0.3.0-beta.13
+# Performance audit — 0.3.0-beta.14
+
+**Target guard re-matched all of Discord — fixed.** Every compiled personal theme wrapped its rules in `@scope (.base:has(... guildsnav ... [aria-selected="true"]))`. Because the scope root depends on a subtree `:has()`, Chromium restyled the entire Discord tree on any DOM mutation touching the guard's features (`aria-selected`, `aria-hidden`, `data-list-item-id`, inserted rows). `ThemeCompiler.Gate` now emits the guard once on the root (setting `--pb-gate-<hash>: 1` and the root-only declarations) and places every descendant rule in `@container style(--pb-gate-<hash>: 1)`.
+
+Synthetic Chromium benchmark (Playwright, 9,314 nodes shaped like Discord's guild rail, channel list and message list; style recalculation forced after each mutation, 50 iterations):
+
+| CSS | Message insert | Voice participant insert | Selection change | `aria-hidden` change |
+| --- | ---: | ---: | ---: | ---: |
+| None | 0.05 ms | 0.006 ms | 0.002 ms | 0.002 ms |
+| beta.13 personal theme | 164 ms | 178 ms | 172 ms | 177 ms |
+| beta.14 personal theme | 0.66 ms | 0.59 ms | 0.53 ms | 0.52 ms |
+
+The four themes enabled together on the development profile (three legacy presets plus personal) cost about 460 ms per mutation with the old structure. Stripping embedded images did not change the result; removing the `:has()` root did. Not measured: the live Discord client, voice network latency, total Discord RAM.
+
+## Previous audit — 0.3.0-beta.13
 
 What this repo does: Theme Studio builds targeted Discord CSS and hosts a Windows editor/preview in WebView2. It supports built-in designs, reviewed CSS imports, local libraries and explicit server/DM targets. Expected load: one editor, frequent edits and large imported artwork alongside one local Discord client.
 

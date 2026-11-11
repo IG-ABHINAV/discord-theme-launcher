@@ -78,7 +78,7 @@ public static class ThemeCompiler
             if (config.Background != "none") overrides += ":scope :is(.chatContent_f75fb0,.chatContent_z_gUBg){background-image:linear-gradient(#101013ed,#101013ed)," + Art(config.Background, config.CustomBackground, "chat-art") + "!important;background-size:cover!important;background-position:center!important;}";
             if (config.Banner != "none" && config.DmChannels.Length > 0) overrides += ":scope:has([data-list-item-id=\"guildsnav___home\"][aria-selected=\"true\"]) :is(.container__9293f,.container_ybUK7Z){background:linear-gradient(#10101388,#10101388)," + Art(config.Banner, config.CustomBanner, "hardware-art") + " center/cover no-repeat!important;min-height:112px;}";
             if (overrides.Length > 0) importedCss += ServerScope(scopeGuild) + "{" + overrides + "}";
-            return designLabel + header + importedCss.Replace(ServerScope(scopeGuild), TargetScope(config));
+            return designLabel + header + Gate(importedCss.Replace(ServerScope(scopeGuild), TargetScope(config)));
         }
         var preset = catalog.Value.Themes.Single(t => t.Id == (config.Preset == "fluent" ? "primebuild" : config.Preset));
         string css = PresetCss(preset.Id);
@@ -147,7 +147,65 @@ public static class ThemeCompiler
         // Insert large imported payloads once, after all other CSS rewrites.
         css = Regex.Replace(css, "__PERSONAL_BANNER__|__PERSONAL_BACKGROUND__", match => match.Value == "__PERSONAL_BANNER__"
             ? Art(config.Banner, config.CustomBanner, "hardware-art") : Art(config.Background, config.CustomBackground, "chat-art"));
-        return designLabel + header + face + css;
+        return designLabel + header + face + Gate(css);
+    }
+
+    // A :has() scope root makes Chromium re-match the whole Discord tree on every DOM change (~460 ms per
+    // mutation measured on 9k nodes). Match it once on the root, then gate descendants with an inherited style query.
+    internal static string Gate(string css)
+    {
+        int start = css.IndexOf("@scope", StringComparison.Ordinal);
+        if (start < 0) return css;
+        var output = new StringBuilder(css.Length + 4096).Append(css, 0, start);
+        foreach (var rule in CssSyntax.Rules(css[start..]))
+        {
+            if (rule.Body is null || !rule.Header.StartsWith("@scope (", StringComparison.Ordinal) || !rule.Header.EndsWith(')')) throw CssSyntax.Invalid();
+            string root = rule.Header[8..^1].Trim();
+            string gate = "--pb-gate-" + Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(root)))[..12].ToLowerInvariant();
+            StringBuilder outside = new(), inside = new();
+            Split(rule.Body, root, outside, inside);
+            output.Append(root).Append('{').Append(gate).Append(":1;}\n").Append(outside)
+                .Append("@container style(").Append(gate).Append(": 1) {\n").Append(inside).Append("}\n");
+        }
+        return output.ToString();
+    }
+
+    private static void Split(string body, string root, StringBuilder outside, StringBuilder inside)
+    {
+        foreach (var rule in CssSyntax.Rules(body))
+        {
+            if (rule.Body is null) throw CssSyntax.Invalid();
+            if (Regex.IsMatch(rule.Header, @"^@(?:media|supports|container)\b"))
+            {
+                StringBuilder o = new(), i = new();
+                Split(rule.Body, root, o, i);
+                if (o.Length > 0) outside.Append(rule.Header).Append("{\n").Append(o).Append("}\n");
+                if (i.Length > 0) inside.Append(rule.Header).Append("{\n").Append(i).Append("}\n");
+                continue;
+            }
+            if (rule.Header.StartsWith('@')) { inside.Append(rule.Header).Append('{').Append(rule.Body).Append("}\n"); continue; }
+            var selectors = CssSyntax.Selectors(rule.Header);
+            var own = selectors.Where(StylesRoot).Select(s => root + s[6..]).ToList();
+            var rest = selectors.Where(s => !StylesRoot(s)).Select(s => s.Replace(":scope", ":is(.base__5e434, .base_pog62O)")).ToList();
+            if (own.Count > 0) outside.AppendJoin(", ", own).Append('{').Append(rule.Body).Append("}\n");
+            if (rest.Count > 0) inside.AppendJoin(", ", rest).Append('{').Append(rule.Body).Append("}\n");
+        }
+    }
+
+    // True when the selector's subject is the scope root itself (":scope", ":scope:has(...)", ":scope::before").
+    private static bool StylesRoot(string selector)
+    {
+        if (!selector.StartsWith(":scope", StringComparison.Ordinal)) return false;
+        int depth = 0; char quote = ' ';
+        foreach (char c in selector.AsSpan(6))
+        {
+            if (quote != ' ') { if (c == quote) quote = ' '; continue; }
+            if (c is '"' or '\'') quote = c;
+            else if (c is '(' or '[') depth++;
+            else if (c is ')' or ']') depth--;
+            else if (depth == 0 && (char.IsWhiteSpace(c) || c is '>' or '+' or '~')) return false;
+        }
+        return true;
     }
 
     private static string Art(string choice, ThemeAsset? asset, string key) => choice switch

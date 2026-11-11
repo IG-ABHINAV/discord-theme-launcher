@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.3.0-beta.14 - 2026-11-11
+
+- Stop personal themes from restyling all of Discord on every DOM change. The `:has()` target guard is now evaluated once on the app root and the remaining rules are gated by an inherited `@container style()` flag. In a synthetic 9,300-node Chromium benchmark, one DOM mutation (new message, voice participant, selection change) dropped from about 170 ms to about 0.6 ms with one personal theme.
+- Keep exact server/DM targeting, hidden-rail and ambiguous-selection fail-closed behavior, multi-target and imported-theme support. Reapply the personal theme to regenerate the installed CSS.
+
 ## 0.3.0-beta.13 - 2026-11-11
 
 - Cache the verified bundled presets and parsed catalog. Keep artwork payloads out of repeated palette, typography and target rewrites to reduce compilation allocations.

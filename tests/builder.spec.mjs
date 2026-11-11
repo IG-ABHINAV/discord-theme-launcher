@@ -63,8 +63,10 @@ for (const preset of ['primebuild', 'primebuild-dev', 'fantafort', 'custom', 'na
     const html = await readFile(new URL(`${preset}.html`, directory), 'utf8');
     const css = html.match(/<style id="personal-theme">([\s\S]*?)<\/style>/)[1];
     const root = postcss.parse(css);
-    expect(root.nodes.filter(n => n.type === 'atrule' && n.name === 'scope')).toHaveLength(1);
-    for (const node of root.nodes.filter(n => n.type !== 'comment')) expect(['scope','font-face']).toContain(node.name);
+    // Root rules carry the exact :has() target guard; everything else sits behind its inherited style gate.
+    expect(root.nodes.filter(n => n.type === 'atrule' && n.name === 'container' && /^style\(--pb-gate-[0-9a-f]{12}: 1\)$/.test(n.params))).toHaveLength(1);
+    for (const node of root.nodes.filter(n => n.type === 'rule')) expect(node.selector).toContain('guildsnav___');
+    for (const node of root.nodes.filter(n => n.type === 'atrule')) expect(['container','font-face']).toContain(node.name);
     expect(css).not.toMatch(/__[A-Z_]+__|@import|url\(["']?https?:/);
   });
 }

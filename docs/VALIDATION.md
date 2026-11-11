@@ -1,3 +1,9 @@
+# Validation - 0.3.0-beta.14
+
+Date: **2026-11-11**. Compiled personal themes now gate descendant rules with `@container style()` instead of a `:has()` scope root. Local checks pass: **142 Core and 72 browser tests**, including exact server/DM isolation, hidden-rail and ambiguous-selection fail-closed cases, imported themes and multi-target output. The browser structure check now requires every top-level rule to carry the target guard and all other rules to sit in one style gate. See the [performance audit](PERFORMANCE-AUDIT.md) for the synthetic benchmark and its limits.
+
+## Previous validation
+
 # Validation — 0.3.0-beta.13
 
 Date: **2026-11-11**. Performance changes are based on published beta.12, preserving the newer editor, library, import and multi-target behavior. Local checks pass: **142 Core, 72 browser and 90 native Windows checks**. Preset/catalog/checksum and JavaScript checks pass. The compiler benchmark measures 86% fewer allocations for the explicit preset case and 63% fewer for two custom payloads. Square/portrait/landscape imports stay within the pixel cap, preserve alpha/aspect and do not upscale.
