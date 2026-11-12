@@ -131,6 +131,12 @@ dotnet run --project launcher/WindowsTests/WindowsTests.csproj -c Release
 
 Edit UI copy in `launcher/Windows/ui/studio-copy.json` and `studio-de.json`, then run `npm run build`; the corresponding portion of `i18n.js` is generated. Keep generated CSS, `catalog.json` and `SHA256SUMS.txt` in sync. See [architecture](docs/ARCHITECTURE.md) for implementation boundaries and [validation](docs/THEME-STUDIO-VALIDATION.md) for test coverage.
 
+## Support the project
+
+discord-theme-launcher is free and open source. If it helps you, you can support its development:
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y6U02AIRB8) [![PayPal](https://img.shields.io/badge/Support-PayPal-0070BA?logo=paypal&logoColor=white)](https://paypal.me/PrimeBuildOfficial)
+
 <h2 id="license-and-credits">License &amp; credits</h2>
 
 Theme Studio is maintained by [PrimeBuild-pc](https://github.com/PrimeBuild-pc) under the [MIT license](LICENSE). Zenit Gold is **by JACKPOT71**, with its [original MIT notice](assets/community/zenit-gold/LICENSE) retained. Bundled fonts retain their SIL OFL notices; portable packages include .NET and WebView2 SDK notices. Community assets remain subject to their own licenses.
