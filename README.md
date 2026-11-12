@@ -112,7 +112,7 @@ Zenit Gold retains its author's MIT notice, original artwork and offline Montser
 <h2 id="compatibility-and-recovery">Compatibility &amp; recovery</h2>
 
 - **BetterDiscord import is a supported subset.** The app reviews a file before accepting it and reports unsupported rules or resources. Arbitrary remote resources are not fetched for preview. Not every gallery theme can be imported. [Import compatibility](docs/BETTERDISCORD-IMPORT.md).
-- **Apply uses the current document's targets only.** It replaces the single personal-theme slot and disables other launcher presets, preserving their files. External themes remain enabled and can still affect appearance.
+- **Apply uses the current document's targets only.** Each saved theme is written to its own file, so several themes can stay enabled for different servers and DMs; preset files are preserved. External themes remain enabled and can still affect appearance. See [server and DM targeting](docs/TARGETS.md).
 - **DM themes require visible message markers.** Empty chats or an incompatible Discord layout keep the theme off. The app does not fetch private messages. [Server and DM targeting](docs/TARGETS.md).
 - **Recovery keeps files and plugins.** Disable launcher themes only, disable all styling including external themes and QuickCSS, or restore a previous setup. Each operation saves a recovery snapshot. [Recovery guide](docs/INSTALLATION.md#restore-previous-setup).
 
