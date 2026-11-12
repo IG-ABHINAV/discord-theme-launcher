@@ -4,7 +4,7 @@
 <h1 align="center">Theme Studio</h1>
 <p align="center"><strong>Create a Discord theme. Make it yours. Choose where it belongs.</strong></p>
 <p align="center">
-  A Windows editor for creating, previewing and sharing themes for the servers and private chats you choose.<br>
+  A Windows theme editor that applies a theme only to the servers and DMs you pick (up to 16 of each), with a live preview and no CSS needed.<br>
   Start from an empty template, customize a community design, or import compatible BetterDiscord CSS.
 </p>
 <p align="center">
@@ -16,8 +16,14 @@
 <p align="center">
   <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.16"><strong>Download beta.16</strong></a>
   &nbsp;·&nbsp; <a href="docs/INSTALLATION.md">Installation</a>
+  &nbsp;·&nbsp; <a href="#how-it-compares">How it compares</a>
+  &nbsp;·&nbsp; <a href="#faq">FAQ</a>
   &nbsp;·&nbsp; <a href="#contributing">Contribute</a>
   &nbsp;·&nbsp; <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/issues">Report an issue</a>
+</p>
+<p align="center">
+  <img src="docs/media/theme-studio-demo.gif" width="860" alt="Theme Studio demo: templates, style, artwork and theme files next to the live preview">
+  <br><sub>Real screen recording of beta.16 with the illustrative preview (synthetic conversations).</sub>
 </p>
 <p align="center">
   <img src="assets/theme-studio-create.png" width="1100" alt="Theme Studio editor and live Discord preview with synthetic conversations">
@@ -37,6 +43,24 @@ Theme Studio brings **creation, editing, preview, targeting, sharing and recover
 </table>
 
 **Themes affect your local client.** Other members install shared themes themselves. No Discord login, token, bot or server permissions are required.
+
+<h2 id="how-it-compares">How it compares</h2>
+
+Theme Studio is a theme editor, not another BetterDiscord. [BetterDiscord](https://betterdiscord.app/) has plugins, a large ecosystem and much more name recognition; Theme Studio has none of those and works alongside it: it imports BetterDiscord CSS themes and sends you to their [theme gallery](https://betterdiscord.app/themes).
+
+**What Theme Studio does**
+
+- **Themes only the chats you choose.** Apply a theme to selected servers and DM chats (up to 16 targets of each kind) and leave the rest of Discord alone.
+- **Editing without CSS.** Live preview, colors, 64 fonts on demand plus font import, and artwork.
+- **Review before apply, and a way back.** You see the theme and its targets before Discord restarts, and every operation saves a recovery snapshot you can restore.
+- **No Discord login, token, bot or server permissions.**
+
+**What it does not do**
+
+- No plugins.
+- Windows x64 only, the standard per-user stable Discord install only, and it needs Vencord for themes.
+- Still a beta, and the executable is unsigned (SmartScreen may warn).
+- BetterDiscord import is a supported subset: not every gallery theme works.
 
 <h2 id="get-started">Get started</h2>
 
@@ -93,6 +117,38 @@ Zenit Gold retains its author's MIT notice, original artwork and offline Montser
 - **Recovery keeps files and plugins.** Disable launcher themes only, disable all styling including external themes and QuickCSS, or restore a previous setup. Each operation saves a recovery snapshot. [Recovery guide](docs/INSTALLATION.md#restore-previous-setup).
 
 Automatic setup supports stable Discord and the default Vencord profile. Store/PTB/Canary, custom profiles and other operating systems are outside automatic support. Discord updates can change theme selectors. See [compatibility](docs/COMPATIBILITY.md) and [tested coverage and remaining limits](docs/THEME-STUDIO-VALIDATION.md).
+
+<h2 id="faq">FAQ</h2>
+
+<details>
+<summary><strong>Windows SmartScreen warns me about the executable. Is it safe?</strong></summary>
+
+The executable is currently unsigned, so SmartScreen may warn on first run. Compare the ZIP's SHA-256 with `SHA256SUMS.txt` from the same release (`Get-FileHash .\<file>.zip -Algorithm SHA256`) before running. The source is public and the app runs without Administrator privileges.
+</details>
+
+<details>
+<summary><strong>Is this allowed by Discord's Terms of Service?</strong></summary>
+
+Vencord is an unofficial client modification, and using it is subject to Discord's terms, as with BetterDiscord and other client mods; this is a grey area and we cannot give guarantees. Theme Studio needs no Discord login, token, bot or server permissions, and it only changes how your own local client looks. You decide whether that is acceptable for you.
+</details>
+
+<details>
+<summary><strong>How do I undo a theme or go back to how Discord was?</strong></summary>
+
+Each saved theme in **Templates → My themes** has **Disable** and **Delete** buttons. For a full way back, the recovery options can disable launcher themes only, disable all styling including external themes and QuickCSS, or restore a previous setup. Every operation saves a recovery snapshot, and your files and plugins are kept. See the [recovery guide](docs/INSTALLATION.md#restore-previous-setup).
+</details>
+
+<details>
+<summary><strong>Can it read my messages?</strong></summary>
+
+No. It does not fetch private messages, and it needs no login or token. For DM targets you give it a chat's channel ID or a message link, and styling needs a visible message from that chat to attach to.
+</details>
+
+<details>
+<summary><strong>Does it work with the Discord Store/PTB/Canary version, macOS or Linux?</strong></summary>
+
+Not automatically. Automatic setup supports Windows x64 with the stable per-user Discord installation and the default Vencord profile. Discord updates can also change theme selectors; see [compatibility](docs/COMPATIBILITY.md).
+</details>
 
 <h2 id="contributing">Contributing</h2>
 
