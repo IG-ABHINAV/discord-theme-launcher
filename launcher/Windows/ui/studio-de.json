@@ -265,5 +265,9 @@
   "disableTheme": "Deaktivieren",
   "deleteTheme": "Löschen",
   "confirmDelete": "Löschen bestätigen",
-  "restartsIfOpen": "Discord startet neu, wenn es geöffnet ist. Andere aktive Designs bleiben aktiv."
+  "restartsIfOpen": "Discord startet neu, wenn es geöffnet ist. Andere aktive Designs bleiben aktiv.",
+  "updateTo": "Auf {version} aktualisieren",
+  "updateHint": "Lädt die geprüfte Version von GitHub, ersetzt diese App und startet sie neu. Designs, Bibliotheken und die Discord-Einrichtung bleiben erhalten.",
+  "optimizeThemes": "Installierte Designs optimieren",
+  "optimizeHint": "Überführt mit älteren Versionen angewendete Designs in das aktuelle, schnellere Format und lässt alle aktiv. Discord startet neu, wenn es geöffnet ist."
 }

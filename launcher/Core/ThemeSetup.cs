@@ -42,7 +42,7 @@ public static class ReleaseDownload
             throw new InvalidDataException("The download failed its integrity check. Nothing was installed.");
     }
 
-    public static async Task<byte[]> FetchAsync(HttpClient http, Uri uri, string hash, int limit, int? expectedSize = null)
+    public static async Task<byte[]> FetchAsync(HttpClient http, Uri uri, string? hash, int limit, int? expectedSize = null)
     {
         if (uri.Scheme != "https" || uri.Host != "github.com") throw new InvalidDataException("Unsupported download source.");
         using var response = await http.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
@@ -58,7 +58,7 @@ public static class ReleaseDownload
             output.Write(buffer, 0, count);
         }
         var bytes = output.ToArray();
-        Verify(bytes, hash, expectedSize);
+        if (hash is not null) Verify(bytes, hash, expectedSize);
         return bytes;
     }
 }
@@ -175,7 +175,7 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
         // The single legacy slot holding this same design is superseded by its per-theme file.
         string personal = Path.Combine(ThemesDirectory, ThemeCompiler.PersonalFile); CheckPath(personal);
         bool supersedes = configuration is not null && File.Exists(personal) &&
-            File.ReadLines(personal).FirstOrDefault() == "/* Theme Studio design: " + System.Text.RegularExpressions.Regex.Replace(configuration.Name.Trim(), @"\s+", " ").Replace("/*", "/ *").Replace("*/", "* /") + " */";
+            File.ReadLines(personal).FirstOrDefault() == DesignLabel(configuration.Name);
         if (supersedes) enabled.Remove(ThemeCompiler.PersonalFile);
         var folder = SaveSnapshot(settings, false, file);
         AtomicWrite(LastPath, System.Text.Encoding.UTF8.GetBytes(Path.GetFileName(folder)));
@@ -186,6 +186,67 @@ public sealed class ThemeStore(string vencordRoot, string stateRoot, Catalog cat
             if (supersedes) File.Delete(personal);
             UpgradeLegacy(enabled);
             settings["enabledThemes"] = new JsonArray(enabled.Distinct().Select(s => (JsonNode?)JsonValue.Create(s)).ToArray());
+            AtomicWrite(SettingsPath, System.Text.Encoding.UTF8.GetBytes(settings.ToJsonString(Catalog.JsonOptions)));
+        }
+        catch { Restore(folder); throw; }
+    }
+
+    private static string DesignLabel(string name) =>
+        "/* Theme Studio design: " + System.Text.RegularExpressions.Regex.Replace(name.Trim(), @"\s+", " ").Replace("/*", "/ *").Replace("*/", "* /") + " */";
+    private bool Current(string file)
+    {
+        var path = Path.Combine(ThemesDirectory, file);
+        if (!File.Exists(path)) return true;
+        var css = File.ReadAllText(path);
+        return !css.Contains("@scope (", StringComparison.Ordinal) && (!IsStudioFile(file) || css.Contains(" * @version " + catalog.Version + "\n", StringComparison.Ordinal));
+    }
+
+    // True when enabled launcher files predate this version: single-slot/preset files, the slow :has() scope or an older compiler.
+    public bool NeedsMigration(LocalLibrary library)
+    {
+        CheckPath(ThemesDirectory);
+        return Enabled(ReadSettings()).Where(IsManaged).Any(f => !Current(f) || File.Exists(Path.Combine(ThemesDirectory, f)) &&
+            (catalog.Themes.Any(t => t.File == f) || f == ThemeCompiler.PersonalFile && library.Themes().Any(t => DesignLabel(t.Name) == File.ReadLines(Path.Combine(ThemesDirectory, f)).FirstOrDefault())));
+    }
+
+    // Moves every enabled launcher theme to its own per-theme file compiled by this version, keeping all of them enabled.
+    // Saved library themes are recompiled; presets become library themes; the legacy slot is matched by its design name.
+    public void Migrate(LocalLibrary library, string? lastConfigurationPath = null)
+    {
+        var settings = ReadSettings();
+        var enabled = Enabled(settings);
+        var folder = SaveSnapshot(settings);
+        AtomicWrite(LastPath, System.Text.Encoding.UTF8.GetBytes(Path.GetFileName(folder)));
+        try
+        {
+            var result = new List<string>(); var obsolete = new List<string>();
+            void Activate(string id, ThemeConfiguration config) { AtomicWrite(Path.Combine(ThemesDirectory, StudioFile(id)), System.Text.Encoding.UTF8.GetBytes(ThemeCompiler.Compile(config))); result.Add(StudioFile(id)); }
+            foreach (var file in enabled)
+            {
+                var path = Path.Combine(ThemesDirectory, file); CheckPath(path);
+                if (!IsManaged(file) || !File.Exists(path)) { result.Add(file); continue; }
+                if (catalog.Themes.FirstOrDefault(t => t.File == file) is { } preset)
+                {
+                    if (!library.Themes().Any(t => t.Id == preset.Id)) library.SaveTheme(CommunityGallery.Create(preset.Id, preset.Guild) with { Name = preset.Name }, preset.Id);
+                    Activate(preset.Id, library.LoadTheme(preset.Id)); obsolete.Add(path); continue;
+                }
+                if (file == ThemeCompiler.PersonalFile)
+                {
+                    string label = File.ReadLines(path).FirstOrDefault() ?? "";
+                    string? id = library.Themes().FirstOrDefault(t => DesignLabel(t.Name) == label)?.Id;
+                    if (id is null && lastConfigurationPath is not null && File.Exists(lastConfigurationPath))
+                    {
+                        var last = ThemeConfiguration.Load(lastConfigurationPath);
+                        if (DesignLabel(last.Name) == label) id = library.SaveTheme(last);
+                    }
+                    if (id is not null) { Activate(id, library.LoadTheme(id)); obsolete.Add(path); continue; }
+                }
+                else if (IsStudioFile(file) && library.Themes().Any(t => t.Id == file[7..^10])) { Activate(file[7..^10], library.LoadTheme(file[7..^10])); continue; }
+                result.Add(file); // Unknown origin: kept enabled and only upgraded below.
+            }
+            UpgradeLegacy(result);
+            foreach (var path in obsolete) File.Delete(path);
+            settings["enabledThemes"] = new JsonArray(result.Distinct().Select(s => (JsonNode?)JsonValue.Create(s)).ToArray());
             AtomicWrite(SettingsPath, System.Text.Encoding.UTF8.GetBytes(settings.ToJsonString(Catalog.JsonOptions)));
         }
         catch { Restore(folder); throw; }

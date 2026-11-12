@@ -1,6 +1,6 @@
 {
   "name": "discord-theme-launcher",
-  "version": "0.3.0-beta.15",
+  "version": "0.3.0-beta.16",
   "private": true,
   "type": "module",
   "description": "Create, edit, preview and share Discord themes for the server you choose, with compatible BetterDiscord theme import and backup/restore.",

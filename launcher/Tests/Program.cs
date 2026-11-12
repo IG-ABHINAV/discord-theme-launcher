@@ -356,6 +356,40 @@ Reject(() => store.RestoreSnapshot(malformedSnapshotId), "malformed history sele
     Check(!stack.PersonalEnabled && !File.Exists(Path.Combine(stack.ThemesDirectory, ThemeCompiler.PersonalFile)) && stack.ActiveThemeIds().Contains("four"), "a legacy personal slot with the same design is replaced by its per-theme file");
     Reject(() => stack.SetThemeActive("../escape", config), "theme identifiers cannot escape the themes folder");
 }
+{
+    // In-app update selection: only newer, non-draft, well-formed tags; final releases beat their betas.
+    Check(AppUpdate.IsNewer("0.3.0-beta.16", "0.3.0-beta.15") && AppUpdate.IsNewer("0.3.0-beta.10", "0.3.0-beta.9") && AppUpdate.IsNewer("0.3.0", "0.3.0-beta.99") &&
+        !AppUpdate.IsNewer("0.3.0-beta.15", "0.3.0-beta.15") && !AppUpdate.IsNewer("0.2.9", "0.3.0-beta.1"), "update versions compare numerically, with finals after betas");
+    var releases = "[{\"tag_name\":\"v0.3.0-beta.18\",\"draft\":true},{\"tag_name\":\"v0.3.0-beta.17\",\"draft\":false},{\"tag_name\":\"v9.9.9-evil/../x\"},{\"tag_name\":\"v0.3.0-beta.12\"}]";
+    Check(AppUpdate.Newest(releases, "0.3.0-beta.15") == "0.3.0-beta.17" && AppUpdate.Newest(releases, "0.3.0-beta.17") is null, "the newest published release is chosen and drafts or malformed tags are ignored");
+    var sums = new string('a', 64) + "  DiscordThemeLauncher-0.3.0-beta.17-windows-x64.exe\n" + new string('b', 64) + "  catalog.json\n";
+    Check(AppUpdate.ExpectedHash(sums, AppUpdate.ExecutableName("0.3.0-beta.17")) == new string('a', 64) && AppUpdate.Asset(catalog, "0.3.0-beta.17", "SHA256SUMS.txt").Host == "github.com", "update downloads use pinned GitHub URLs and the release checksum");
+    Reject(() => AppUpdate.ExpectedHash(sums, "other.exe"), "an update without a listed checksum is refused");
+
+    // Upgrade from older versions: legacy slot, raw :has() presets and stale per-theme files become current per-theme files.
+    var oldRoot = Path.Combine(fixture, "upgrade-vencord"); Directory.CreateDirectory(Path.Combine(oldRoot, "settings"));
+    File.WriteAllText(Path.Combine(oldRoot, "settings", "settings.json"), "{\"enabledThemes\":[\"Mine.theme.css\"]}");
+    var oldState = Path.Combine(fixture, "upgrade-state"); var oldLibrary = new LocalLibrary(Path.Combine(oldState, "library"));
+    var upgrade = new ThemeStore(oldRoot, oldState, catalog);
+    upgrade.Apply([catalog.Themes[0].Id], all); // Raw preset with the old :has() scope root.
+    File.WriteAllText(Path.Combine(upgrade.ThemesDirectory, "Mine.theme.css"), "/* external */");
+    var legacy = config with { Name = "Legacy pink" };
+    upgrade.ApplyPersonal(legacy); oldLibrary.SaveTheme(legacy, "legacy-pink");
+    var settingsFile = upgrade.SettingsPath; var json = JsonNode.Parse(File.ReadAllText(settingsFile))!;
+    json["enabledThemes"]!.AsArray().Add(catalog.Themes[0].File); File.WriteAllText(settingsFile, json.ToJsonString());
+    var staleTheme = config with { Name = "Stale" }; var staleId = oldLibrary.SaveTheme(staleTheme);
+    upgrade.SetThemeActive(staleId, staleTheme);
+    var stalePath = Path.Combine(upgrade.ThemesDirectory, ThemeStore.StudioFile(staleId));
+    File.WriteAllText(stalePath, File.ReadAllText(stalePath).Replace(" * @version " + catalog.Version + "\n", " * @version 0.3.0-beta.10\n"));
+    Check(upgrade.NeedsMigration(oldLibrary), "older launcher files are detected as needing migration");
+    upgrade.Migrate(oldLibrary);
+    string[] enabledAfter = JsonNode.Parse(File.ReadAllText(settingsFile))!["enabledThemes"]!.AsArray().Select(n => n!.GetValue<string>()).ToArray();
+    Check(enabledAfter.Order().SequenceEqual(new[] { "Mine.theme.css", ThemeStore.StudioFile(catalog.Themes[0].Id), "Studio-legacy-pink.theme.css", ThemeStore.StudioFile(staleId) }.Order()), "migration keeps every theme enabled, including external ones");
+    Check(!File.Exists(Path.Combine(upgrade.ThemesDirectory, ThemeCompiler.PersonalFile)) && !File.Exists(Path.Combine(upgrade.ThemesDirectory, catalog.Themes[0].File)) && File.ReadAllText(Path.Combine(upgrade.ThemesDirectory, "Mine.theme.css")) == "/* external */", "migration removes replaced launcher files and leaves external themes untouched");
+    Check(enabledAfter.Where(f => f.StartsWith("Studio-")).All(f => File.ReadAllText(Path.Combine(upgrade.ThemesDirectory, f)) is var css && !css.Contains("@scope (") && css.Contains(" * @version " + catalog.Version + "\n")), "migrated files use this version's style-gated output");
+    Check(oldLibrary.Themes().Any(t => t.Id == catalog.Themes[0].Id) && !upgrade.NeedsMigration(oldLibrary), "presets become saved themes and migration is idempotent");
+    upgrade.RestoreLast(); Check(File.Exists(Path.Combine(upgrade.ThemesDirectory, ThemeCompiler.PersonalFile)) && upgrade.PersonalEnabled, "migration is reversible from recovery");
+}
 Console.WriteLine($"{checks} checks passed. Fixture: {fixture}");
 // Intentional: leave the temporary test fixture for inspection; never recurse over an unchecked root.
 

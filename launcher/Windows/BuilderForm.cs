@@ -36,13 +36,16 @@ internal sealed class BuilderForm : Form
     private string[]? importPaths;
     private object[]? importCandidates;
     internal int SimulatedOperations { get; private set; }
+    private readonly bool afterUpdate;
+    private string? availableUpdate;
+    private bool migrationPending;
     private string notice = "Design here. Preview here. Apply when you're ready.", validation = "";
     private string DraftPath => Path.Combine(documentRoot, "last-configuration.dtheme");
     private string SessionPath => Path.Combine(documentRoot, "studio-session.json");
 
-    public BuilderForm(bool safePreview, string? sessionRoot = null)
+    public BuilderForm(bool safePreview, string? sessionRoot = null, bool afterUpdate = false)
     {
-        dryRun = safePreview;
+        dryRun = safePreview; this.afterUpdate = afterUpdate;
         store = new ThemeStore(client.VencordRoot, client.StateRoot, ThemeCompiler.BundledCatalog);
         documentRoot = sessionRoot ?? (dryRun ? Path.Combine(Path.GetTempPath(), "ThemeStudio-library-" + Guid.NewGuid().ToString("N")) : client.StateRoot);
         persistSession = !dryRun || sessionRoot is not null;
@@ -108,6 +111,7 @@ internal sealed class BuilderForm : Form
         {
             LauncherStyle.DarkCaption(this);
             await surface.InitializeAsync();
+            if (!dryRun) await MaintainAsync();
         };
         RenderPreview();
     }
@@ -216,7 +220,7 @@ internal sealed class BuilderForm : Form
             canDisable = canDisable && !busy, canRestore = canRestore && !busy,
             designs = CommunityGallery.Designs,
             fonts = FontLibrary.Choices.Select(f => new { f.Id, f.Family, f.Category, fileName = Path.GetFileName(f.Path) }),
-            recoveryHistory = history, localThemes = library.Themes(), activeThemes = active, localPalettes = library.Palettes(), localImages = library.Images(), paletteId, localThemeId,
+            recoveryHistory = history, localThemes = library.Themes(), activeThemes = active, update = availableUpdate, migrationPending = migrationPending && !dryRun, localPalettes = library.Palettes(), localImages = library.Images(), paletteId, localThemeId,
             discardPending = pendingDiscard.HasValue || pendingClose, closing = pendingClose, discardProblem = UiText.Text(discardProblem), location, importCandidates,
             imported = configuration.Imported is { } imported ? ReviewState(CssThemeImporter.Inspect(imported)) : null,
             importReview = importReview is null ? null : ReviewState(importReview),
@@ -262,6 +266,8 @@ internal sealed class BuilderForm : Form
                     var sourceTheme = library.LoadTheme(message.GetProperty("value").GetString() ?? "");
                     library.SaveTheme(sourceTheme with { Name = message.GetProperty("name").GetString() ?? "" });
                     Publish(); return;
+                case "installUpdate": await InstallUpdateAsync(); return;
+                case "migrateThemes": if (!dryRun) await MigrateAsync(); return;
                 case "activateLocalTheme": case "deactivateLocalTheme": case "deleteLocalTheme":
                     await QuickThemeAsync(action, message.GetProperty("value").GetString() ?? ""); return;
                 case "savePalette":
@@ -510,24 +516,84 @@ internal sealed class BuilderForm : Form
         if (config is not null) { AssetImport.ValidateImages(config); config.Validate(); }
         bool delete = action == "deleteLocalTheme", wasActive = !dryRun && store.ActiveThemeIds().Contains(id);
         if (dryRun || (delete && !wasActive)) { if (delete) DeleteLocal(id); else SimulatedOperations++; notice = delete ? "Theme deleted from My themes." : "Simulation complete. No Discord or Vencord files or processes were changed."; Publish(); return; }
-        bool running = false, stopped = false;
+        var done = delete ? "Theme disabled and deleted from My themes." : config is not null ? "Theme enabled. Other enabled themes stay active." : "Theme disabled. Other enabled themes stay active.";
+        if (await WithDiscordClosedAsync("Updating your themes…", () => store.SetThemeActive(id, config), done) && delete) { DeleteLocal(id); Publish(); }
+    }
+
+    // Vencord owns its settings while Discord runs: close it only when open, change files, then reopen it.
+    private async Task<bool> WithDiscordClosedAsync(string progress, Action work, string done)
+    {
+        bool stopped = false;
         try
         {
             client.ValidateEnvironment(); busy = true;
-            running = System.Diagnostics.Process.GetProcessesByName("Discord").Any();
-            notice = running ? "Closing Discord to update your themes…" : "Updating your themes…"; Publish();
+            bool running = System.Diagnostics.Process.GetProcessesByName("Discord").Any();
+            notice = running ? "Closing Discord to update your themes…" : progress; Publish();
             if (running) { await client.StopAsync(); stopped = true; }
-            await Task.Run(() => store.SetThemeActive(id, config));
-            if (delete) DeleteLocal(id);
+            await Task.Run(work);
             if (running) { notice = "Opening Discord and checking startup…"; Publish(); await client.OpenAsync(); stopped = false; }
-            notice = delete ? "Theme disabled and deleted from My themes." : config is not null ? "Theme enabled. Other enabled themes stay active." : "Theme disabled. Other enabled themes stay active.";
+            notice = done; return true;
         }
         catch (Exception error)
         {
             notice = error is InvalidDataException or InvalidOperationException ? error.Message : "Setup could not finish. Check the profile, disk space and manual recovery guide.";
             if (stopped) notice += " No automatic retry was made.";
+            return false;
         }
         finally { busy = false; Publish(); }
+    }
+
+    private async Task MigrateAsync()
+    {
+        await WithDiscordClosedAsync("Optimizing installed themes…", () => store.Migrate(library, DraftPath), "Installed themes optimized for this version. All your themes were kept.");
+        try { migrationPending = store.NeedsMigration(library); } catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException or JsonException) { }
+        Publish();
+    }
+
+    private static HttpClient UpdateClient()
+    {
+        var http = new HttpClient { Timeout = TimeSpan.FromSeconds(120) };
+        http.DefaultRequestHeaders.UserAgent.ParseAdd("PrimeBuild-DiscordThemeLauncher/" + ThemeCompiler.BundledCatalog.Version);
+        return http;
+    }
+
+    // Runs once after the window opens: tidy up launcher files from older versions, then look for a newer release.
+    private async Task MaintainAsync()
+    {
+        try { migrationPending = store.NeedsMigration(library); }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException or JsonException) { }
+        if (migrationPending && (afterUpdate || !System.Diagnostics.Process.GetProcessesByName("Discord").Any())) await MigrateAsync();
+        else Publish();
+        try { using var http = UpdateClient(); availableUpdate = await AppUpdate.CheckAsync(http, ThemeCompiler.BundledCatalog); Publish(); }
+        catch (Exception error) when (error is HttpRequestException or TaskCanceledException or InvalidDataException or JsonException or InvalidOperationException) { /* Offline: no update prompt. */ }
+    }
+
+    // Replace the running executable in place (Windows allows renaming it), start the new one and close.
+    private async Task InstallUpdateAsync()
+    {
+        if (dryRun || availableUpdate is not { } version) return;
+        if (dirty) { notice = "Save or discard your changes before updating."; Publish(); return; }
+        string path = Environment.ProcessPath ?? throw new InvalidOperationException(), staged = path + ".new", old = path + ".old";
+        busy = true; notice = "Downloading and verifying the update…"; Publish();
+        try
+        {
+            ThemeStore.CheckPath(path);
+            byte[] bytes; using (var http = UpdateClient()) bytes = await AppUpdate.DownloadAsync(http, ThemeCompiler.BundledCatalog, version);
+            await File.WriteAllBytesAsync(staged, bytes);
+            File.Move(path, old, true);
+            try { File.Move(staged, path); } catch { File.Move(old, path, true); throw; }
+            SaveSession();
+            var start = new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = false };
+            start.ArgumentList.Add("--after-update"); start.ArgumentList.Add(Environment.ProcessId.ToString());
+            System.Diagnostics.Process.Start(start);
+            notice = "Update ready. Restarting Theme Studio…"; busy = false; closeApproved = true; Close();
+        }
+        catch (Exception error)
+        {
+            try { if (File.Exists(staged)) File.Delete(staged); } catch (IOException) { }
+            notice = error is InvalidDataException ? error.Message : error is IOException or UnauthorizedAccessException ? "The update could not be installed here. Download it from the releases page." : "The update could not be downloaded. Check your connection and try again.";
+            busy = false; Publish();
+        }
     }
     private void DeleteLocal(string id)
     {

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.3.0-beta.16 - 2026-11-12
+
+- Offer in-app updates: check GitHub Releases on start, download the newer standalone EXE, verify it against the release SHA256SUMS.txt, replace the app in place and restart.
+- Migrate launcher files from older versions on start: recompile saved themes into per-theme files with the current compiler, turn bundled presets into saved themes, match the legacy personal slot to its saved theme and keep every theme enabled. Runs automatically when Discord is closed or after an in-app update; otherwise Optimize installed themes is offered.
+
 ## 0.3.0-beta.15 - 2026-11-12
 
 - Keep several themes enabled at once. Each saved theme gets its own Vencord file (`Studio-<id>.theme.css`); applying or toggling one theme no longer disables the others.

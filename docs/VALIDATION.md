@@ -1,4 +1,8 @@
-# Validation - 0.3.0-beta.15
+# Validation - 0.3.0-beta.16
+
+Date: **2026-11-12**. Adds in-app updates and automatic migration of older launcher files. Local checks pass: **159 Core, 74 browser and 90 native Windows checks**. New Core checks cover version ordering with finals after betas, release selection ignoring drafts and malformed tags, pinned download URLs, refusal without a listed checksum, and migration of a legacy personal slot, a raw `:has()` preset and a per-theme file from an older compiler: every theme stays enabled, external themes are untouched, replaced launcher files are removed, output is current and style-gated, presets become saved themes, the migration is idempotent and reversible. A browser test covers the Update and Optimize buttons.
+
+## Validation - 0.3.0-beta.15
 
 Date: **2026-11-12**. Several saved themes can stay enabled together. Local checks pass: **149 Core, 73 browser and 90 native Windows checks**. New Core checks cover two saved themes with a preset and an external theme enabled together, legacy preset upgrade to the style-gated format, disabling one theme without touching the others, recovery of quick toggles, removal of a newly enabled file on restore, replacement of a matching legacy personal slot and identifier path safety. A browser test covers the Active/Inactive badge, quick Enable/Disable, two-step Delete and busy-state disabling. On the development profile, four themes (PrimeBuild, PrimeBuild.dev, FantaFort and a personal design) were migrated to per-theme files; in the fixture each activates only on its own server and none on another server or in DMs.
 

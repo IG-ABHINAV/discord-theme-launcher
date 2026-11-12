@@ -91,7 +91,11 @@ If Discord already reopened successfully, do not assume a repair is still necess
 
 ## Updates
 
-Download a new complete portable package, or the new standalone EXE. Each launcher is pinned to its own catalog and release; an old launcher does not silently fetch a different version. Apply your selection to update managed theme files. Local custom edits are included in the preceding backup but are replaced by the new selected release.
+From beta.16, Theme Studio checks GitHub Releases when it opens. When a newer version exists, **Update to …** appears in the header. It downloads that release's standalone EXE, verifies it against the release `SHA256SUMS.txt`, replaces the running app in place (the previous file is kept as `.old` until the new version starts and removes it), and restarts. Only the version number comes from the GitHub API; download URLs are rebuilt for the pinned repository. Nothing is downloaded or replaced without the click. If the app folder is not writable, download the release manually.
+
+Versions up to beta.15 have no updater: download the new portable ZIP or EXE once and run it in place of the old one. Libraries, saved themes and recovery history stay under `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher`.
+
+**Automatic cleanup of older installations.** On every start, the app checks the enabled launcher files in Vencord. Files from older versions — the single personal slot, preset files, the slow `:has()` scope or per-theme files compiled by an older version — are migrated: every saved theme is recompiled by the current version into its own `Studio-<id>.theme.css`, bundled presets become saved themes in My themes, and a legacy personal slot is matched to its saved theme by name (or to the last applied configuration). Every theme stays enabled; external themes, plugins and QuickCSS are untouched, and a recovery snapshot is taken first. If Discord is closed, this happens automatically; if it is open, **Optimize installed themes** appears in the header and restarts Discord when clicked (right after an in-app update it runs automatically). A separate installer script is not needed: the new executable performs the cleanup itself.
 
 ## Recovery without opening settings
 

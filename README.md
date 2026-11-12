@@ -8,13 +8,13 @@
   Start from an empty template, customize a community design, or import compatible BetterDiscord CSS.
 </p>
 <p align="center">
-  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.15"><img src="https://img.shields.io/badge/release-v0.3.0--beta.15-8b7cf6?style=flat-square" alt="Release v0.3.0-beta.15"></a>
+  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.16"><img src="https://img.shields.io/badge/release-v0.3.0--beta.16-8b7cf6?style=flat-square" alt="Release v0.3.0-beta.16"></a>
   <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/actions/workflows/check.yml"><img src="https://github.com/PrimeBuild-pc/discord-theme-launcher/actions/workflows/check.yml/badge.svg?branch=main" alt="Build and tests"></a>
   <img src="https://img.shields.io/badge/platform-Windows%20x64-0078d4?style=flat-square" alt="Windows x64">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-3da77a?style=flat-square" alt="MIT license"></a>
 </p>
 <p align="center">
-  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.15"><strong>Download beta.15</strong></a>
+  <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.16"><strong>Download beta.16</strong></a>
   &nbsp;·&nbsp; <a href="docs/INSTALLATION.md">Installation</a>
   &nbsp;·&nbsp; <a href="#contributing">Contribute</a>
   &nbsp;·&nbsp; <a href="https://github.com/PrimeBuild-pc/discord-theme-launcher/issues">Report an issue</a>
@@ -40,7 +40,7 @@ Theme Studio brings **creation, editing, preview, targeting, sharing and recover
 
 <h2 id="get-started">Get started</h2>
 
-1. Download the **Windows x64 portable ZIP** from the [beta.15 release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.15), extract it and run `DiscordThemeLauncher.exe` without Administrator privileges.
+1. Download the **Windows x64 portable ZIP** from the [beta.16 release](https://github.com/PrimeBuild-pc/discord-theme-launcher/releases/tag/v0.3.0-beta.16), extract it and run `DiscordThemeLauncher.exe` without Administrator privileges.
 2. Open **Templates** and choose an empty or community template, or import a downloaded `.theme.css` / `.dtheme` file in **Editor → Files**. Folder import is also available.
 3. In **Editor**, set your targets, colors, typography and artwork. **Save theme** keeps the design in **My themes**; **Save a new copy…** keeps a separate variation.
 4. Choose **Review & apply**, review the current theme and all its targets, finish calls or streams, then confirm. Discord restarts during application.
@@ -67,7 +67,7 @@ A `.dtheme` export includes the selected assets, font license and preserved impo
 
 - **64 additional font families** are searchable and downloaded only when selected. Downloads are hash-verified and cached; selected fonts and licenses travel with the exported theme. Display headings/channels change while messages keep native typography. [Font catalog](docs/FONT-CATALOG.md).
 - **PNG/JPEG artwork** is normalized and embedded, downscaled when needed to at most 1920 px per side and 2,073,600 pixels to limit decoded memory. Imported images stay usable if their original files move. Static TTF/OTF import remains available with a redistribution license. [Format and limits](docs/CONFIGURATIONS.md).
-- Themes, palettes and images live under `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\library`. Session state and recovery snapshots are stored beside that library. Upgrading the portable app preserves these local files.
+- Themes, palettes and images live under `%LOCALAPPDATA%\PrimeBuild\DiscordThemeLauncher\library`. Session state and recovery snapshots are stored beside that library. Upgrading the portable app preserves these local files. From beta.16 the app offers **Update to …** when a newer release exists, and on start it moves themes applied with older versions to the current, faster per-theme format while keeping all of them enabled ([updates](docs/INSTALLATION.md#updates)).
 
 </details>
 

@@ -139,7 +139,11 @@
     "disableTheme": "Disable",
     "deleteTheme": "Delete",
     "confirmDelete": "Confirm delete",
-    "restartsIfOpen": "Discord restarts if it is open. Other enabled themes stay active."
+    "restartsIfOpen": "Discord restarts if it is open. Other enabled themes stay active.",
+    "updateTo": "Update to {version}",
+    "updateHint": "Downloads the verified release from GitHub, replaces this app and restarts it. Your themes, libraries and Discord setup are kept.",
+    "optimizeThemes": "Optimize installed themes",
+    "optimizeHint": "Moves themes applied with older versions to the current, faster format and keeps every theme active. Discord restarts if it is open."
   },
   "it": {
     "share": "Esporta una copia",
@@ -281,7 +285,11 @@
     "disableTheme": "Disattiva",
     "deleteTheme": "Elimina",
     "confirmDelete": "Conferma eliminazione",
-    "restartsIfOpen": "Discord si riavvia se è aperto. Gli altri temi attivi restano attivi."
+    "restartsIfOpen": "Discord si riavvia se è aperto. Gli altri temi attivi restano attivi.",
+    "updateTo": "Aggiorna a {version}",
+    "updateHint": "Scarica la release verificata da GitHub, sostituisce questa app e la riavvia. Temi, librerie e configurazione di Discord vengono mantenuti.",
+    "optimizeThemes": "Ottimizza i temi installati",
+    "optimizeHint": "Porta i temi applicati con versioni precedenti al formato attuale, più veloce, e li mantiene tutti attivi. Discord si riavvia se è aperto."
   },
   "es": {
     "share": "Exportar una copia",
@@ -423,7 +431,11 @@
     "disableTheme": "Desactivar",
     "deleteTheme": "Eliminar",
     "confirmDelete": "Confirmar eliminación",
-    "restartsIfOpen": "Discord se reinicia si está abierto. Los demás temas activos siguen activos."
+    "restartsIfOpen": "Discord se reinicia si está abierto. Los demás temas activos siguen activos.",
+    "updateTo": "Actualizar a {version}",
+    "updateHint": "Descarga la versión verificada de GitHub, reemplaza esta app y la reinicia. Se conservan tus temas, bibliotecas y la configuración de Discord.",
+    "optimizeThemes": "Optimizar temas instalados",
+    "optimizeHint": "Pasa los temas aplicados con versiones anteriores al formato actual, más rápido, y los mantiene todos activos. Discord se reinicia si está abierto."
   },
   "ru": {
     "share": "Экспортировать копию",
@@ -565,6 +577,10 @@
     "disableTheme": "Выключить",
     "deleteTheme": "Удалить",
     "confirmDelete": "Подтвердить удаление",
-    "restartsIfOpen": "Discord перезапустится, если открыт. Остальные включённые темы остаются активными."
+    "restartsIfOpen": "Discord перезапустится, если открыт. Остальные включённые темы остаются активными.",
+    "updateTo": "Обновить до {version}",
+    "updateHint": "Скачивает проверенный выпуск с GitHub, заменяет это приложение и перезапускает его. Темы, библиотеки и настройка Discord сохраняются.",
+    "optimizeThemes": "Оптимизировать установленные темы",
+    "optimizeHint": "Переводит темы, применённые старыми версиями, в текущий более быстрый формат и оставляет их все активными. Discord перезапустится, если открыт."
   }
 }

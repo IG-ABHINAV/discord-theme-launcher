@@ -110,6 +110,19 @@ test('My themes shows which themes are active with quick enable, disable and two
   await expect(page.locator('[data-toggle-theme=pink]')).toBeDisabled();
 });
 
+test('update and theme optimization buttons appear only when the host offers them',async({page})=>{
+  await studio(page);
+  await expect(page.locator('#update-app')).toBeHidden();
+  await expect(page.locator('#migrate-themes')).toBeHidden();
+  await page.evaluate(()=>window.patchTestState({update:'0.3.0-beta.99',migrationPending:true}));
+  await expect(page.locator('#update-app')).toHaveText('Update to 0.3.0-beta.99');
+  await page.locator('#migrate-themes').click();
+  await page.locator('#update-app').click();
+  expect(await page.evaluate(()=>window.testMessages.filter(m=>['installUpdate','migrateThemes'].includes(m.action)).map(m=>m.action))).toEqual(['migrateThemes','installUpdate']);
+  await page.evaluate(()=>window.patchTestState({busy:true}));
+  await expect(page.locator('#update-app')).toBeDisabled();
+});
+
 test('a saved theme can be duplicated without replacing the open draft or changing Discord',async({page})=>{
   await studio(page);
   await page.evaluate(()=>window.patchTestState({dirty:true,localThemes:[{id:'original',name:'Original theme'}]}));
