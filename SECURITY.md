@@ -12,7 +12,7 @@ Report it privately using GitHub's private vulnerability reporting form:
 
 **[Report a vulnerability](https://github.com/PrimeBuild-pc/discord-theme-launcher/security/advisories/new)**
 
-See [GitHub's guide to privately reporting a security vulnerability](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/report-privately) if the form is unfamiliar. Include the affected version, what the issue allows an attacker to do, and steps to reproduce it. If the reporting form is not available on this repository, open a public issue that contains **no vulnerability details** and asks only for a private contact — the maintainer will enable private reporting and follow up.
+See [GitHub's guide to privately reporting a security vulnerability](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/report-privately) if the form is unfamiliar. Include the affected version, what the issue allows an attacker to do, and steps to reproduce it. If you cannot use the form, email **primebuild.official@gmail.com**.
 
 ## Scope
 
